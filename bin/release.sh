@@ -1,6 +1,6 @@
 #!/bin/bash
 PYTHON=python3
-PACKNAME=tspy
+PACKNAME=tspice
 
 type=$1;shift
 if [ "x$type" = "x" ]
@@ -47,7 +47,7 @@ rm -rf dist/*
 
 #Report version
 echo $version >> .versions
-# For TSpy, we might not have a version.py file, so we can skip or modify this part
+# For TSPICE, we might not have a version.py file, so we can skip or modify this part
 if [ -f "src/$PACKNAME/version.py" ]; then
     cp src/$PACKNAME/version.py tmp/version.py.bak
     echo "version='$version'" > src/$PACKNAME/version.py

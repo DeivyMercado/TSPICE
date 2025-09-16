@@ -3,8 +3,8 @@ import numpy as np
 import spiceypy as spy
 import scipy.special as sps
 import os
-from tspy.utils import loc_func, convert_step_to_seconds
-from tspy.kernels import download_kernels, write_meta_kernel
+from tspice.utils import loc_func, convert_step_to_seconds
+from tspice.kernels import download_kernels, write_meta_kernel
 
 #Directories
 file_dir = os.path.dirname(os.path.abspath(__file__)) #Current file location

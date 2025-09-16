@@ -1,4 +1,4 @@
-# TODO List for TSpy
+# TODO List for TSPICE
 
 The High Priority list is made of things that we are actually working on.
 

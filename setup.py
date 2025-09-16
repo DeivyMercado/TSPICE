@@ -6,14 +6,14 @@ with open("README.md", "r") as f:
 setuptools.setup(
 
     #Basic description
-    name='TSpy',
+    name='TSPICE',
     author="Deivy Mercado",
     author_email="david231097@gmail.com",
     description="Tidal signal with Python and SPICE",
     long_description=long_description,
     long_description_content_type="text/markdown",
-    url="https://github.com/DeivyMercado/TSpy",
-    keywords='astrodynamics geophysics tides spiceypy',
+    url="https://github.com/DeivyMercado/TSPICE",
+    keywords='astrodynamics geophysics tides spice',
     license='MIT',
 
     #Clasifier
@@ -48,6 +48,6 @@ setuptools.setup(
 
     #Options
     include_package_data=True,
-    package_data={'tspy': ['data/spice_kernels.json']
+    package_data={'tspice': ['data/spice_kernels.json']
                   },
 )

@@ -6,7 +6,7 @@ COMMIT=[MAN] Maintenance
 RELMODE=release
 PYTHON=python3
 PIP=pip3
-PACKNAME=TSpy
+PACKNAME=TSPICE
 
 #Show
 show:
@@ -59,4 +59,4 @@ install:
 	@$(PIP) install -e .
 
 test:
-	@$(PYTHON) -c "import tspy; print('tspy imported successfully')"
+	@$(PYTHON) -c "import tspice; print('tspice imported successfully')"
