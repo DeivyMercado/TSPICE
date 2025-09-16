@@ -6,7 +6,7 @@ COMMIT=[MAN] Maintenance
 RELMODE=release
 PYTHON=python3
 PIP=pip3
-PACKNAME=tspy
+PACKNAME=TSpy
 
 #Show
 show:
