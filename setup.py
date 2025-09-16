@@ -48,6 +48,6 @@ setuptools.setup(
 
     #Options
     include_package_data=True,
-    package_data={'tspy': ['data/*']
+    package_data={'tspy': ['data/spice_kernels.json']
                   },
 )
