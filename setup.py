@@ -6,7 +6,7 @@ with open("README.md", "r") as f:
 setuptools.setup(
 
     #Basic description
-    name='TSPICE',
+    name='tspice',
     author="Deivy Mercado",
     author_email="david231097@gmail.com",
     description="Tidal signal with Python and SPICE",
