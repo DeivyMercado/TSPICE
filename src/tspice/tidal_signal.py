@@ -1,5 +1,4 @@
 import numpy as np
-#import pymcel as pc
 import spiceypy as spy
 import scipy.special as sps
 import os
@@ -187,7 +186,7 @@ class MainBody():
 			#If the function is called within V_g_tidal_total
 			phi_sta, theta_sta, a_sta = self.phi_sta, self.theta_sta, self.a_sta
 		else:
-			phi_sta, theta_sta, a_sta = loc_func(loc_sta, self.a_main)
+			phi_sta, theta_sta, a_sta = loc_func(loc_sta, self.a_ellips)
 
 		#Array of UTC times in ET
 		if dates is None:
@@ -269,7 +268,7 @@ class MainBody():
 					#'Saturn':6, 'Uranus':7, 'Neptune':8}
 
 		#Cordinates of the station
-		phi_sta, theta_sta, a_sta = loc_func(loc_sta, self.a_main)
+		phi_sta, theta_sta, a_sta = loc_func(loc_sta, self.a_ellips)
 		self.phi_sta, self.theta_sta, self.a_sta = phi_sta, theta_sta, a_sta
 
 		#Array of UTC times in ET
