@@ -29,6 +29,9 @@ dist/
 ehthumbs.db
 Thumbs.db
 
+#This file is a registered of the versions created with the Makefile
+.versions
+
 #SPICE Kernel Files (important to ignore large files)
 kernels/
 

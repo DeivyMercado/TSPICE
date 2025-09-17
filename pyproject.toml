@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "tspice"
-version = "0.0.1"
+version = "0.0.3"
 description = "Tidal signal with Python and SPICE"
 readme = "README.md"
 requires-python = ">=3.7"
@@ -31,4 +31,4 @@ packages = {find = {where = ["src"]}}
 include-package-data = true
 
 [tool.setuptools.package-data]
-"tspice" = ["data/*"]
+"tspice" = ["data/spice_kernels.json"]
