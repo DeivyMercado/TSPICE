@@ -13,8 +13,9 @@ __version__ = "0.0.1"
 # from tspice.utils import load_kernels
 
 from .tidal_signal import initialize, MainBody
+from . import love_numbers
 from . import kernels
 from . import utils
 
-#List what should be imported with "from tspy import *"
-__all__ = ['initialize', 'MainBody', 'kernels', 'utils']
+#List what should be imported with "from tspice import *"
+__all__ = ['initialize', 'MainBody', 'love_numbers', 'kernels', 'utils']

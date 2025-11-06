@@ -27,9 +27,19 @@
             "url": "https://naif.jpl.nasa.gov/pub/naif/generic_kernels/spk/satellites/sat457.bsp"
         },        
         {
-            "filename": "ura182.bsp",
-            "description": "Last Satellite and Planetary ephemerides for Uranus - binary SPK",
-            "url": "https://naif.jpl.nasa.gov/pub/naif/generic_kernels/spk/satellites/ura182.bsp"
+            "filename": "ura184_part-1.bsp",
+            "description": "First Part of the last Satellite and Planetary ephemerides for Uranus - binary SPK",
+            "url": "https://naif.jpl.nasa.gov/pub/naif/generic_kernels/spk/satellites/ura184_part-1.bsp"
+        },
+        {
+            "filename": "ura184_part-2.bsp",
+            "description": "Second Part of the last Satellite and Planetary ephemerides for Uranus - binary SPK",
+            "url": "https://naif.jpl.nasa.gov/pub/naif/generic_kernels/spk/satellites/ura184_part-2.bsp"
+        },
+        {
+            "filename": "ura184_part-3.bsp",
+            "description": "Third Part of the last Satellite and Planetary ephemerides for Uranus - binary SPK",
+            "url": "https://naif.jpl.nasa.gov/pub/naif/generic_kernels/spk/satellites/ura184_part-3.bsp"
         },
         {
             "filename": "nep105.bsp",

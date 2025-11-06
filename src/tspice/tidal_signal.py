@@ -37,7 +37,7 @@ def initialize(data_directory=None):
     spy.furnsh(meta_kernel_path)
     
     kernels_loaded = True
-    print(f"TSpy initialized successfully. Kernels loaded from: {meta_kernel_path}")
+    print(f"TSPICE initialized successfully. Kernels loaded from: {meta_kernel_path}")
 
 #This is the class that define the main body
 class MainBody():
@@ -48,12 +48,12 @@ class MainBody():
 		#Check if kernels are loaded before allowing creation of a MainBody
 		if not kernels_loaded:
 			raise RuntimeError(
-				"SPICE kernels not loaded. Please call tspy.initialize() first. "
+				"SPICE kernels not loaded. Please call tspice.initialize() first. "
 				"Example:\n\n"
-				"import tspy\n"
-				"tspy.initialize()\n"
-				"# or specify a custom directory: tspy.initialize('/path/to/my/kernels')\n"
-				"body = tspy.MainBody('Moon')"
+				"import tspice\n"
+				"tspice.initialize()\n"
+				"# or specify a custom directory: tspice.initialize('/path/to/my/kernels')\n"
+				"body = tspice.MainBody('Moon')"
 			)
 		
 		#Name of the main body

@@ -3,7 +3,7 @@ import json
 import os
 
 #Function to download the kernels
-def download_kernels(data_dir):
+def download_kernels(data_dir, verbose=False):
 
     #Directory for the kernels and the configuration file
     kernel_dir = os.path.join(data_dir, 'kernels')
@@ -26,31 +26,31 @@ def download_kernels(data_dir):
         #Start downloading the kernel files
         for i,k in enumerate(config['kernels']):
             try:
-                print(f"Downloading the file {k['filename']} from {k['url']}...\n")
+                if verbose: print(f"Downloading the file {k['filename']} from {k['url']}...\n")
                 os.system(f"wget -P {kernel_dir} {k['url']}")
-                print(f"The file {k['filename']} has been downloaded.\n")
+                if verbose: print(f"The file {k['filename']} has been downloaded.\n")
             except:
                 print(f"Error downloading the file {k['filename']} from {k['url']}.\n")
 
     #If the directory exists, verify that the files are there already
     else:
-        print(f"Directory for Kernels already exists.")
+        if verbose: print(f"Directory for Kernels already exists.")
         
         #Verify that the files are there already or download them if they are not
         for i,k in enumerate(config['kernels']):
-            if k['filename'] in os.listdir(kernel_dir):
-                print(f"The file {k['filename']} already exists in the kernel directory.\n")
+            if (k['filename'] in os.listdir(kernel_dir)):
+                if verbose: print(f"The file {k['filename']} already exists in the kernel directory.\n")
             else:
                 #Download the kernel file if it does not exist
                 try:
-                    print(f"Downloading the file {k['filename']} from {k['url']}...\n")
+                    if verbose: print(f"Downloading the file {k['filename']} from {k['url']}...\n")
                     os.system(f"wget -P {kernel_dir} {k['url']}")
-                    print(f"The file {k['filename']} has been downloaded.\n")
+                    if verbose: print(f"The file {k['filename']} has been downloaded.\n")
                 except:
                     print(f"Error downloading the file {k['filename']} from {k['url']}.\n")
 
 #Function to write the meta kernel
-def write_meta_kernel(data_dir):
+def write_meta_kernel(data_dir, verbose=False):
 
     #Create the path to the meta kernel
     meta_kernel_path = os.path.join(data_dir, 'meta_kernel')
@@ -76,11 +76,11 @@ def write_meta_kernel(data_dir):
             for k in os.listdir(kernel_dir):
                 f.write(f"'$KERNELS/{k}',\n")
             f.write(')\n')
-        print(f"Meta kernel created at {meta_kernel_path}.")
+        if verbose: print(f"Meta kernel created at {meta_kernel_path}.")
 
     #If the meta kernel already exists, return its path
     else:
-        print(f"Meta kernel already exists at {meta_kernel_path}.")
+        if verbose: print(f"Meta kernel already exists at {meta_kernel_path}.")
 
     #It always returns the path to the meta kernel
     return meta_kernel_path
