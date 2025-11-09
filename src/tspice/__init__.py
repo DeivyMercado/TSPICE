@@ -12,10 +12,11 @@ __version__ = "0.0.1"
 # instead of:
 # from tspice.utils import load_kernels
 
-from .tidal_signal import initialize, MainBody
-from . import love_numbers
+from .tidal_signal import initialize, Body
+from .internal_dynamics import InteriorModel
 from . import kernels
 from . import utils
+from . import integration_tools
 
 #List what should be imported with "from tspice import *"
-__all__ = ['initialize', 'MainBody', 'love_numbers', 'kernels', 'utils']
+__all__ = ['initialize', 'Body', 'InteriorModel', 'internal_dynamics', 'kernels', 'utils', 'integration_tools']

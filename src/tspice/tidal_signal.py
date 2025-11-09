@@ -1,3 +1,4 @@
+#Libraries
 import numpy as np
 import spiceypy as spy
 import scipy.special as sps
@@ -40,54 +41,77 @@ def initialize(data_directory=None):
     print(f"TSPICE initialized successfully. Kernels loaded from: {meta_kernel_path}")
 
 #This is the class that define the main body
-class MainBody():
+class Body():
 	
 	#Constructor of the class
-	def __init__(self, name):
+	def __init__(self, name, solar_system=True):
 		
-		#Check if kernels are loaded before allowing creation of a MainBody
-		if not kernels_loaded:
-			raise RuntimeError(
-				"SPICE kernels not loaded. Please call tspice.initialize() first. "
-				"Example:\n\n"
-				"import tspice\n"
-				"tspice.initialize()\n"
-				"# or specify a custom directory: tspice.initialize('/path/to/my/kernels')\n"
-				"body = tspice.MainBody('Moon')"
-			)
-		
-		#Name of the main body
-		self.main_body = name
-		
-		try:
-			#GM for the main body
-			self.GM_main = spy.bodvrd(name, 'GM', 1)[1][0]    #in [km^3/s^2]
-		except Exception as e:
-			print(f"Error getting GM for {name}: {e}")
-			self.GM_main = None
-			
-		try:
-			#a_main is the mean radius for the main body
-			self.a_ellips = spy.bodvrd(name, 'RADII', 3)[1]		#in [km]
-			self.a_main = self.a_ellips.mean()	#in [km]
-			#Flattening of the main body
-			self.f_main = (self.a_ellips[0]-self.a_ellips[-1])/self.a_ellips[0]
-		except Exception as e:
-			print(f"Error getting RADII for {name}: {e}")
-			self.a_main = None
+		'''
+		This class defines the Body for tidal calculations. The body could be a Solar System body or an exoplanet from a real or hypothetical system.
+            
+		Input:
+		- name: Name of the main body, e.g. 'Earth', 'Mars', 'Io', 'Wasp-12b', etc.
+		- solar_system: Boolean to indicate if the body is in the solar system and made part of the SPICE kernels (default True) or an exoplanet from a real or hypothetical system (False). In the case of exoplanets, the user should provide the necessary physical and orbital parameters later for the tidal calculations.
+        
+        Output:
+		- MainBody object with the physical parameters of the body.
+		'''
 
-		if self.GM_main and self.a_main:
-			self.g_ref = 1e3*self.GM_main/self.a_main**2	#in [m/s^2]
+		#By default, the bodies are from the solar system
+		if solar_system:
+		
+			#Check if kernels are loaded before allowing creation of a MainBody
+			if not kernels_loaded:
+				raise RuntimeError(
+					"SPICE kernels not loaded. Please call tspice.initialize() first. "
+					"Example:\n\n"
+					"import tspice\n"
+					"tspice.initialize()\n"
+					"# or specify a custom directory: tspice.initialize('/path/to/my/kernels')\n"
+					"body = tspice.MainBody('Moon')"
+				)
+			
+			#Name of the main body
+			self.main_body = name
+			
+			try:
+				#GM for the main body
+				self.GM_main = spy.bodvrd(name, 'GM', 1)[1][0]    #in [km^3/s^2]
+			except Exception as e:
+				print(f"Error getting GM for {name}: {e}")
+				self.GM_main = None
+				
+			try:
+				#a_main is the mean radius for the main body
+				self.a_ellips = spy.bodvrd(name, 'RADII', 3)[1]		#in [km]
+				self.a_main = self.a_ellips.mean()	#in [km]
+				#Flattening of the main body
+				self.f_main = (self.a_ellips[0]-self.a_ellips[-1])/self.a_ellips[0]
+			except Exception as e:
+				print(f"Error getting RADII for {name}: {e}")
+				self.a_main = None
+
+			if self.GM_main and self.a_main:
+				self.g_ref = 1e3*self.GM_main/self.a_main**2	#in [m/s^2]
+		
+		else:
+			#[PENDING] Add functionality for other bodies outside the solar system
+			raise NotImplementedError("Currently, only solar system bodies are supported.")
+
+			#[PENDING] Add physical parameters for exoplanets or hypothetical bodies
 
 	#Function to define array the times
 	def array_et_utc(self, date):
-		'''This function creates an array of times in ET from a dictionary with start, stop, step, and time_frame (UTC or TDB).
+
+		'''
+		This function creates an array of times in ET from a dictionary with start, stop, step, and time_frame (UTC or TDB).
 
 		Input:
 		- date: Dictionary with start, stop, step, and time_frame (UTC or TDB).
 
 		Output:
-		- et_utc: Array of times in ET.'''
+		- et_utc: Array of times in ET.
+		'''
 
 		if date['time_frame'] == 'UTC' or 'time_frame' not in date.keys():
 			et_utc_start = spy.utc2et(date['start'])
@@ -105,7 +129,9 @@ class MainBody():
 
 	#Kn constants
 	def Kn_func(self, n, M_ext, M_main=None, a_main=None):
-		'''This program calculate the constant Kn in the TGP expansion
+
+		'''
+		This program calculate the constant Kn in the Tide-Generating Potential expansion.
 		
 		Input:
 		- n: Degree of the term
@@ -121,9 +147,7 @@ class MainBody():
 		should multiply this value by (a/a_main)^n
 		2. This definition is different to the one use in Agnew (2015)
 		that includes the factor 1/r_mean, with r_mean the mean distance
-		to the external body.
-
-		'''
+		to the external body.'''
 
 		if M_main is None and a_main is None:
 			M_main = self.GM_main
@@ -135,12 +159,14 @@ class MainBody():
 	#Function to get the subpoint coordinates of an external body
 	def subpoint_coordinates(self, et_utc, body):
 
-		'''This function calculates the geographical coordinates of the subpoint
+		'''
+		This function calculates the geographical coordinates of the subpoint
 		of an external body on the main body for an array of times in ET.
 		
 		Input:
 		- et_utc: Array of times in ET.
 		- body: Name of the external body, e.g. 'Moon', 'Sun', 'Mercury', etc.
+
 		Output:
 		- phis_ext: Array of longitudes of the subpoint [rad].
 		- thetas_ext: Array of colatitudes of the subpoint [rad].
@@ -166,8 +192,8 @@ class MainBody():
 	#Función del potencial de marea
 	def V_g_tidal_body(self, body, loc_sta=None, dates=None, nmax=None, time_array=False):
 
-		'''This function calculates the TGP for a point on the main body with
-		geographic coordinates (lon_s, lat_s) at a distance a from the COM,
+		'''
+		This function calculates the TGP for a point on the main body with geographic coordinates (lon_s, lat_s) at a distance a from the COM,
 		due to a list of external bodies.
 		
 		Input:
@@ -249,7 +275,8 @@ class MainBody():
 	#Function to get the total tidal potential from multiple bodies
 	def V_g_tidal_total(self, bodies, loc_sta, dates, nmax=6, body_signal=False):
 
-		'''This function calculates the TGP for a point on the main body with geographic coordinates (lon_s, lat_s) at a distance a from the COM, due to a list of external bodies.
+		'''
+		This function calculates the TGP for a point on the main body with geographic coordinates (lon_s, lat_s) at a distance a from the COM, due to a list of external bodies.
 		
 		Input:
 		- loc_sta: Dictionary with the geographic coordinates of the station, including depth. For example: dict(lat=4.49, lon=-73.14, depth=0)
