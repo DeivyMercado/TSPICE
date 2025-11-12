@@ -1,11 +1,11 @@
 #Libraries
 import numpy as np
 from scipy.integrate import solve_ivp
-from tspice.integration_tools.initial_conditions import *
-from tspice.integration_tools.differential_equations import *
 
 #Import TSPICE
 from tspice import Body
+from tspice.integration_tools.initial_conditions import *
+from tspice.integration_tools.differential_equations import *
 
 #This class will contain the body information to do the integration of equations of motion
 class InteriorModel(Body):
