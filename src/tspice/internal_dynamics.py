@@ -18,13 +18,13 @@ class InteriorModel(Body):
         #GM_main, a_ellips, a_main, f_main, g_ref
 
     #To calculate the characteristic scales for adimensionalization
-    def scale_constants(self, verbose=False):
+    def scale_constants(self, verbose=True):
 
         '''
         Function to calculate characteristic scales for adimensionalization of the internal solutions yis.
 
         Inputs:
-        - verbose: Boolean to print the characteristic scales (default: False)
+        - verbose: Boolean to print the characteristic scales (default: True)
 
         Outputs:
         - L: Length scale [m]
@@ -142,6 +142,9 @@ class InteriorModel(Body):
         - None (the parameters are stored as attributes of the class). We can access them as self.n, self.omega, self.rho0_ad, etc.
 
         '''
+
+        #Calculate the scale constants if not done yet  
+        self.scale_constants(verbose=False)      
         
         #Degree of the solution
         self.n = n
