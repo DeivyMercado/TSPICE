@@ -22,7 +22,7 @@ setuptools.setup(
         "License :: OSI Approved :: MIT License",
         "Operating System :: OS Independent"
         ],
-    version='0.0.4',
+    version='0.0.1',
 
     #Files
     package_dir={"": "src"},
