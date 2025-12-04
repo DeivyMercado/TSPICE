@@ -8,7 +8,7 @@ version = "0.0.1"
 description = "Tidal signal with Python and SPICE"
 readme = "README.md"
 requires-python = ">=3.7"
-license = {file = "LICENSE"}
+license = "MIT"
 authors = [
   {name = "Deivy Mercado", email = "david231097@gmail.com"},
 ]
