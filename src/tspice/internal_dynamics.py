@@ -8,7 +8,7 @@ from tspice.integration_tools.initial_conditions import *
 from tspice.integration_tools.differential_equations import *
 
 #This class will contain the body information to do the integration of equations of motion
-class InteriorModel(Body):
+class BodyResponse(Body):
 
     #Constructor of the class
     def __init__(self, name):
