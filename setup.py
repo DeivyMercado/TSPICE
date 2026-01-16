@@ -19,7 +19,7 @@ setuptools.setup(
     #Clasifier
     classifiers=[
         "Programming Language :: Python :: 3",
-        "License :: OSI Approved :: MIT License",
+        #"License :: OSI Approved :: MIT License",
         "Operating System :: OS Independent"
         ],
     version='0.0.1',
