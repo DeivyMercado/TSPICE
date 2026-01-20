@@ -192,7 +192,7 @@ class Body():
 		return phis_ext, thetas_ext, alts_ext
 
 	#Función del potencial de marea
-	def V_g_tidal_body(self, body, loc_sta=None, dates=None, nmax=None, time_array=False):
+	def tgp_one_body(self, body, loc_sta=None, dates=None, nmax=None, time_array=False):
 
 		'''
 		This function calculates the TGP for a point on the main body with geographic coordinates (lon_s, lat_s) at a distance a from the COM,
@@ -211,14 +211,14 @@ class Body():
 
 		#Cordinates of the station
 		if loc_sta is None:
-			#If the function is called within V_g_tidal_total
+			#If the function is called within tgp_many_bodies
 			phi_sta, theta_sta, a_sta = self.phi_sta, self.theta_sta, self.a_sta
 		else:
 			phi_sta, theta_sta, a_sta = loc_func(loc_sta, self.a_ellips)
 
 		#Array of UTC times in ET
 		if dates is None:
-			#If the function is called within V_g_tidal_total
+			#If the function is called within tgp_many_bodies
 			step_seconds, et_utc = self.step_seconds, self.et_utc
 		else:
 			step_seconds, et_utc = self.array_et_utc(dates)
@@ -275,7 +275,7 @@ class Body():
 			return V_g_tid_body
 	
 	#Function to get the total tidal potential from multiple bodies
-	def V_g_tidal_total(self, bodies, loc_sta, dates, nmax=6, body_signal=False):
+	def tgp_many_bodies(self, bodies, loc_sta, dates, nmax=6, body_signal=False):
 
 		'''
 		This function calculates the TGP for a point on the main body with geographic coordinates (lon_s, lat_s) at a distance a from the COM, due to a list of external bodies.
@@ -313,7 +313,7 @@ class Body():
 		#Loop over external bodies
 		for i,body in enumerate(bodies):
 			#V/g time series for the body
-			V_g_tid_body = self.V_g_tidal_body(body,)
+			V_g_tid_body = self.tgp_one_body(body,)
 			V_g_tid_array[:,i] = V_g_tid_body
 			print(f'{body} contribution calculated!')
 		
