@@ -71,21 +71,23 @@ class Body():
 					"body = tspice.MainBody('Moon')"
 				)
 			
-			#Name of the main body
-			self.main_body = name
+			#Name, Id and body-fixed frame of the (target) body
+			self.body_name = name
+			self.body_id = spy.bodn2c(name)
+			self.body_frame = spy.cidfrm(self.body_id)[1]
 			
 			try:
-				#GM for the main body
+				#GM for the body
 				self.GM_main = spy.bodvrd(name, 'GM', 1)[1][0]    #in [km^3/s^2]
 			except Exception as e:
 				print(f"Error getting GM for {name}: {e}")
 				self.GM_main = None
 				
 			try:
-				#a_main is the mean radius for the main body
+				#a_main is the mean radius for the body
 				self.a_ellips = spy.bodvrd(name, 'RADII', 3)[1]		#in [km]
 				self.a_main = self.a_ellips.mean()	#in [km]
-				#Flattening of the main body
+				#Flattening of the body
 				self.f_main = (self.a_ellips[0]-self.a_ellips[-1])/self.a_ellips[0]
 			except Exception as e:
 				print(f"Error getting RADII for {name}: {e}")
@@ -178,7 +180,7 @@ class Body():
 		for i, t in enumerate(et_utc):
 
 			#Rectangular coordinates of the subpoint
-			subp, et, pos = spy.subpnt('INTERCEPT/ELLIPSOID','EARTH',t,'IAU_EARTH','XCN+S',body)
+			subp, et, pos = spy.subpnt('INTERCEPT/ELLIPSOID', self.body_name, t, self.body_frame, 'XCN+S', body)
 
 			#Geographical coordinates of the subpoint
 			lon, lat, alt = spy.recgeo(subp, self.a_main, self.f_main) #in [rad, rad, km]
@@ -231,7 +233,7 @@ class Body():
 		GM_ext = spy.bodvrd(body, 'GM', 1)[1][0] #in [km^3/s^2]
 
 		#State vector and light time travel
-		x, lt = spy.spkezr(body, et_utc, 'ECLIPJ2000', 'XCN+S', self.main_body)	#in [km]
+		x, lt = spy.spkezr(body, et_utc, 'ECLIPJ2000', 'XCN+S', self.body_name)	#in [km]
 
 		#Position vector
 		r_ext = np.array(x)[:,:3]	#in [km]
