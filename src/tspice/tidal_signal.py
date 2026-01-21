@@ -103,7 +103,7 @@ class Body():
 			#[PENDING] Add physical parameters for exoplanets or hypothetical bodies
 
 	#Function to define array the times
-	def array_et_utc(self, date):
+	def array_et_utc(self, date, return_step_seconds=False):
 
 		'''
 		This function creates an array of times in ET from a dictionary with start, stop, step, and time_frame (UTC or TDB).
@@ -125,7 +125,10 @@ class Body():
 		else:
 			raise ValueError("Currently, only 'UTC' time frame is supported.")
 
-		return step_seconds, et_utc
+		if return_step_seconds:
+			return step_seconds, et_utc
+		else:
+			return et_utc
 
 	#[PENDING] Function to get the body IDs from their names
 
@@ -219,9 +222,9 @@ class Body():
 		#Array of UTC times in ET
 		if dates is None:
 			#If the function is called within tgp_many_bodies
-			step_seconds, et_utc = self.step_seconds, self.et_utc
+			et_utc = self.et_utc
 		else:
-			step_seconds, et_utc = self.array_et_utc(dates)
+			et_utc = self.array_et_utc(dates)
 
 		#Maximum degree
 		if nmax is None:
@@ -275,7 +278,7 @@ class Body():
 			return V_g_tid_body
 	
 	#Function to get the total tidal potential from multiple bodies
-	def tgp_many_bodies(self, bodies, loc_sta, dates, nmax=6, body_signal=False):
+	def tgp_many_bodies(self, bodies, loc_sta, dates, nmax=6, time_array=False, body_signal=False, verbose=True):
 
 		'''
 		This function calculates the TGP for a point on the target body with geographic coordinates (lon_s, lat_s) at a distance a from the COM, due to a list of external bodies.
@@ -301,8 +304,8 @@ class Body():
 		self.phi_sta, self.theta_sta, self.a_sta = phi_sta, theta_sta, a_sta
 
 		#Array of UTC times in ET
-		step_seconds, et_utc = self.array_et_utc(dates)
-		self.step_seconds, self.et_utc = step_seconds, et_utc
+		et_utc = self.array_et_utc(dates)
+		self.et_utc = et_utc
 
 		#Maximum degree
 		self.nmax = nmax
@@ -315,12 +318,17 @@ class Body():
 			#V/g time series for the body
 			V_g_tid_body = self.tgp_one_body(body,)
 			V_g_tid_array[:,i] = V_g_tid_body
-			print(f'{body} contribution calculated!')
+			if verbose: print(f'{body} contribution calculated!')
 		
 		if body_signal == True:
-			return V_g_tid_array, et_utc
+			if time_array:
+				return V_g_tid_array, et_utc
+			else:
+				return V_g_tid_array
 		else:
 			#Total V/g summing the contributions of all bodies
 			V_g_tid_total = V_g_tid_array.sum(axis=1)
-			return V_g_tid_total, et_utc
-		
+			if time_array:
+				return V_g_tid_total, et_utc
+			else:
+				return V_g_tid_total
