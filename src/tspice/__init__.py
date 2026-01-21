@@ -18,6 +18,7 @@ from .internal_dynamics import BodyResponse
 from . import kernels
 from . import utils
 from . import integration_tools
+from .plotting import plot_one_signal
 
 #List what should be imported with "from tspice import *"
-__all__ = ['initialize', 'Body', 'BodyResponse', 'internal_dynamics', 'kernels', 'utils', 'integration_tools']
+__all__ = ['initialize', 'Body', 'BodyResponse', 'internal_dynamics', 'kernels', 'utils', 'integration_tools', 'plot_one_signal']

@@ -40,7 +40,7 @@ def initialize(data_directory=None):
     kernels_loaded = True
     print(f"TSPICE initialized successfully. Kernels loaded from: {meta_kernel_path}")
 
-#This is the class that define the main body
+#This is the class that define the body
 class Body():
 	
 	#Constructor of the class
@@ -50,17 +50,17 @@ class Body():
 		This class defines the Body for tidal calculations. The body could be a Solar System body or an exoplanet from a real or hypothetical system.
             
 		Input:
-		- name: Name of the main body, e.g. 'Earth', 'Mars', 'Io', 'Wasp-12b', etc.
+		- name: Name of the body, e.g. 'Earth', 'Mars', 'Io', 'Wasp-12b', etc.
 		- solar_system: Boolean to indicate if the body is in the solar system and made part of the SPICE kernels (default True) or an exoplanet from a real or hypothetical system (False). In the case of exoplanets, the user should provide the necessary physical and orbital parameters later for the tidal calculations.
         
         Output:
-		- MainBody object with the physical parameters of the body.
+		- Body object with the physical parameters of the body.
 		'''
 
 		#By default, the bodies are from the solar system
 		if solar_system:
 		
-			#Check if kernels are loaded before allowing creation of a MainBody
+			#Check if kernels are loaded before allowing creation of a Body
 			if not kernels_loaded:
 				raise RuntimeError(
 					"SPICE kernels not loaded. Please call tspice.initialize() first. "
@@ -68,7 +68,7 @@ class Body():
 					"import tspice\n"
 					"tspice.initialize()\n"
 					"# or specify a custom directory: tspice.initialize('/path/to/my/kernels')\n"
-					"body = tspice.MainBody('Moon')"
+					"body = tspice.Body('Moon')"
 				)
 			
 			#Name, Id and body-fixed frame of the (target) body
@@ -78,23 +78,23 @@ class Body():
 			
 			try:
 				#GM for the body
-				self.GM_main = spy.bodvrd(name, 'GM', 1)[1][0]    #in [km^3/s^2]
+				self.GM = spy.bodvrd(name, 'GM', 1)[1][0]    #in [km^3/s^2]
 			except Exception as e:
 				print(f"Error getting GM for {name}: {e}")
-				self.GM_main = None
+				self.GM = None
 				
 			try:
-				#a_main is the mean radius for the body
+				#a_p is the mean radius for the body
 				self.a_ellips = spy.bodvrd(name, 'RADII', 3)[1]		#in [km]
-				self.a_main = self.a_ellips.mean()	#in [km]
+				self.a_p = self.a_ellips.mean()	#in [km]
 				#Flattening of the body
-				self.f_main = (self.a_ellips[0]-self.a_ellips[-1])/self.a_ellips[0]
+				self.f = (self.a_ellips[0]-self.a_ellips[-1])/self.a_ellips[0]
 			except Exception as e:
 				print(f"Error getting RADII for {name}: {e}")
-				self.a_main = None
+				self.a_p = None
 
-			if self.GM_main and self.a_main:
-				self.g_ref = 1e3*self.GM_main/self.a_main**2	#in [m/s^2]
+			if self.GM and self.a_p:
+				self.g_ref = 1e3*self.GM/self.a_p**2	#in [m/s^2]
 		
 		else:
 			#[PENDING] Add functionality for other bodies outside the solar system
@@ -130,32 +130,32 @@ class Body():
 	#[PENDING] Function to get the body IDs from their names
 
 	#Kn constants
-	def Kn_func(self, n, M_ext, M_main=None, a_main=None):
+	def Kn_func(self, n, M_ext, M=None, a_p=None):
 
 		'''
 		This program calculate the constant Kn in the Tide-Generating Potential expansion.
 		
 		Input:
 		- n: Degree of the term
-		- a_main: Radius of the main body [m]
-		- M_main: Mass of the main body [any mass units]
-		- M_ext: Mass of the external body [the same as M_main]
+		- a_p: Radius of the target body [m]
+		- M: Mass of the target body [any mass units]
+		- M_ext: Mass of the external body [the same as M]
 
 		Output:
-		- Kn: Constant K_n for a = a_main
+		- Kn: Constant K_n for a = a_p
 		
 		Note:
 		1. To get the potential for other distance from the COM,
-		should multiply this value by (a/a_main)^n
+		should multiply this value by (a/a_p)^n
 		2. This definition is different to the one use in Agnew (2015)
 		that includes the factor 1/r_mean, with r_mean the mean distance
 		to the external body.'''
 
-		if M_main is None and a_main is None:
-			M_main = self.GM_main
-			a_main = self.a_main
+		if M is None and a_p is None:
+			M = self.GM
+			a_p = self.a_p
 
-		Kn = (4*np.pi/(2*n+1))*(M_ext/M_main)*a_main**(n+2)	#in [km^(n+2)]
+		Kn = (4*np.pi/(2*n+1))*(M_ext/M)*a_p**(n+2)	#in [km^(n+2)]
 		return Kn
 	
 	#Function to get the subpoint coordinates of an external body
@@ -163,7 +163,7 @@ class Body():
 
 		'''
 		This function calculates the geographical coordinates of the subpoint
-		of an external body on the main body for an array of times in ET.
+		of an external body on the target body for an array of times in ET.
 		
 		Input:
 		- et_utc: Array of times in ET.
@@ -183,7 +183,7 @@ class Body():
 			subp, et, pos = spy.subpnt('INTERCEPT/ELLIPSOID', self.body_name, t, self.body_frame, 'XCN+S', body)
 
 			#Geographical coordinates of the subpoint
-			lon, lat, alt = spy.recgeo(subp, self.a_main, self.f_main) #in [rad, rad, km]
+			lon, lat, alt = spy.recgeo(subp, self.a_p, self.f) #in [rad, rad, km]
 			lons_ext[i], lats_ext[i], alts_ext[i] = lon, lat, alt
 		
 		#Final coordinates arrays
@@ -195,7 +195,7 @@ class Body():
 	def tgp_one_body(self, body, loc_sta=None, dates=None, nmax=None, time_array=False):
 
 		'''
-		This function calculates the TGP for a point on the main body with geographic coordinates (lon_s, lat_s) at a distance a from the COM,
+		This function calculates the TGP for a point on the target body with geographic coordinates (lon_s, lat_s) at a distance a from the COM,
 		due to a list of external bodies.
 		
 		Input:
@@ -251,8 +251,8 @@ class Body():
 		n_init = 2
 		n_final = nmax
 		for n in range(n_init,n_final+1):
-			Kn = self.Kn_func(n, GM_ext, self.GM_main, self.a_main)
-			aamain_n = (a_sta/self.a_main)**n	#For a != a_main
+			Kn = self.Kn_func(n, GM_ext, self.GM, self.a_p)
+			aamain_n = (a_sta/self.a_p)**n	#For a != a_p
 			fn = aamain_n*Kn/r**(n+1)	#in [km] because a and r is in [km]
 
 			#Sum over the orders
@@ -278,7 +278,7 @@ class Body():
 	def tgp_many_bodies(self, bodies, loc_sta, dates, nmax=6, body_signal=False):
 
 		'''
-		This function calculates the TGP for a point on the main body with geographic coordinates (lon_s, lat_s) at a distance a from the COM, due to a list of external bodies.
+		This function calculates the TGP for a point on the target body with geographic coordinates (lon_s, lat_s) at a distance a from the COM, due to a list of external bodies.
 		
 		Input:
 		- loc_sta: Dictionary with the geographic coordinates of the station, including depth. For example: dict(lat=4.49, lon=-73.14, depth=0)
