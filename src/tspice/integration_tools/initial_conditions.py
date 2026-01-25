@@ -120,6 +120,7 @@ def Y0_AmorinGudkova2024_ad(r0, params_ad):
 
     where:
     - n: degree of the tidal potential
+    - omega: frequency parameter
     - lam, mu: Lamé parameters
     - rho: density at equilibrium
     - g: gravitational acceleration at equilibrium
@@ -130,6 +131,7 @@ def Y0_AmorinGudkova2024_ad(r0, params_ad):
     
     #Degree of the tidal potential
     n = params_ad["n"]
+    omega = params_ad["omega"]
     
     #Planetary profiles at r=r0
     lam = params_ad["lam"](0)
@@ -137,8 +139,8 @@ def Y0_AmorinGudkova2024_ad(r0, params_ad):
     rho = params_ad["rho"](0)
 
     #Auxiliar variable
-    J = mu**(-1)
     gamma = (4/3)*np.pi*rho
+    J = gamma/(n*gamma - omega**2)
     
 	#First independent solution
     y11 = n*J*r0**(n-1)

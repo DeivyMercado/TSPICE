@@ -147,7 +147,7 @@ def dydr_solid_AmorinGudkova2024_ad(r, y, params_adim):
 		dy1 = -2*lam*y1/(beta*r) + y2/beta + n1*lam*y3/(beta*r)
 		dy2 = -(rho*(omega**2)*(r**2) + 4*g*rho*r - 4*gamma)*y1/(r**2) - 4*mu*y2/(beta*r) + (n1*g*rho*r - 2*n1*gamma)*y3/(r**2) + n1*y4/r - rho*y6
 		dy3 = -y1/r + y3/r + y4/mu
-		dy4 = (g*rho*r - 2*gamma)*y1/(r**2) - lam*y2/(beta*r) + (rho*omega**2*r**2 + (2*mu/beta)*((2*n1 - 1)*lam + 2*(n1 - 1)*mu))*y3/(r**2) - 3*y4/r - rho*y5/r	#PENDIENT: review the sign of the term with omega
+		dy4 = (g*rho*r - 2*gamma)*y1/(r**2) - lam*y2/(beta*r) + (-rho*omega**2*r**2 + (2*mu/beta)*((2*n1 - 1)*lam + 2*(n1 - 1)*mu))*y3/(r**2) - 3*y4/r - rho*y5/r	#The original paper had a typo here with a plus sign before rho*omega**2*r**2
 		dy5 = 4*np.pi*rho*y1 + y6
 		dy6 = -4*np.pi*rho*n1*y3/r + n1*y5/r**2 - 2*y6/r
 
