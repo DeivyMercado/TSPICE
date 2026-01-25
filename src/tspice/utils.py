@@ -1,4 +1,6 @@
 import numpy as np
+import spiceypy as spy
+from datetime import datetime
 import re
 
 #To get the triaxial ellipsoid radius
@@ -87,3 +89,24 @@ def convert_step_to_seconds(step):
     step_s = value*unit_conversion[unit]
 
     return step_s
+
+def et_to_utc_string(et, prec=2, format='ISOC', datetime_format=True):
+    
+    '''
+    This function converts Ephemeris Time (ET) to a UTC string format "YYYY-MM-DD HR:MN:SC".
+
+    Inputs:
+    - et: [float] Ephemeris Time.
+
+    Outputs:
+    - utc_string: [str] UTC time in the format "YYYY-MM-DD HR:MN:SC".
+    '''
+
+    #Convert ET to UTC with spiceypy
+    utc_times = spy.et2utc(et, format_str=format, prec=prec)	#UTC strings
+
+    #Convert to datetime objects if needed (useful for plotting)
+    if datetime_format:
+        utc_times = [datetime.fromisoformat(utc) for utc in utc_times] #Datetime objects
+
+    return utc_times
