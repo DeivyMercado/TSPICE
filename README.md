@@ -4,7 +4,7 @@ Tidal Signal with Python and SPICE
 
 ## Description
 
-\href{https://pypi.org/project/tspice/}{\textit{TSPICE}}, is a Python package developed my Bachelor's thesis work, "Tidal Potential: Calculations", to facilitate the calculation of the tidal potential and the planetary response. The package incorporates routines and integration schemes we described there. 
+TSPICE, is a Python package developed my Bachelor's thesis work, "Tidal Potential: Calculations", to facilitate the calculation of the tidal potential and the planetary response. The package incorporates routines and integration schemes we described there. 
 
 ## Installation
 
