@@ -1,35 +1,10 @@
+##################################################################
+#                                                                #
+# TSPICE: Tidal Signal with Python and SPICE                     #
+#                                                                #
+##################################################################
+# License: GNU Affero General Public License v3 (AGPL-3.0)       #
+##################################################################
 [build-system]
-requires = ["setuptools>=61.0.0", "wheel"]
+requires = ['setuptools', 'numpy', 'scipy', 'spiceypy']
 build-backend = "setuptools.build_meta"
-
-[project]
-name = "tspice"
-version = "0.0.2"
-description = "Tidal signal with Python and SPICE"
-readme = "README.md"
-requires-python = ">=3.7"
-license = "MIT"
-authors = [
-  {name = "Deivy Mercado", email = "david231097@gmail.com"},
-  {name = "Jorge I. Zuluaga", email = "jorge.zuluaga@udea.edu.co"},
-  {name = "Gloria Moncayo", email = "gloria.moncayo@udea.edu.co"},
-]
-keywords = ["astrodynamics", "geophysics", "tides", "spice"]
-classifiers = [
-    "Programming Language :: Python :: 3",
-    "Operating System :: OS Independent"
-]
-dependencies = [
-    "numpy",
-    "scipy",
-    "spiceypy",
-]
-urls = {Homepage = "https://github.com/DeivyMercado/TSPICE"}
-
-[tool.setuptools]
-package-dir = {"" = "src"}
-packages = {find = {where = ["src"]}}
-include-package-data = true
-
-[tool.setuptools.package-data]
-"tspice" = ["data/spice_kernels.json"]

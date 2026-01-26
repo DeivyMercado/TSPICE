@@ -40,3 +40,6 @@ meta_kernel
 
 #Config files with PyPI info
 .pypirc
+
+contrib
+.tspice

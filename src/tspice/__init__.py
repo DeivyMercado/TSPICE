@@ -1,5 +1,5 @@
 """
-TSPICE - Tidal Signal with Python and SPICE
+tSPICE - Tidal Signal with Python and SPICE
 A package for calculating the tidal potential using SPICE.
 """
 

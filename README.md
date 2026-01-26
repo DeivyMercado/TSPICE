@@ -1,28 +1,58 @@
-# TSPICE
+# tSPICE
 
-Tidal Signal with Python and SPICE
+[![version](https://img.shields.io/pypi/v/tspice?color=blue)](https://pypi.org/project/tspice/)
+[![license](https://img.shields.io/badge/License-AGPL%20v3-blue.svg)](https://github.com/DeivyMercado/TSPICE/blob/master/LICENSE)
+[![pythonver](https://img.shields.io/pypi/pyversions/tspice)](https://pypi.org/project/tspice/)
+[![Powered by SpiceyPy](https://img.shields.io/badge/Powered%20by-SpiceyPy-blue)](https://github.com/AndrewAnnex/SpiceyPy)
+[![arXiv](https://img.shields.io/badge/arXiv-0000.00000-orange.svg?style=flat)](https://arxiv.org/abs/0000.00000)
+
+<p></p>
+<div align="center">
+  <!-- <img src="https://raw.githubusercontent.com/DeivyMercado/TSPICE/main/docs/tspice-logo-white.webp" alt="tSPICE Logo" width="600"/> -->
+  <img src="https://raw.githubusercontent.com/seap-udea/tspice/main/docs/tspice-logo-white.webp" alt="tSPICE Logo" width="600"/>
+</div>
+<p></p>
+
+**tSPICE** is a Python package developed for the calculation of the tidal potential and the planetary response, using SPICE kernels.
 
 ## Description
 
-TSPICE, is a Python package developed my Bachelor's thesis work, "Tidal Potential: Calculations", to facilitate the calculation of the tidal potential and the planetary response. The package incorporates routines and integration schemes we described there. 
+tSPICE was developed as part of the Bachelor's thesis "Tidal Potential: Calculations" to facilitate the calculation of the tidal potential and the planetary response. The package incorporates routines and integration schemes described in the thesis.
 
 ## Installation
 
-It is already available on PyPI, so you can install it easily with:
+You can install it easily with:
 
 ```bash
 pip install tspice
 ```
 
-After this, you can start using the package after importing it:
+## Quick Start
+
+After installation, you can start using the package:
 
 ```python
 import tspice
 ```
-Once the package is installed and imported into your script, you should run the following before you start using it:
+
+Before your first calculation, initialize the package to load SPICE kernels:
 
 ```python
 tspice.initialize()
 ```
 
-This downloads and loads the necessary SPICE kernels from the NAIF website. Internally, \texttt{initialize} looks for the kernels in the package's structure, and if they don't exist, it loads them with \texttt{furnsh}. If the kernels and the structure where they are stored don't exist, this function downloads them, creates the structure in the package folder, and loads them. Thus, the second time you use TSPICE, \texttt{initialize} won't download the kernels again. This guarantees that the necessary kernels are available before any calculation.
+This function ensures that tThe second time you use tSPICE, \texttt{initialize} won't download the kernels again.f not present) and loaded.
+
+## Examples
+
+*(Examples to be added)*
+
+## Authors
+
+- **Deivy Mercado** - david231097@gmail.com
+- **Jorge I. Zuluaga** - jorge.zuluaga@udea.edu.co
+- **Gloria Moncayo** - gloria.moncayo@udea.edu.co
+
+## License
+
+This project is licensed under the GNU Affero General Public License v3.0 (AGPL-3.0) - see the [LICENSE](LICENSE) file for details.

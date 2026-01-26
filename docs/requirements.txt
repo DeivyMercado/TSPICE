@@ -1,0 +1,11 @@
+sphinx
+pydata-sphinx-theme
+sphinx-rtd-theme
+sphinx-mdinclude
+nbsphinx
+ipykernel
+pypandoc-binary
+numpy>=1.20.0
+scipy>=1.7.0
+matplotlib>=3.3.0
+spiceypy>=5.0.0
