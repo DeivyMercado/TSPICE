@@ -43,9 +43,9 @@ class BodyResponse(Body):
 
         #[PENDING] Check this, I'm making int(self.a_main) for the radius to be the same as the PREM model
         #In the future we should guarantee that the planetary model has the same radius as the SPICE mean radius
-        self.L = int(self.a_main)*1e3	#Length in [m] 
+        self.L = int(self.a_p)*1e3	#Length in [m] 
 
-        self.M = self.GM_main*1e9/self.G	#Mass in [kg]
+        self.M = self.GM*1e9/self.G	#Mass in [kg]
         self.RHO = self.M/self.L**3	#kg/m^3
         self.P = self.G*self.M**2/self.L**4	#Pressure/Elasticity modules in [Pa]
         self.V = (self.P/self.RHO)**0.5	#Velocity in [m/s]

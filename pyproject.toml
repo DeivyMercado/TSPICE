@@ -4,13 +4,15 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "tspice"
-version = "0.0.1"
+version = "0.0.2"
 description = "Tidal signal with Python and SPICE"
 readme = "README.md"
 requires-python = ">=3.7"
 license = "MIT"
 authors = [
   {name = "Deivy Mercado", email = "david231097@gmail.com"},
+  {name = "Jorge I. Zuluaga", email = "jorge.zuluaga@udea.edu.co"},
+  {name = "Gloria Moncayo", email = "gloria.moncayo@udea.edu.co"},
 ]
 keywords = ["astrodynamics", "geophysics", "tides", "spice"]
 classifiers = [

@@ -7,8 +7,8 @@ setuptools.setup(
 
     #Basic description
     name='tspice',
-    author="Deivy Mercado",
-    author_email="david231097@gmail.com",
+    author="Deivy Mercado, Jorge I. Zuluaga, Gloria Moncayo",
+    author_email="david231097@gmail.com, jorge.zuluaga@udea.edu.co, gloria.moncayo@udea.edu.co",
     description="Tidal signal with Python and SPICE",
     long_description=long_description,
     long_description_content_type="text/markdown",
@@ -22,7 +22,7 @@ setuptools.setup(
         #"License :: OSI Approved :: MIT License",
         "Operating System :: OS Independent"
         ],
-    version='0.0.1',
+    version='0.0.2',
 
     #Files
     package_dir={"": "src"},
