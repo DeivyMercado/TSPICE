@@ -1,9 +1,12 @@
-"""
-tSPICE - Tidal Signal with Python and SPICE
-A package for calculating the tidal potential using SPICE.
-"""
-
-#Version of the TSPICE package
+##################################################################
+#                                                                #
+# tSPICE: Tidal Signal with Python and SPICE                    #
+#                                                                #
+##################################################################
+# License: GNU Affero General Public License v3 (AGPL-3.0)       #
+# Authors: Jorge I. Zuluaga, Juanita A. Agudelo                  #
+# Contact: jorge.zuluaga@udea.edu.co                             #
+##################################################################
 __version__ = "0.0.2"
 
 import os
@@ -19,32 +22,79 @@ kernels_loaded = False
 
 def get_data(filename):
     """
-    Get the full path of the `filename` which is one of the datafiles provided with the package.
+    Get the full path to a package data file.
+    
+    This function returns the absolute path to data files included with the tSPICE package,
+    such as SPICE kernel configuration files or planetary models.
     
     Parameters
     ----------
     filename : str
-        Name of the data file.
+        Name of the data file (e.g., 'spice_kernels.json', 'PREM_amorin.xlsx').
         
     Returns
     -------
-    path : str
-        Full path to package datafile.
+    str
+        Absolute path to the requested data file.
+        
+    Examples
+    --------
+    >>> import tspice
+    >>> kernel_config = tspice.get_data('spice_kernels.json')
+    >>> print(kernel_config)
+    /path/to/tspice/data/spice_kernels.json
     """
     return os.path.join(ROOTDIR, 'data', filename)
 
-def initialize(data_directory=None, verbose=True, level='minimal'):
+def initialize(data_directory=None, verbose=True, level='planetary'):
     """
-    Download and load the necessary SPICE kernels.
+    Download and load SPICE kernels for tSPICE.
     
-    Input:
-    - data_directory : [str, optional] Path to the directory where kernels should be stored and loaded from. 
-                       If not provided, a 'tspice_data' directory will be created in the current working directory.
-    - verbose : [bool, optional] If True, print detailed information about kernel downloading and loading. Default is True.
-    - level : [str, optional] Level of kernels to download. Options are 'minimal', 'planetary', 'full'. Default is 'full'.
-              'minimal': Only small kernels (non-.bsp).
-              'planetary': Minimal + Planetary ephemeris (de442.bsp).
-              'full': All kernels.
+    This function handles downloading SPICE kernels from NASA's NAIF server and loading them
+    into memory. Kernels are essential for computing ephemerides of celestial bodies. The function
+    creates a meta-kernel file that references all downloaded kernels and loads them using SPICE.
+    
+    Parameters
+    ----------
+    data_directory : str, optional
+        Path to the directory where kernels should be stored and loaded from.
+        If not provided, a 'tspice_data' directory will be created in the current working directory.
+    verbose : bool, optional
+        If True, print detailed information about kernel downloading and loading.
+        Default is True.
+    level : {'minimal', 'planetary', 'full'}, optional
+        Level of kernels to download. Default is 'planetary'.
+        
+        - 'minimal': Only small kernels (leap seconds, frame definitions, etc.)
+        - 'planetary': Minimal + planetary ephemeris (de442.bsp, ~600 MB)
+        - 'full': All kernels including satellite ephemerides
+    
+    Raises
+    ------
+    ValueError
+        If an invalid `level` argument is provided.
+    
+    Notes
+    -----
+    Downloaded kernels are cached in the specified directory. If kernels already exist,
+    they will not be re-downloaded unless they are missing.
+    
+    The function sets the global `kernels_loaded` flag to True upon successful completion.
+    
+    Examples
+    --------
+    Initialize with default settings (planetary kernels in current directory):
+    
+    >>> import tspice
+    >>> tspice.initialize()
+    
+    Initialize with minimal kernels in a custom directory:
+    
+    >>> tspice.initialize(data_directory='/path/to/kernels', level='minimal')
+    
+    Quiet initialization:
+    
+    >>> tspice.initialize(verbose=False)
     """
     global kernels_loaded
     
@@ -63,7 +113,7 @@ def initialize(data_directory=None, verbose=True, level='minimal'):
     # kernel_config is still inside the package installation
     kernel_config = os.path.join(ROOTDIR, 'data', 'spice_kernels.json')
 
-    #Read the JSON file
+
     with open(kernel_config, 'r') as f:
         config = json.load(f) 	#Reads the file and turns it into a Python dictionary!
     
@@ -80,7 +130,7 @@ def initialize(data_directory=None, verbose=True, level='minimal'):
     allowed_levels = levels_map[level]
     kernels_to_download = [k for k in config['kernels'] if k.get('level', 'full') in allowed_levels]
 
-    #If the kernel directory does not exist, create it and download the kernels
+
     #Note: initialize creates data_dir implicitly if we pass it to makedirs, or valid checks
     if not os.path.exists(kernel_dir):
         os.makedirs(kernel_dir)
@@ -125,7 +175,6 @@ def initialize(data_directory=None, verbose=True, level='minimal'):
                 if os.path.exists(part_filepath):
                     os.remove(part_filepath)
 
-    #If the directory exists, verify that the files are there already
     else:
         if verbose: print(f"Directory for Kernels already exists at: {kernel_dir}")
         
@@ -198,37 +247,23 @@ def initialize(data_directory=None, verbose=True, level='minimal'):
     
     if verbose: print(f"Meta kernel created/updated at {meta_kernel_path}.")
     
-    #Load the meta kernel
+
     spy.furnsh(meta_kernel_path)
     
     kernels_loaded = True
     print(f"TSPICE initialized successfully. Kernels loaded from: {meta_kernel_path}")
     if verbose: print(f"Kernels loaded from: {meta_kernel_path}")
 
+# Import classes and methods
+from .tides import Body, BodyResponse
+from .planet import Earth
 
-#Import key functions to make them available at the top level for users. This allows users to write:
-#from tspice import initialize, Body, BodyResponse
-#Instead of:
-#from tspice.tidal_signal import initialize, Body
-#from tspice.internal_dynamics import BodyResponse
-
-from .tidal_signal import Body
-from .internal_dynamics import BodyResponse
-from . import utils
-from . import integration_tools
-from .plotting import plot_one_signal, plot_many_signal
-# from .data import Data
-
-
-# Package initialization message
+# Welcome message
 def _welcome_message():
     """Display welcome message on import."""
     print(f"Welcome to tSPICE v{__version__}")
-
 _welcome_message()
-
-# Clean up namespace
 del _welcome_message
 
-#List what should be imported with "from tspice import *"
-__all__ = ['initialize', 'Body', 'BodyResponse', 'internal_dynamics', 'utils', 'integration_tools', 'plot_one_signal', 'plot_many_signal', 'get_data'] #, 'Data']
+# Classes and methods to export
+__all__ = ['initialize', 'Body', 'BodyResponse', 'Earth', 'get_data']

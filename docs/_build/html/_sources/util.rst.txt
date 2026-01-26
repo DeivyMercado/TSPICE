@@ -1,7 +1,7 @@
 Utilities
 =========
 
-.. automodule:: multineas.util
+.. automodule:: tspice.util
    :members:
    :undoc-members:
    :show-inheritance:

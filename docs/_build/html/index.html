@@ -18,7 +18,8 @@
       <script src="_static/sphinx_highlight.js?v=6ffebe34"></script>
     <script src="_static/js/theme.js"></script>
     <link rel="index" title="Index" href="genindex.html" />
-    <link rel="search" title="Search" href="search.html" /> 
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="Tutorials and Examples" href="examples.html" /> 
 </head>
 
 <body class="wy-body-for-nav"> 
@@ -40,19 +41,16 @@
   </form>
 </div>
         </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
-              <!-- Local TOC -->
-              <div class="local-toc"><ul>
-<li><a class="reference internal" href="#">tSPICE</a><ul>
-<li><a class="reference internal" href="#description">Description</a></li>
-<li><a class="reference internal" href="#installation">Installation</a></li>
-<li><a class="reference internal" href="#quick-start">Quick Start</a></li>
-<li><a class="reference internal" href="#examples">Examples</a></li>
-<li><a class="reference internal" href="#authors">Authors</a></li>
-<li><a class="reference internal" href="#license">License</a></li>
+              <p class="caption" role="heading"><span class="caption-text">EXAMPLES</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="examples.html">Tutorials and Examples</a></li>
 </ul>
-</li>
+<p class="caption" role="heading"><span class="caption-text">API Reference:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="tides.html">Tides Module</a></li>
+<li class="toctree-l1"><a class="reference internal" href="planet.html">Planet Module</a></li>
 </ul>
-</div>
+
         </div>
       </div>
     </nav>
@@ -79,11 +77,11 @@
              
   <section id="tspice">
 <h1>tSPICE<a class="headerlink" href="#tspice" title="Link to this heading"></a></h1>
-<a class="reference external image-reference" href="https://pypi.org/project/tspice/"><img alt="version" src="https://img.shields.io/pypi/v/tspice?color=blue" />
+<a class="reference external image-reference" href="https://pypi.org/project/tspice/"><img alt="pypi" src="https://img.shields.io/badge/pypi-v0.0.2-blue" />
 </a>
-<a class="reference external image-reference" href="https://github.com/DeivyMercado/TSPICE/blob/master/LICENSE"><img alt="license" src="https://img.shields.io/badge/License-AGPL%20v3-blue.svg" />
+<a class="reference external image-reference" href="https://github.com/DeivyMercado/TSPICE/blob/master/LICENSE"><img alt="License" src="https://img.shields.io/badge/License-AGPL%20v3-blue.svg" />
 </a>
-<a class="reference external image-reference" href="https://pypi.org/project/tspice/"><img alt="pythonver" src="https://img.shields.io/pypi/pyversions/tspice" />
+<a class="reference external image-reference" href="https://pypi.org/project/tspice/"><img alt="python" src="https://img.shields.io/badge/python-3-grey" />
 </a>
 <a class="reference external image-reference" href="https://github.com/AndrewAnnex/SpiceyPy"><img alt="Powered by SpiceyPy" src="https://img.shields.io/badge/Powered%20by-SpiceyPy-blue" />
 </a>
@@ -91,12 +89,21 @@
 </a>
 <p></p>
 <div align="center">
-  <img src="https://raw.githubusercontent.com/DeivyMercado/TSPICE/main/docs/tspice-logo-white.webp" alt="tSPICE Logo" width="600"/>
+  <!-- <img src="https://raw.githubusercontent.com/DeivyMercado/TSPICE/main/docs/tspice-logo-white.webp" alt="tSPICE Logo" width="600"/> -->
+  <img src="https://raw.githubusercontent.com/seap-udea/tspice/main/docs/tspice-logo-white.webp" alt="tSPICE Logo" width="600"/>
 </div>
 <p></p><p><strong>tSPICE</strong> is a Python package developed for the calculation of the tidal potential and the planetary response, using SPICE kernels.</p>
 <section id="description">
 <h2>Description<a class="headerlink" href="#description" title="Link to this heading"></a></h2>
-<p>tSPICE was developed as part of the Bachelor’s thesis “Tidal Potential: Calculations” to facilitate the calculation of the tidal potential and the planetary response. The package incorporates routines and integration schemes described in the thesis.</p>
+<p>tSPICE develops a coherent pathway from the fundamentals of tidal potential theory and elasticity to practical computations of tidal signals and elastic responses. The package uses SPICE’s kernels and modular routines to compute tidal signals and integrate planetary interior models.</p>
+<p>This work was developed as part of the Bachelor’s thesis <strong>“Planetary Tides and Elastic Response: From Theory to Calculations”</strong> by Deivy J. Mercado R. (2026).</p>
+<p>Key features:</p>
+<ul class="simple">
+<li><p><strong>Tidal Potential</strong>: Implements Tide-Generating Potentials (TGPs) in spherical-harmonic form.</p></li>
+<li><p><strong>Elastic Response</strong>: Solves governing elastodynamic equations for self-gravitating, elastic, transversely isotropic, spherical bodies.</p></li>
+<li><p><strong>Integration</strong>: Solves coupled first-order ODEs for displacement, strain, stress, and perturbing potential fields.</p></li>
+<li><p><strong>Validation</strong>: Reproduces tidal signals on Earth consistent with ETERNA-x and computes Love numbers in agreement with literature (e.g., using a modified PREM Earth model).</p></li>
+</ul>
 </section>
 <section id="installation">
 <h2>Installation<a class="headerlink" href="#installation" title="Link to this heading"></a></h2>
@@ -134,13 +141,33 @@
 <p>This project is licensed under the GNU Affero General Public License v3.0 (AGPL-3.0) - see the <a class="reference external" href="LICENSE">LICENSE</a> file for details.</p>
 <div class="toctree-wrapper compound">
 </div>
+<div class="toctree-wrapper compound">
+</div>
+<div class="toctree-wrapper compound">
+<p class="caption" role="heading"><span class="caption-text">API Reference:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="tides.html">Tides Module</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="tides.html#classes">Classes</a></li>
+<li class="toctree-l2"><a class="reference internal" href="tides.html#tspice.tides.Body"><code class="docutils literal notranslate"><span class="pre">Body</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="tides.html#tspice.tides.BodyResponse"><code class="docutils literal notranslate"><span class="pre">BodyResponse</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="planet.html">Planet Module</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="planet.html#classes">Classes</a></li>
+<li class="toctree-l2"><a class="reference internal" href="planet.html#tspice.planet.Earth"><code class="docutils literal notranslate"><span class="pre">Earth</span></code></a></li>
+</ul>
+</li>
+</ul>
+</div>
 </section>
 </section>
 
 
            </div>
           </div>
-          <footer>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="examples.html" class="btn btn-neutral float-right" title="Tutorials and Examples" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
 
   <hr/>
 

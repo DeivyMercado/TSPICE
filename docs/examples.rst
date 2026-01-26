@@ -6,6 +6,5 @@ Tutorials and Examples
    :maxdepth: 2
    :caption: Examples
 
-   examples/multineas_quickstart
-   examples/multimin_tutorial
-   examples/population_asteroid_tutorial
+   examples/love_numbers_test
+   examples/tidal_signal_test

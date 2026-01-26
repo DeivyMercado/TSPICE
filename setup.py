@@ -57,7 +57,9 @@ setuptools.setup(
         'numpy',
         'scipy',
         'spiceypy',
-        'matplotlib'
+        'matplotlib',
+        'pandas',
+        'openpyxl'
     ],
     
     python_requires='>=3.7',
