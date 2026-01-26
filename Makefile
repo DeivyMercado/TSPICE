@@ -61,6 +61,7 @@ clean:
 	find . -type d -name __pycache__ -exec rm -rf {} +
 	find . -type f -name '*.pyc' -delete
 	find . -type f -name '*.pyo' -delete
+	find . -type d -name "tspice_data" -exec rm -rf {} +
 
 build: clean
 	$(PYTHON) -m build

@@ -1,10 +1,6 @@
 # tSPICE
 
-[![version](https://img.shields.io/pypi/v/tspice?color=blue)](https://pypi.org/project/tspice/)
-[![license](https://img.shields.io/badge/License-AGPL%20v3-blue.svg)](https://github.com/DeivyMercado/TSPICE/blob/master/LICENSE)
-[![pythonver](https://img.shields.io/pypi/pyversions/tspice)](https://pypi.org/project/tspice/)
-[![Powered by SpiceyPy](https://img.shields.io/badge/Powered%20by-SpiceyPy-blue)](https://github.com/AndrewAnnex/SpiceyPy)
-[![arXiv](https://img.shields.io/badge/arXiv-0000.00000-orange.svg?style=flat)](https://arxiv.org/abs/0000.00000)
+[![pypi](https://img.shields.io/badge/pypi-v0.0.2-blue)](https://pypi.org/project/tspice/) [![License](https://img.shields.io/badge/License-AGPL%20v3-blue.svg)](https://github.com/DeivyMercado/TSPICE/blob/master/LICENSE) [![python](https://img.shields.io/badge/python-3-grey)](https://pypi.org/project/tspice/) [![Powered by SpiceyPy](https://img.shields.io/badge/Powered%20by-SpiceyPy-blue)](https://github.com/AndrewAnnex/SpiceyPy) [![arXiv](https://img.shields.io/badge/arXiv-0000.00000-orange.svg?style=flat)](https://arxiv.org/abs/0000.00000)
 
 <p></p>
 <div align="center">
@@ -17,7 +13,15 @@
 
 ## Description
 
-tSPICE was developed as part of the Bachelor's thesis "Tidal Potential: Calculations" to facilitate the calculation of the tidal potential and the planetary response. The package incorporates routines and integration schemes described in the thesis.
+tSPICE develops a coherent pathway from the fundamentals of tidal potential theory and elasticity to practical computations of tidal signals and elastic responses. The package uses SPICE’s kernels and modular routines to compute tidal signals and integrate planetary interior models.
+
+This work was developed as part of the Bachelor's thesis **"Planetary Tides and Elastic Response: From Theory to Calculations"** by Deivy J. Mercado R. (2026).
+
+Key features:
+-   **Tidal Potential**: Implements Tide-Generating Potentials (TGPs) in spherical-harmonic form.
+-   **Elastic Response**: Solves governing elastodynamic equations for self-gravitating, elastic, transversely isotropic, spherical bodies.
+-   **Integration**: Solves coupled first-order ODEs for displacement, strain, stress, and perturbing potential fields.
+-   **Validation**: Reproduces tidal signals on Earth consistent with ETERNA-x and computes Love numbers in agreement with literature (e.g., using a modified PREM Earth model).
 
 ## Installation
 
