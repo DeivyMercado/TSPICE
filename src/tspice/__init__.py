@@ -46,7 +46,7 @@ def get_data(filename):
     """
     return os.path.join(ROOTDIR, 'data', filename)
 
-def initialize(data_directory=None, verbose=True, level='planetary'):
+def initialize(data_directory=None, verbose=False, level='planetary'):
     """
     Download and load SPICE kernels for tSPICE.
     

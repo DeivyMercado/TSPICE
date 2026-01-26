@@ -16,10 +16,11 @@
       <script src="_static/documentation_options.js?v=e3a6060d"></script>
       <script src="_static/doctools.js?v=fd6eb6e6"></script>
       <script src="_static/sphinx_highlight.js?v=6ffebe34"></script>
+      <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
     <script src="_static/js/theme.js"></script>
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
-    <link rel="next" title="Tides Module" href="tides.html" />
+    <link rel="next" title="Tidal Gravitational Potential using tSPICE: Quickstart" href="examples/tidal_potential_quickstart.html" />
     <link rel="prev" title="tSPICE" href="index.html" /> 
 </head>
 
@@ -44,7 +45,24 @@
         </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
               <p class="caption" role="heading"><span class="caption-text">EXAMPLES</span></p>
 <ul class="current">
-<li class="toctree-l1 current"><a class="current reference internal" href="#">Tutorials and Examples</a><ul class="simple">
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Tutorials and Examples</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="examples/tidal_potential_quickstart.html">Tidal Gravitational Potential using <code class="docutils literal notranslate"><span class="pre">tSPICE</span></code>: Quickstart</a></li>
+<li class="toctree-l2"><a class="reference internal" href="examples/tidal_potential_indepth.html">Tidal Gravitational Potential using <code class="docutils literal notranslate"><span class="pre">tSPICE</span></code>: In depth</a></li>
+<li class="toctree-l2"><a class="reference internal" href="examples/love_numbers_quickstart.html">Planetary Tidal Response using <code class="docutils literal notranslate"><span class="pre">tSPICE</span></code>: Quickstart</a></li>
+<li class="toctree-l2"><a class="reference internal" href="examples/love_numbers_indepth.html">Love numbers using <code class="docutils literal notranslate"><span class="pre">tSPICE</span></code>: In depth</a></li>
+<li class="toctree-l2"><a class="reference internal" href="examples/love_numbers_tutorial.html">Love numbers using <code class="docutils literal notranslate"><span class="pre">tSPICE</span></code>: Tutorial</a></li>
+<li class="toctree-l2"><a class="reference internal" href="examples/love_numbers_tutorial.html#Scale-parameters">Scale parameters</a></li>
+<li class="toctree-l2"><a class="reference internal" href="examples/love_numbers_tutorial.html#Planetary-Model">Planetary Model</a></li>
+<li class="toctree-l2"><a class="reference internal" href="examples/love_numbers_tutorial.html#Integration-parameters">Integration parameters</a></li>
+<li class="toctree-l2"><a class="reference internal" href="examples/love_numbers_tutorial.html#Layers">Layers</a></li>
+<li class="toctree-l2"><a class="reference internal" href="examples/love_numbers_tutorial.html#Adimensional-coupled-ODEs">Adimensional coupled ODEs</a></li>
+<li class="toctree-l2"><a class="reference internal" href="examples/love_numbers_tutorial.html#Initial-solutions">Initial solutions</a></li>
+<li class="toctree-l2"><a class="reference internal" href="examples/love_numbers_tutorial.html#Integration">Integration</a></li>
+<li class="toctree-l2"><a class="reference internal" href="examples/love_numbers_tutorial.html#Concatenate-the-layers">Concatenate the layers</a></li>
+<li class="toctree-l2"><a class="reference internal" href="examples/love_numbers_tutorial.html#Combining-solutions">Combining solutions</a></li>
+<li class="toctree-l2"><a class="reference internal" href="examples/love_numbers_tutorial.html#Love-Number-results">Love Number results</a></li>
+<li class="toctree-l2"><a class="reference internal" href="examples/planet_interior_indepth.html">Integration of internal solutions: In-depth</a></li>
+<li class="toctree-l2"><a class="reference internal" href="examples/planet_interior_indepth.html#Testing-the-integration-with-TSPICE">Testing the integration with TSPICE</a></li>
 </ul>
 </li>
 </ul>
@@ -81,6 +99,65 @@
   <section id="tutorials-and-examples">
 <h1>Tutorials and Examples<a class="headerlink" href="#tutorials-and-examples" title="Link to this heading"></a></h1>
 <div class="toctree-wrapper compound">
+<p class="caption" role="heading"><span class="caption-text">Examples</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="examples/tidal_potential_quickstart.html">Tidal Gravitational Potential using <code class="docutils literal notranslate"><span class="pre">tSPICE</span></code>: Quickstart</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="examples/tidal_potential_quickstart.html#Target-body">Target body</a></li>
+<li class="toctree-l2"><a class="reference internal" href="examples/tidal_potential_quickstart.html#One-perturbing-body">One perturbing body</a></li>
+<li class="toctree-l2"><a class="reference internal" href="examples/tidal_potential_quickstart.html#Serveral-perturbing-bodies">Serveral perturbing bodies</a></li>
+<li class="toctree-l2"><a class="reference internal" href="examples/tidal_potential_quickstart.html#Plotting-individual-contributions-to-the-TGP">Plotting individual contributions to the TGP</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="examples/tidal_potential_indepth.html">Tidal Gravitational Potential using <code class="docutils literal notranslate"><span class="pre">tSPICE</span></code>: In depth</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="examples/tidal_potential_indepth.html#Tides-on-the-Earth">Tides on the Earth</a></li>
+<li class="toctree-l2"><a class="reference internal" href="examples/tidal_potential_indepth.html#Global-distribution">Global distribution</a></li>
+<li class="toctree-l2"><a class="reference internal" href="examples/tidal_potential_indepth.html#Tides-on-the-Moon">Tides on the Moon</a></li>
+<li class="toctree-l2"><a class="reference internal" href="examples/tidal_potential_indepth.html#Io-and-Jupiter">Io and Jupiter</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="examples/love_numbers_quickstart.html">Planetary Tidal Response using <code class="docutils literal notranslate"><span class="pre">tSPICE</span></code>: Quickstart</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="examples/love_numbers_quickstart.html#Responding-body">Responding body</a></li>
+<li class="toctree-l2"><a class="reference internal" href="examples/love_numbers_quickstart.html#Planetary-profile">Planetary profile</a></li>
+<li class="toctree-l2"><a class="reference internal" href="examples/love_numbers_quickstart.html#Response-integration">Response integration</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="examples/love_numbers_indepth.html">Love numbers using <code class="docutils literal notranslate"><span class="pre">tSPICE</span></code>: In depth</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="examples/love_numbers_indepth.html#Comparison-with-Amorin-&amp;-Gudkova-(2024):">Comparison with Amorin &amp; Gudkova (2024):</a></li>
+<li class="toctree-l2"><a class="reference internal" href="examples/love_numbers_indepth.html#Comparison-with-Xu-&amp;-Sun-(2003)">Comparison with Xu &amp; Sun (2003)</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="examples/love_numbers_tutorial.html">Love numbers using <code class="docutils literal notranslate"><span class="pre">tSPICE</span></code>: Tutorial</a></li>
+<li class="toctree-l1"><a class="reference internal" href="examples/love_numbers_tutorial.html#Scale-parameters">Scale parameters</a></li>
+<li class="toctree-l1"><a class="reference internal" href="examples/love_numbers_tutorial.html#Planetary-Model">Planetary Model</a></li>
+<li class="toctree-l1"><a class="reference internal" href="examples/love_numbers_tutorial.html#Integration-parameters">Integration parameters</a></li>
+<li class="toctree-l1"><a class="reference internal" href="examples/love_numbers_tutorial.html#Layers">Layers</a></li>
+<li class="toctree-l1"><a class="reference internal" href="examples/love_numbers_tutorial.html#Adimensional-coupled-ODEs">Adimensional coupled ODEs</a></li>
+<li class="toctree-l1"><a class="reference internal" href="examples/love_numbers_tutorial.html#Initial-solutions">Initial solutions</a></li>
+<li class="toctree-l1"><a class="reference internal" href="examples/love_numbers_tutorial.html#Integration">Integration</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="examples/love_numbers_tutorial.html#Inner-core">Inner core</a></li>
+<li class="toctree-l2"><a class="reference internal" href="examples/love_numbers_tutorial.html#Outer-core">Outer core</a></li>
+<li class="toctree-l2"><a class="reference internal" href="examples/love_numbers_tutorial.html#Mantle">Mantle</a></li>
+<li class="toctree-l2"><a class="reference internal" href="examples/love_numbers_tutorial.html#Litosphere">Litosphere</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="examples/love_numbers_tutorial.html#Concatenate-the-layers">Concatenate the layers</a></li>
+<li class="toctree-l1"><a class="reference internal" href="examples/love_numbers_tutorial.html#Combining-solutions">Combining solutions</a></li>
+<li class="toctree-l1"><a class="reference internal" href="examples/love_numbers_tutorial.html#Love-Number-results">Love Number results</a></li>
+<li class="toctree-l1"><a class="reference internal" href="examples/planet_interior_indepth.html">Integration of internal solutions: In-depth</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="examples/planet_interior_indepth.html#Scale-parameters">Scale parameters</a></li>
+<li class="toctree-l2"><a class="reference internal" href="examples/planet_interior_indepth.html#Planetary-Model">Planetary Model</a></li>
+<li class="toctree-l2"><a class="reference internal" href="examples/planet_interior_indepth.html#Integration-parameters">Integration parameters</a></li>
+<li class="toctree-l2"><a class="reference internal" href="examples/planet_interior_indepth.html#Layers">Layers</a></li>
+<li class="toctree-l2"><a class="reference internal" href="examples/planet_interior_indepth.html#Adimensional-coupled-ODEs">Adimensional coupled ODEs</a></li>
+<li class="toctree-l2"><a class="reference internal" href="examples/planet_interior_indepth.html#Initial-solutions">Initial solutions</a></li>
+<li class="toctree-l2"><a class="reference internal" href="examples/planet_interior_indepth.html#Integration">Integration</a></li>
+<li class="toctree-l2"><a class="reference internal" href="examples/planet_interior_indepth.html#Concatenate-the-layers">Concatenate the layers</a></li>
+<li class="toctree-l2"><a class="reference internal" href="examples/planet_interior_indepth.html#Combining-solutions">Combining solutions</a></li>
+<li class="toctree-l2"><a class="reference internal" href="examples/planet_interior_indepth.html#Love-Number-results">Love Number results</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="examples/planet_interior_indepth.html#Testing-the-integration-with-TSPICE">Testing the integration with TSPICE</a></li>
+</ul>
 </div>
 </section>
 
@@ -89,7 +166,7 @@
           </div>
           <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
         <a href="index.html" class="btn btn-neutral float-left" title="tSPICE" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
-        <a href="tides.html" class="btn btn-neutral float-right" title="Tides Module" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+        <a href="examples/tidal_potential_quickstart.html" class="btn btn-neutral float-right" title="Tidal Gravitational Potential using tSPICE: Quickstart" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
     </div>
 
   <hr/>

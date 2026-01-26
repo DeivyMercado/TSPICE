@@ -46,7 +46,7 @@ Calculate Love numbers for Earth:
 """
 
 # Import modules
-from tspice.util import *
+from tspice.utils import *
 
 # Import libraries
 import numpy as np
@@ -394,7 +394,7 @@ class Body():
 		fig.tight_layout()
 
 		if savepath:
-			fig.savefig(savepath, format='pdf', bbox_inches='tight', dpi=300)
+			fig.savefig(savepath, bbox_inches='tight', dpi=300)
 
 	def plot_many_signal(self, et, tgps, loc, colors, y_label=r'V(t)/g', signal_labels=None, units='cm', savepath=None):
 		'''
@@ -432,7 +432,7 @@ class Body():
 		fig.tight_layout()
 
 		if savepath:
-			fig.savefig(savepath, format='pdf', bbox_inches='tight', dpi=300)
+			fig.savefig(savepath, bbox_inches='tight', dpi=300)
 
 class BodyResponse(Body):
 

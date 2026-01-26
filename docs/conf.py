@@ -16,6 +16,7 @@ extensions = [
     'sphinx.ext.mathjax',
     'sphinx_rtd_theme',
     'sphinx_mdinclude',
+    'nbsphinx',
 ]
 
 templates_path = ['_templates']

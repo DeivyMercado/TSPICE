@@ -6,5 +6,9 @@ Tutorials and Examples
    :maxdepth: 2
    :caption: Examples
 
-   examples/love_numbers_test
-   examples/tidal_signal_test
+   examples/tidal_potential_quickstart
+   examples/tidal_potential_indepth
+   examples/love_numbers_quickstart
+   examples/love_numbers_indepth
+   examples/love_numbers_tutorial
+   examples/planet_interior_indepth

@@ -12,3 +12,6 @@ sphinx-mdinclude
 # Build tools
 build>=0.7.0
 twine>=3.2.0
+
+astropy>=5.0.0
+cartopy>=0.20.0
