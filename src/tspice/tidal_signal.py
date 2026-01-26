@@ -2,43 +2,30 @@
 import numpy as np
 import spiceypy as spy
 import scipy.special as sps
+
+# Compatibility for new SciPy versions (e.g. >= 1.15.0) where sph_harm is removed
+if not hasattr(sps, 'sph_harm'):
+    if hasattr(sps, 'sph_harm_y'):
+         # Map old signature sph_harm(m, n, theta=azimuthal, phi=polar)
+         # to new signature sph_harm_y(n, m, theta=polar, phi=azimuthal)
+         def _sph_harm_compat(m, n, theta, phi):
+             return sps.sph_harm_y(n, m, phi, theta)
+         sps.sph_harm = _sph_harm_compat
 import os
 from tspice.utils import loc_func, convert_step_to_seconds
-from tspice.kernels import download_kernels, write_meta_kernel
+from tspice.utils import loc_func, convert_step_to_seconds
+#from tspice.kernels import download_kernels, write_meta_kernel
 
 #Directories
 file_dir = os.path.dirname(os.path.abspath(__file__)) #Current file location
 data_dir = os.path.join(file_dir, 'data')	#Data files
 
 #To track if kernels are loaded
-kernels_loaded = False
+#Directories
+file_dir = os.path.dirname(os.path.abspath(__file__)) #Current file location
+data_dir = os.path.join(file_dir, 'data')	#Data files
 
-def initialize(data_directory=None):
-
-    """
-    Download and load the necessary SPICE kernels.
-    
-    Input:
-    - data_directory : [str, optional] Path to the directory where kernels should be stored and loaded from. If not provided, the default package data directory is used.
-    """
-
-    global kernels_loaded, data_dir
-    
-    #User can specify another data directory
-    if data_directory is not None:
-        data_dir = data_directory
-    
-    #Download kernels if not present
-    download_kernels(data_dir)
-    
-    #Write the meta kernel and get its path
-    meta_kernel_path = write_meta_kernel(data_dir)
-    
-    #Load the meta kernel
-    spy.furnsh(meta_kernel_path)
-    
-    kernels_loaded = True
-    print(f"TSPICE initialized successfully. Kernels loaded from: {meta_kernel_path}")
+#This is the class that define the body
 
 #This is the class that define the body
 class Body():
@@ -60,8 +47,9 @@ class Body():
 		#By default, the bodies are from the solar system
 		if solar_system:
 		
-			#Check if kernels are loaded before allowing creation of a Body
-			if not kernels_loaded:
+		#Check if kernels are loaded before allowing creation of a Body
+			import tspice
+			if not tspice.kernels_loaded:
 				raise RuntimeError(
 					"SPICE kernels not loaded. Please call tspice.initialize() first. "
 					"Example:\n\n"
