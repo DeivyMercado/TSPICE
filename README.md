@@ -5,7 +5,9 @@
 </div>
 <p></p>
 
-[![pypi](https://img.shields.io/badge/pypi-v0.0.2-blue)](https://pypi.org/project/tspice/) [![License](https://img.shields.io/badge/License-AGPL%20v3-blue.svg)](https://github.com/DeivyMercado/TSPICE/blob/master/LICENSE) [![python](https://img.shields.io/badge/python-3-grey)](https://pypi.org/project/tspice/) [![Powered by SpiceyPy](https://img.shields.io/badge/Powered%20by-SpiceyPy-blue)](https://github.com/AndrewAnnex/SpiceyPy) [![arXiv](https://img.shields.io/badge/arXiv-0000.00000-orange.svg?style=flat)](https://arxiv.org/abs/0000.00000)
+[![pypi](https://img.shields.io/badge/pypi-v0.0.2-blue)](https://pypi.org/project/tspice/) [![License](https://img.shields.io/badge/License-AGPL%20v3-blue.svg)](https://github.com/DeivyMercado/TSPICE/blob/master/LICENSE) [![python](https://img.shields.io/badge/python-3-grey)](https://pypi.org/project/tspice/) [![Powered by SpiceyPy](https://img.shields.io/badge/Powered%20by-SpiceyPy-blue)](https://github.com/AndrewAnnex/SpiceyPy) 
+<!--[![arXiv](https://img.shields.io/badge/arXiv-0000.00000-orange.svg?style=flat)](https://arxiv.org/abs/0000.00000)
+-->
 
 **tSPICE** is a Python package developed for the calculation of the tidal potential and the planetary response, using SPICE kernels.
 
