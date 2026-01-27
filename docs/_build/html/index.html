@@ -6,7 +6,7 @@
   <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>tSPICE &mdash; tSPICE 0.0.2 documentation</title>
+  <title>Description &mdash; tSPICE 0.0.2 documentation</title>
       <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=b86133f3" />
       <link rel="stylesheet" type="text/css" href="_static/css/theme.css?v=9edc463e" />
 
@@ -66,7 +66,7 @@
           <div role="navigation" aria-label="Page navigation">
   <ul class="wy-breadcrumbs">
       <li><a href="#" class="icon icon-home" aria-label="Home"></a></li>
-      <li class="breadcrumb-item active">tSPICE</li>
+      <li class="breadcrumb-item active">Description</li>
       <li class="wy-breadcrumbs-aside">
             <a href="_sources/index.rst.txt" rel="nofollow"> View page source</a>
       </li>
@@ -76,9 +76,12 @@
           <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
            <div itemprop="articleBody">
              
-  <section id="tspice">
-<h1>tSPICE<a class="headerlink" href="#tspice" title="Link to this heading"></a></h1>
-<a class="reference external image-reference" href="https://pypi.org/project/tspice/"><img alt="pypi" src="https://img.shields.io/badge/pypi-v0.0.2-blue" />
+  <p></p>
+<div align="center">
+  <!-- <img src="https://raw.githubusercontent.com/DeivyMercado/TSPICE/main/docs/tspice-logo-white.webp" alt="tSPICE Logo" width="600"/> -->
+  <img src="https://raw.githubusercontent.com/seap-udea/tspice/main/docs/tspice-logo-white.webp" alt="tSPICE Logo" width="600"/>
+</div>
+<p></p><a class="reference external image-reference" href="https://pypi.org/project/tspice/"><img alt="pypi" src="https://img.shields.io/badge/pypi-v0.0.2-blue" />
 </a>
 <a class="reference external image-reference" href="https://github.com/DeivyMercado/TSPICE/blob/master/LICENSE"><img alt="License" src="https://img.shields.io/badge/License-AGPL%20v3-blue.svg" />
 </a>
@@ -88,14 +91,9 @@
 </a>
 <a class="reference external image-reference" href="https://arxiv.org/abs/0000.00000"><img alt="arXiv" src="https://img.shields.io/badge/arXiv-0000.00000-orange.svg?style=flat" />
 </a>
-<p></p>
-<div align="center">
-  <!-- <img src="https://raw.githubusercontent.com/DeivyMercado/TSPICE/main/docs/tspice-logo-white.webp" alt="tSPICE Logo" width="600"/> -->
-  <img src="https://raw.githubusercontent.com/seap-udea/tspice/main/docs/tspice-logo-white.webp" alt="tSPICE Logo" width="600"/>
-</div>
-<p></p><p><strong>tSPICE</strong> is a Python package developed for the calculation of the tidal potential and the planetary response, using SPICE kernels.</p>
+<p><strong>tSPICE</strong> is a Python package developed for the calculation of the tidal potential and the planetary response, using SPICE kernels.</p>
 <section id="description">
-<h2>Description<a class="headerlink" href="#description" title="Link to this heading"></a></h2>
+<h1>Description<a class="headerlink" href="#description" title="Link to this heading"></a></h1>
 <p>tSPICE develops a coherent pathway from the fundamentals of tidal potential theory and elasticity to practical computations of tidal signals and elastic responses. The package uses SPICE’s kernels and modular routines to compute tidal signals and integrate planetary interior models.</p>
 <p>This work was developed as part of the Bachelor’s thesis <strong>“Planetary Tides and Elastic Response: From Theory to Calculations”</strong> by Deivy J. Mercado R. under the supervision of Prof. Jorge I. Zuluaga and Prof. Gloria Moncayo (2026).</p>
 <p>Key features:</p>
@@ -107,14 +105,14 @@
 </ul>
 </section>
 <section id="theoretical-background">
-<h2>Theoretical Background<a class="headerlink" href="#theoretical-background" title="Link to this heading"></a></h2>
+<h1>Theoretical Background<a class="headerlink" href="#theoretical-background" title="Link to this heading"></a></h1>
 <p>Tides are not merely the rise and fall of oceans; they are a fundamental consequence of the differential gravitational forces exerted by external bodies on an extended planetary body. <strong>tSPICE</strong> provides a computational framework to explore this phenomenon from first principles.</p>
 <section id="the-tide-generating-potential-tgp">
-<h3>The Tide-Generating Potential (TGP)<a class="headerlink" href="#the-tide-generating-potential-tgp" title="Link to this heading"></a></h3>
+<h2>The Tide-Generating Potential (TGP)<a class="headerlink" href="#the-tide-generating-potential-tgp" title="Link to this heading"></a></h2>
 <p>The gravitational field of an external body (like the Moon or Sun) varies across a planet’s volume. By subtracting the orbital acceleration (the force felt by the planet as a whole), we isolate the <strong>Tide-Generating Potential (TGP)</strong>. This potential is mathematically expanded using <strong>Spherical Harmonics</strong>, allowing us to decompose the complex tidal signal into precise spatial patterns and temporal frequencies (semidiurnal, diurnal, and long-period bands).</p>
 </section>
 <section id="planetary-elastic-response">
-<h3>Planetary Elastic Response<a class="headerlink" href="#planetary-elastic-response" title="Link to this heading"></a></h3>
+<h2>Planetary Elastic Response<a class="headerlink" href="#planetary-elastic-response" title="Link to this heading"></a></h2>
 <p>Planets are not rigid; they deform under the influence of the TGP. <strong>tSPICE</strong> models the planet as a <strong>self-gravitating, elastic, transversely isotropic sphere</strong>. This means we account for:</p>
 <ul class="simple">
 <li><p><strong>Self-gravity</strong>: How the planet’s own gravity resists deformation.</p></li>
@@ -123,7 +121,7 @@
 </ul>
 </section>
 <section id="love-numbers">
-<h3>Love Numbers<a class="headerlink" href="#love-numbers" title="Link to this heading"></a></h3>
+<h2>Love Numbers<a class="headerlink" href="#love-numbers" title="Link to this heading"></a></h2>
 <p>The deformation is quantified using dimensionless coefficients known as <strong>Love Numbers</strong> ($h_n, l_n, k_n$). These numbers act as transfer functions, connecting the external potential to:</p>
 <ul class="simple">
 <li><p><strong>Radial and Tangential Displacement</strong> ($h_n, l_n$): How much the surface moves up/down and sideways.</p></li>
@@ -131,19 +129,19 @@
 </ul>
 </section>
 <section id="numerical-integration">
-<h3>Numerical Integration<a class="headerlink" href="#numerical-integration" title="Link to this heading"></a></h3>
+<h2>Numerical Integration<a class="headerlink" href="#numerical-integration" title="Link to this heading"></a></h2>
 <p>To compute these values, <strong>tSPICE</strong> solves a system of coupled first-order Ordinary Differential Equations (ODEs) derived from the <strong>Navier-Cauchy equation of motion</strong> and <strong>Poisson’s equation</strong> for gravity. The package integrates these equations from the planet’s center to the surface, applying rigorous boundary conditions to ensure physical consistency.</p>
 </section>
 </section>
 <section id="installation">
-<h2>Installation<a class="headerlink" href="#installation" title="Link to this heading"></a></h2>
+<h1>Installation<a class="headerlink" href="#installation" title="Link to this heading"></a></h1>
 <p>You can install it easily with:</p>
 <div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>pip<span class="w"> </span>install<span class="w"> </span>tspice
 </pre></div>
 </div>
 </section>
 <section id="quick-start">
-<h2>Quick Start<a class="headerlink" href="#quick-start" title="Link to this heading"></a></h2>
+<h1>Quick Start<a class="headerlink" href="#quick-start" title="Link to this heading"></a></h1>
 <p>After installation, you can start using the package:</p>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span><span class="w"> </span><span class="nn">tspice</span>
 </pre></div>
@@ -155,9 +153,9 @@
 <p>This function ensures that tThe second time you use tSPICE, texttt{initialize} won’t download the kernels again.f not present) and loaded.</p>
 </section>
 <section id="examples">
-<h2>Examples<a class="headerlink" href="#examples" title="Link to this heading"></a></h2>
+<h1>Examples<a class="headerlink" href="#examples" title="Link to this heading"></a></h1>
 <section id="calculating-the-tide-generating-potential-tgp">
-<h3>Calculating the Tide-Generating Potential (TGP)<a class="headerlink" href="#calculating-the-tide-generating-potential-tgp" title="Link to this heading"></a></h3>
+<h2>Calculating the Tide-Generating Potential (TGP)<a class="headerlink" href="#calculating-the-tide-generating-potential-tgp" title="Link to this heading"></a></h2>
 <p>Here is a quick example of how to calculate the tidal potential generated by the Moon on Earth.</p>
 <p>First, initialize the package and define the location on the planetary body:</p>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span><span class="w"> </span><span class="nn">tspice</span>
@@ -196,7 +194,7 @@
 </a>
 </section>
 <section id="multiple-bodies">
-<h3>Multiple Bodies<a class="headerlink" href="#multiple-bodies" title="Link to this heading"></a></h3>
+<h2>Multiple Bodies<a class="headerlink" href="#multiple-bodies" title="Link to this heading"></a></h2>
 <p>You can also calculate the combined tidal potential from multiple celestial bodies:</p>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="c1"># List of bodies</span>
 <span class="n">bodylist</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;Moon&#39;</span><span class="p">,</span> <span class="s1">&#39;Sun&#39;</span><span class="p">,</span> <span class="s1">&#39;Mercury&#39;</span><span class="p">,</span> <span class="s1">&#39;Venus&#39;</span><span class="p">,</span> <span class="s1">&#39;Mars Barycenter&#39;</span><span class="p">,</span> <span class="s1">&#39;Jupiter Barycenter&#39;</span><span class="p">]</span>
@@ -213,7 +211,7 @@
 </a>
 </section>
 <section id="calculating-planetary-response-love-numbers">
-<h3>Calculating Planetary Response (Love Numbers)<a class="headerlink" href="#calculating-planetary-response-love-numbers" title="Link to this heading"></a></h3>
+<h2>Calculating Planetary Response (Love Numbers)<a class="headerlink" href="#calculating-planetary-response-love-numbers" title="Link to this heading"></a></h2>
 <p>tSPICE can also calculate the elastic response of a planetary body (Love numbers) by integrating interior models. Here is how to calculate the Love numbers $k_2, h_2, l_2$ for Earth using a modified PREM model:</p>
 <p>First, initialize the package and define the responding body with its characteristic scales:</p>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span><span class="w"> </span><span class="nn">tspice</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">tsp</span>
@@ -260,7 +258,7 @@
 </div>
 </section>
 <section id="spectral-analysis-lomb-scargle">
-<h3>Spectral Analysis (Lomb-Scargle)<a class="headerlink" href="#spectral-analysis-lomb-scargle" title="Link to this heading"></a></h3>
+<h2>Spectral Analysis (Lomb-Scargle)<a class="headerlink" href="#spectral-analysis-lomb-scargle" title="Link to this heading"></a></h2>
 <p>You can also analyze the spectral content of the tidal signal to identify the main tidal modes (e.g., monthly, fortnightly). Here is how to compute the Lomb-Scargle periodogram for the Moon’s potential:</p>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span><span class="w"> </span><span class="nn">astropy.timeseries</span><span class="w"> </span><span class="kn">import</span> <span class="n">LombScargle</span>
 <span class="kn">import</span><span class="w"> </span><span class="nn">astropy.units</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">u</span>
@@ -293,7 +291,7 @@
 </section>
 </section>
 <section id="authors">
-<h2>Authors<a class="headerlink" href="#authors" title="Link to this heading"></a></h2>
+<h1>Authors<a class="headerlink" href="#authors" title="Link to this heading"></a></h1>
 <ul class="simple">
 <li><p><strong>Deivy Mercado</strong> - <a class="reference external" href="mailto:david231097&#37;&#52;&#48;gmail&#46;com">david231097<span>&#64;</span>gmail<span>&#46;</span>com</a></p></li>
 <li><p><strong>Jorge I. Zuluaga</strong> - <a class="reference external" href="mailto:jorge&#46;zuluaga&#37;&#52;&#48;udea&#46;edu&#46;co">jorge<span>&#46;</span>zuluaga<span>&#64;</span>udea<span>&#46;</span>edu<span>&#46;</span>co</a></p></li>
@@ -301,7 +299,7 @@
 </ul>
 </section>
 <section id="license">
-<h2>License<a class="headerlink" href="#license" title="Link to this heading"></a></h2>
+<h1>License<a class="headerlink" href="#license" title="Link to this heading"></a></h1>
 <p>This project is licensed under the GNU Affero General Public License v3.0 (AGPL-3.0) - see the <a class="reference external" href="LICENSE">LICENSE</a> file for details.</p>
 <div class="toctree-wrapper compound">
 </div>
@@ -323,7 +321,6 @@
 </li>
 </ul>
 </div>
-</section>
 </section>
 
 
