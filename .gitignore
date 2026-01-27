@@ -34,9 +34,14 @@ Thumbs.db
 
 #SPICE Kernel Files (important to ignore large files)
 kernels/
+**/tspice_data/
+examples/tspice_data
 
 #Meta_kernel will be created by the user after the initiallization
 meta_kernel
 
 #Config files with PyPI info
 .pypirc
+
+contrib
+.tspice

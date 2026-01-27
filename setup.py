@@ -1,11 +1,19 @@
+##################################################################
+#                                                                #
+# tSPICE: Tidal Signal with Python and SPICE                     #
+#                                                                #
+##################################################################
+# License: GNU Affero General Public License v3 (AGPL-3.0)       #
+##################################################################
 import setuptools
 
-with open("README.md", "r") as f:
-    long_description = f.read()
+with open("README.md", "r", encoding="utf-8") as fh:
+    long_description = fh.read()
 
 setuptools.setup(
-
-    #Basic description
+    # ######################################################################
+    # BASIC DESCRIPTION
+    # ######################################################################
     name='tspice',
     author="Deivy Mercado, Jorge I. Zuluaga, Gloria Moncayo",
     author_email="david231097@gmail.com, jorge.zuluaga@udea.edu.co, gloria.moncayo@udea.edu.co",
@@ -14,40 +22,51 @@ setuptools.setup(
     long_description_content_type="text/markdown",
     url="https://github.com/DeivyMercado/TSPICE",
     keywords='astrodynamics geophysics tides spice',
-    license='MIT',
+    license='AGPL-3.0-only',
 
-    #Clasifier
+    # ######################################################################
+    # CLASSIFIER
+    # ######################################################################
     classifiers=[
+        "Development Status :: 3 - Alpha",
+        "Intended Audience :: Science/Research",
+        "Topic :: Scientific/Engineering :: Astronomy",
+        "Topic :: Scientific/Engineering :: Physics",
         "Programming Language :: Python :: 3",
-        #"License :: OSI Approved :: MIT License",
-        "Operating System :: OS Independent"
-        ],
+        "License :: OSI Approved :: GNU Affero General Public License v3 (AGPL)",
+        "Operating System :: OS Independent",
+    ],
     version='0.0.2',
 
-    #Files
+    # ######################################################################
+    # FILES
+    # ######################################################################
     package_dir={"": "src"},
     packages=setuptools.find_packages(where="src"),
     
     # ######################################################################
-    # ENTRY POINTS
-    # ######################################################################
-    #entry_points={
-        #'console_scripts': ['install=pymcel.install:main'],
-    #},
-
-    # ######################################################################
     # TESTS
     # ######################################################################
-    #test_suite='nose.collector',
-    #tests_require=['nose'],
+    test_suite='tests',
+    tests_require=['pytest'],
 
-    #Dependencies
-    install_requires=['numpy',
-                      'scipy',
-                      'spiceypy'],
+    # ######################################################################
+    # DEPENDENCIES
+    # ######################################################################
+    install_requires=[
+        'numpy',
+        'scipy',
+        'spiceypy',
+        'matplotlib',
+        'pandas',
+        'openpyxl'
+    ],
+    
+    python_requires='>=3.7',
 
-    #Options
+    # ######################################################################
+    # OPTIONS
+    # ######################################################################
     include_package_data=True,
-    package_data={'tspice': ['data/spice_kernels.json']
-                  },
+    package_data={'tspice': ['data/spice_kernels.json']},
 )

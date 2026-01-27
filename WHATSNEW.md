@@ -5,3 +5,4 @@
 - Core functionality for calculating the Tide-generating Potential using SPICE.
 - Includes functions to download and manage necessary kernels from SPICE.
 - Contains a class to calculate Love Numbers of an Earth-like planet.
+

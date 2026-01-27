@@ -1,0 +1,413 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="../">
+<head>
+  <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Tidal Gravitational Potential using tSPICE: Quickstart &mdash; tSPICE 0.0.2 documentation</title>
+      <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=b86133f3" />
+      <link rel="stylesheet" type="text/css" href="../_static/css/theme.css?v=9edc463e" />
+      <link rel="stylesheet" type="text/css" href="../_static/nbsphinx-code-cells.css?v=2aa19091" />
+
+  
+      <script src="../_static/jquery.js?v=5d32c60e"></script>
+      <script src="../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="../_static/documentation_options.js?v=e3a6060d"></script>
+      <script src="../_static/doctools.js?v=fd6eb6e6"></script>
+      <script src="../_static/sphinx_highlight.js?v=6ffebe34"></script>
+      <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
+      <script>window.MathJax = {"tex": {"inlineMath": [["$", "$"], ["\\(", "\\)"]], "processEscapes": true}, "options": {"ignoreHtmlClass": "tex2jax_ignore|mathjax_ignore|document", "processHtmlClass": "tex2jax_process|mathjax_process|math|output_area"}}</script>
+      <script defer="defer" src="https://cdn.jsdelivr.net/npm/mathjax@4/tex-mml-chtml.js"></script>
+    <script src="../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="Tidal Gravitational Potential using tSPICE: In depth" href="tidal_potential_indepth.html" />
+    <link rel="prev" title="Tutorials and Examples" href="../examples.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../index.html" class="icon icon-home">
+            tSPICE
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">EXAMPLES</span></p>
+<ul class="current">
+<li class="toctree-l1 current"><a class="reference internal" href="../examples.html">Tutorials and Examples</a><ul class="current">
+<li class="toctree-l2 current"><a class="current reference internal" href="#">Tidal Gravitational Potential using <code class="docutils literal notranslate"><span class="pre">tSPICE</span></code>: Quickstart</a></li>
+<li class="toctree-l2"><a class="reference internal" href="tidal_potential_indepth.html">Tidal Gravitational Potential using <code class="docutils literal notranslate"><span class="pre">tSPICE</span></code>: In depth</a></li>
+<li class="toctree-l2"><a class="reference internal" href="love_numbers_quickstart.html">Planetary Tidal Response using <code class="docutils literal notranslate"><span class="pre">tSPICE</span></code>: Quickstart</a></li>
+<li class="toctree-l2"><a class="reference internal" href="love_numbers_indepth.html">Love numbers using <code class="docutils literal notranslate"><span class="pre">tSPICE</span></code>: In depth</a></li>
+<li class="toctree-l2"><a class="reference internal" href="love_numbers_tutorial.html">Love numbers using <code class="docutils literal notranslate"><span class="pre">tSPICE</span></code>: Tutorial</a></li>
+<li class="toctree-l2"><a class="reference internal" href="love_numbers_tutorial.html#Scale-parameters">Scale parameters</a></li>
+<li class="toctree-l2"><a class="reference internal" href="love_numbers_tutorial.html#Planetary-Model">Planetary Model</a></li>
+<li class="toctree-l2"><a class="reference internal" href="love_numbers_tutorial.html#Integration-parameters">Integration parameters</a></li>
+<li class="toctree-l2"><a class="reference internal" href="love_numbers_tutorial.html#Layers">Layers</a></li>
+<li class="toctree-l2"><a class="reference internal" href="love_numbers_tutorial.html#Adimensional-coupled-ODEs">Adimensional coupled ODEs</a></li>
+<li class="toctree-l2"><a class="reference internal" href="love_numbers_tutorial.html#Initial-solutions">Initial solutions</a></li>
+<li class="toctree-l2"><a class="reference internal" href="love_numbers_tutorial.html#Integration">Integration</a></li>
+<li class="toctree-l2"><a class="reference internal" href="love_numbers_tutorial.html#Concatenate-the-layers">Concatenate the layers</a></li>
+<li class="toctree-l2"><a class="reference internal" href="love_numbers_tutorial.html#Combining-solutions">Combining solutions</a></li>
+<li class="toctree-l2"><a class="reference internal" href="love_numbers_tutorial.html#Love-Number-results">Love Number results</a></li>
+<li class="toctree-l2"><a class="reference internal" href="planet_interior_indepth.html">Integration of internal solutions: In-depth</a></li>
+<li class="toctree-l2"><a class="reference internal" href="planet_interior_indepth.html#Testing-the-integration-with-TSPICE">Testing the integration with TSPICE</a></li>
+</ul>
+</li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">API Reference:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../tides.html">Tides Module</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../planet.html">Planet Module</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">tSPICE</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="../examples.html">Tutorials and Examples</a></li>
+      <li class="breadcrumb-item active">Tidal Gravitational Potential using <code class="docutils literal notranslate"><span class="pre">tSPICE</span></code>: Quickstart</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="../_sources/examples/tidal_potential_quickstart.ipynb.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <p><a class="reference external" href="https://colab.research.google.com/github/seap-udea/tspice/blob/main/examples/tidal_potential_quickstart.ipynb"><img alt="Open In Colab" src="https://colab.research.google.com/assets/colab-badge.svg" /></a></p>
+<section id="Tidal-Gravitational-Potential-using-tSPICE:-Quickstart">
+<h1>Tidal Gravitational Potential using <code class="docutils literal notranslate"><span class="pre">tSPICE</span></code>: Quickstart<a class="headerlink" href="#Tidal-Gravitational-Potential-using-tSPICE:-Quickstart" title="Link to this heading"></a></h1>
+<p>This notebook demonstrates how to calculate the tidal potential generated by various celestial bodies at a specific location on Earth using <code class="docutils literal notranslate"><span class="pre">tSPICE</span></code>.</p>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[1]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="k">try</span><span class="p">:</span>
+    <span class="kn">from</span><span class="w"> </span><span class="nn">google.colab</span><span class="w"> </span><span class="kn">import</span> <span class="n">drive</span>
+    <span class="o">%</span><span class="k">pip</span> install -Uq tspice
+<span class="k">except</span> <span class="ne">ImportError</span><span class="p">:</span>
+    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Not running in Colab, skipping installation&quot;</span><span class="p">)</span>
+    <span class="o">%</span><span class="k">load_ext</span> autoreload
+    <span class="o">%</span><span class="k">autoreload</span> 2
+
+<span class="c1"># Uncomment to install from GitHub (development version)</span>
+<span class="c1"># !pip install git+https://github.com/seap-udea/tspice.git</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
+Not running in Colab, skipping installation
+</pre></div></div>
+</div>
+<p>Import package and initialize it (load data required for computations)</p>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[2]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span><span class="w"> </span><span class="nn">tspice</span>
+<span class="n">tspice</span><span class="o">.</span><span class="n">initialize</span><span class="p">(</span><span class="n">verbose</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
+Welcome to tSPICE v0.0.2
+TSPICE initialized successfully. Kernels loaded from: /Users/jzuluaga/dev/tspice/examples/tspice_data/meta_kernel
+</pre></div></div>
+</div>
+<section id="Target-body">
+<h2>Target body<a class="headerlink" href="#Target-body" title="Link to this heading"></a></h2>
+<p>Create a target Body:</p>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[3]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">earth</span> <span class="o">=</span> <span class="n">tspice</span><span class="o">.</span><span class="n">Body</span><span class="p">(</span><span class="s1">&#39;Earth&#39;</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<p>We need to define a location and a set of dates when to compute the tidal gravitational potential. We use as example, the signal around (14 days before and after) the seismic event in Paratebueno, Colombia (<span class="math notranslate nohighlight">\(M_{w}=6.3\)</span>):</p>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[4]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">loc</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">(</span><span class="n">lat</span> <span class="o">=</span> <span class="mf">4.49</span><span class="p">,</span>
+           <span class="n">lon</span> <span class="o">=</span> <span class="o">-</span><span class="mf">73.14</span><span class="p">,</span>
+           <span class="n">depth</span> <span class="o">=</span> <span class="mi">9</span><span class="p">)</span>
+
+<span class="n">date</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">(</span><span class="n">start</span> <span class="o">=</span> <span class="s1">&#39;2025-05-25 13:08:05&#39;</span><span class="p">,</span>
+            <span class="n">stop</span> <span class="o">=</span> <span class="s1">&#39;2025-06-22 13:08:05&#39;</span><span class="p">,</span>
+            <span class="n">step</span> <span class="o">=</span> <span class="s1">&#39;1h&#39;</span><span class="p">,</span>
+            <span class="n">time_frame</span> <span class="o">=</span> <span class="s1">&#39;UTC&#39;</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+</section>
+<section id="One-perturbing-body">
+<h2>One perturbing body<a class="headerlink" href="#One-perturbing-body" title="Link to this heading"></a></h2>
+<p>Calculate the tidal gravitational potential (TGP) produced by the moon:</p>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[5]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">tgp_one</span><span class="p">,</span> <span class="n">et_utc</span> <span class="o">=</span> <span class="n">earth</span><span class="o">.</span><span class="n">tgp_one_body</span><span class="p">(</span><span class="s1">&#39;Moon&#39;</span><span class="p">,</span> <span class="n">loc_sta</span><span class="o">=</span><span class="n">loc</span><span class="p">,</span> <span class="n">dates</span><span class="o">=</span><span class="n">date</span><span class="p">,</span> <span class="n">nmax</span><span class="o">=</span><span class="mi">6</span><span class="p">,</span> <span class="n">time_array</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<p>Now we can plot it:</p>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[6]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">earth</span><span class="o">.</span><span class="n">plot_one_signal</span><span class="p">(</span><span class="n">et_utc</span><span class="p">,</span> <span class="n">tgp_one</span><span class="o">*</span><span class="mi">100</span><span class="p">,</span> <span class="n">loc</span><span class="o">=</span><span class="n">loc</span><span class="p">,</span> <span class="n">colors</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;blue&#39;</span><span class="p">,</span><span class="s1">&#39;red&#39;</span><span class="p">],</span> <span class="n">mean_value</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+                      <span class="n">savepath</span><span class="o">=</span><span class="s1">&#39;./gallery/tgp-earth-moon.png&#39;</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<img alt="../_images/examples_tidal_potential_quickstart_14_0.png" src="../_images/examples_tidal_potential_quickstart_14_0.png" />
+</div>
+</div>
+</section>
+<section id="Serveral-perturbing-bodies">
+<h2>Serveral perturbing bodies<a class="headerlink" href="#Serveral-perturbing-bodies" title="Link to this heading"></a></h2>
+<p>We choose the bodies to include in the calculation:</p>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[7]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">bodylist</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;Moon&#39;</span><span class="p">,</span> <span class="s1">&#39;Sun&#39;</span><span class="p">,</span> <span class="s1">&#39;Mercury&#39;</span><span class="p">,</span> <span class="s1">&#39;Venus&#39;</span><span class="p">,</span> <span class="s1">&#39;Mars Barycenter&#39;</span><span class="p">,</span> <span class="s1">&#39;Jupiter Barycenter&#39;</span><span class="p">]</span>
+</pre></div>
+</div>
+</div>
+<p>Compute the combined TGP:</p>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[8]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">tgp_many</span> <span class="o">=</span> <span class="n">earth</span><span class="o">.</span><span class="n">tgp_many_bodies</span><span class="p">(</span><span class="n">bodylist</span><span class="p">,</span> <span class="n">loc_sta</span><span class="o">=</span><span class="n">loc</span><span class="p">,</span> <span class="n">dates</span><span class="o">=</span><span class="n">date</span><span class="p">,</span> <span class="n">nmax</span><span class="o">=</span><span class="mi">6</span><span class="p">,</span> <span class="n">body_signal</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">time_array</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
+Moon contribution calculated!
+Sun contribution calculated!
+Mercury contribution calculated!
+Venus contribution calculated!
+Mars Barycenter contribution calculated!
+Jupiter Barycenter contribution calculated!
+</pre></div></div>
+</div>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[9]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">earth</span><span class="o">.</span><span class="n">plot_one_signal</span><span class="p">(</span><span class="n">et_utc</span><span class="p">,</span> <span class="n">tgp_many</span><span class="o">*</span><span class="mi">100</span><span class="p">,</span> <span class="n">loc</span><span class="o">=</span><span class="n">loc</span><span class="p">,</span> <span class="n">colors</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;blue&#39;</span><span class="p">,</span><span class="s1">&#39;red&#39;</span><span class="p">],</span> <span class="n">mean_value</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+                      <span class="n">savepath</span><span class="o">=</span><span class="s1">&#39;./gallery/tgp-earth-planets.png&#39;</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<img alt="../_images/examples_tidal_potential_quickstart_20_0.png" src="../_images/examples_tidal_potential_quickstart_20_0.png" />
+</div>
+</div>
+</section>
+<section id="Plotting-individual-contributions-to-the-TGP">
+<h2>Plotting individual contributions to the TGP<a class="headerlink" href="#Plotting-individual-contributions-to-the-TGP" title="Link to this heading"></a></h2>
+<p>We can also plot the contributions:</p>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[10]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">tgp_earth_bodies</span><span class="p">,</span> <span class="n">et_utc</span> <span class="o">=</span> <span class="n">earth</span><span class="o">.</span><span class="n">tgp_many_bodies</span><span class="p">(</span><span class="n">bodylist</span><span class="p">,</span> <span class="n">loc_sta</span><span class="o">=</span><span class="n">loc</span><span class="p">,</span> <span class="n">dates</span><span class="o">=</span><span class="n">date</span><span class="p">,</span> <span class="n">nmax</span><span class="o">=</span><span class="mi">6</span><span class="p">,</span> <span class="n">time_array</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">body_signal</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+<span class="n">tgp_earth_total</span> <span class="o">=</span> <span class="n">tgp_earth_bodies</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+<span class="n">tgp_earth_mean</span> <span class="o">=</span> <span class="n">tgp_earth_total</span><span class="o">.</span><span class="n">mean</span><span class="p">()</span>
+
+<span class="c1">#Convert ET to UTC</span>
+<span class="n">utc_times</span> <span class="o">=</span> <span class="n">tspice</span><span class="o">.</span><span class="n">utils</span><span class="o">.</span><span class="n">et_to_utc_string</span><span class="p">(</span><span class="n">et_utc</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
+Moon contribution calculated!
+Sun contribution calculated!
+Mercury contribution calculated!
+Venus contribution calculated!
+Mars Barycenter contribution calculated!
+Jupiter Barycenter contribution calculated!
+</pre></div></div>
+</div>
+<p>Elements needed for plotting:</p>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[11]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span><span class="w"> </span><span class="nn">matplotlib.dates</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">mdates</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">matplotlib.pyplot</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">plt</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">numpy</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">np</span>
+<span class="n">body_colors</span> <span class="o">=</span> <span class="p">{</span>
+    <span class="s1">&#39;Moon&#39;</span><span class="p">:</span> <span class="s1">&#39;#778899&#39;</span><span class="p">,</span>      <span class="c1">#Gray</span>
+    <span class="s1">&#39;Sun&#39;</span><span class="p">:</span> <span class="s1">&#39;#EE7733&#39;</span><span class="p">,</span>       <span class="c1">#Vibrant Yellow/Orange</span>
+    <span class="s1">&#39;Mercury&#39;</span><span class="p">:</span> <span class="s1">&#39;#0077BB&#39;</span><span class="p">,</span>   <span class="c1">#Blue</span>
+    <span class="s1">&#39;Venus&#39;</span><span class="p">:</span> <span class="s1">&#39;#33BBEE&#39;</span><span class="p">,</span>     <span class="c1">#Cyan</span>
+    <span class="s1">&#39;Earth&#39;</span><span class="p">:</span> <span class="s1">&#39;#009988&#39;</span><span class="p">,</span>     <span class="c1">#Blue-Green (Teal)</span>
+    <span class="s1">&#39;Mars&#39;</span><span class="p">:</span> <span class="s1">&#39;#CC3311&#39;</span><span class="p">,</span>      <span class="c1">#Red</span>
+    <span class="s1">&#39;Jupiter&#39;</span><span class="p">:</span> <span class="s1">&#39;#DDAA33&#39;</span><span class="p">,</span>   <span class="c1">#Mustard Brown</span>
+    <span class="s1">&#39;Saturn&#39;</span><span class="p">:</span> <span class="s1">&#39;#AA3377&#39;</span><span class="p">,</span>    <span class="c1">#Purple</span>
+    <span class="s1">&#39;Uranus&#39;</span><span class="p">:</span> <span class="s1">&#39;#66CCEE&#39;</span><span class="p">,</span>    <span class="c1">#Light Cyan</span>
+    <span class="s1">&#39;Neptune&#39;</span><span class="p">:</span> <span class="s1">&#39;#004488&#39;</span><span class="p">,</span>   <span class="c1">#Navy Blue</span>
+<span class="p">}</span>
+</pre></div>
+</div>
+</div>
+<p>Contribution plotting</p>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[12]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">fig</span><span class="p">,</span> <span class="n">axs</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">subplots</span><span class="p">(</span><span class="mi">3</span><span class="p">,</span><span class="mi">1</span><span class="p">,</span><span class="n">figsize</span><span class="o">=</span><span class="p">(</span><span class="mi">8</span><span class="p">,</span><span class="mf">8.75</span><span class="p">),</span> <span class="n">sharex</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+
+<span class="c1">#Taking 5 equally spaced times</span>
+<span class="n">ticks</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">linspace</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="n">utc_times</span><span class="p">)</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="mi">6</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="nb">int</span><span class="p">)</span>
+
+<span class="c1">#Total signal</span>
+<span class="n">ax</span> <span class="o">=</span> <span class="n">axs</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+<span class="n">ax</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">utc_times</span><span class="p">,</span> <span class="n">tgp_earth_total</span><span class="o">*</span><span class="mi">100</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="n">body_colors</span><span class="p">[</span><span class="s1">&#39;Earth&#39;</span><span class="p">])</span>
+<span class="n">ax</span><span class="o">.</span><span class="n">hlines</span><span class="p">(</span><span class="n">tgp_earth_mean</span><span class="o">*</span><span class="mi">100</span><span class="p">,</span> <span class="n">utc_times</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">utc_times</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">],</span> <span class="n">color</span><span class="o">=</span><span class="s1">&#39;red&#39;</span><span class="p">,</span> <span class="n">label</span><span class="o">=</span><span class="sa">r</span><span class="s1">&#39;Mean $V_{\text</span><span class="si">{tid}</span><span class="s1">}/g=</span><span class="si">%.2f</span><span class="s1">$ cm&#39;</span><span class="o">%</span><span class="p">(</span><span class="n">tgp_earth_mean</span><span class="o">*</span><span class="mi">100</span><span class="p">))</span>
+<span class="n">ax</span><span class="o">.</span><span class="n">set_ylabel</span><span class="p">(</span><span class="sa">r</span><span class="s1">&#39;$V_{\text</span><span class="si">{tid}</span><span class="s1">}/g$ [cm]&#39;</span><span class="p">,</span> <span class="n">fontsize</span><span class="o">=</span><span class="mi">12</span><span class="p">)</span>
+<span class="n">ax</span><span class="o">.</span><span class="n">xaxis</span><span class="o">.</span><span class="n">set_tick_params</span><span class="p">(</span><span class="n">direction</span><span class="o">=</span><span class="s1">&#39;in&#39;</span><span class="p">,</span> <span class="n">which</span><span class="o">=</span><span class="s1">&#39;both&#39;</span><span class="p">,</span> <span class="n">labelsize</span><span class="o">=</span><span class="mi">12</span><span class="p">)</span>
+<span class="n">ax</span><span class="o">.</span><span class="n">yaxis</span><span class="o">.</span><span class="n">set_tick_params</span><span class="p">(</span><span class="n">direction</span><span class="o">=</span><span class="s1">&#39;in&#39;</span><span class="p">,</span> <span class="n">which</span><span class="o">=</span><span class="s1">&#39;both&#39;</span><span class="p">,</span> <span class="n">labelsize</span><span class="o">=</span><span class="mi">12</span><span class="p">)</span>
+<span class="n">ax</span><span class="o">.</span><span class="n">xaxis</span><span class="o">.</span><span class="n">set_major_formatter</span><span class="p">(</span><span class="n">mdates</span><span class="o">.</span><span class="n">DateFormatter</span><span class="p">(</span><span class="s1">&#39;%Y-%m-</span><span class="si">%d</span><span class="s1">&#39;</span><span class="p">))</span>
+<span class="n">ax</span><span class="o">.</span><span class="n">legend</span><span class="p">(</span><span class="n">fontsize</span><span class="o">=</span><span class="mi">12</span><span class="p">,</span> <span class="n">loc</span><span class="o">=</span><span class="s1">&#39;upper right&#39;</span><span class="p">)</span>
+<span class="n">ax</span><span class="o">.</span><span class="n">margins</span><span class="p">(</span><span class="n">x</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+<span class="n">ax</span><span class="o">.</span><span class="n">grid</span><span class="p">(</span><span class="n">alpha</span><span class="o">=</span><span class="mf">0.2</span><span class="p">)</span>
+<span class="n">ax</span><span class="o">.</span><span class="n">set_xticks</span><span class="p">([</span><span class="n">utc_times</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">ticks</span><span class="p">])</span>
+
+<span class="c1">#Moon and Sun contributions</span>
+<span class="n">ax</span> <span class="o">=</span> <span class="n">axs</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
+<span class="n">ax</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">utc_times</span><span class="p">,</span> <span class="n">tgp_earth_bodies</span><span class="p">[:,</span><span class="mi">0</span><span class="p">]</span><span class="o">*</span><span class="mi">100</span><span class="p">,</span> <span class="n">label</span><span class="o">=</span><span class="s1">&#39;Moon&#39;</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="n">body_colors</span><span class="p">[</span><span class="s1">&#39;Moon&#39;</span><span class="p">])</span>
+<span class="n">ax</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">utc_times</span><span class="p">,</span> <span class="n">tgp_earth_bodies</span><span class="p">[:,</span><span class="mi">1</span><span class="p">]</span><span class="o">*</span><span class="mi">100</span><span class="p">,</span> <span class="n">label</span><span class="o">=</span><span class="s1">&#39;Sun&#39;</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="n">body_colors</span><span class="p">[</span><span class="s1">&#39;Sun&#39;</span><span class="p">])</span>
+<span class="n">ax</span><span class="o">.</span><span class="n">set_ylabel</span><span class="p">(</span><span class="sa">r</span><span class="s1">&#39;$V_</span><span class="si">{tid}</span><span class="s1">/g$ [cm]&#39;</span><span class="p">,</span> <span class="n">fontsize</span><span class="o">=</span><span class="mi">12</span><span class="p">)</span>
+<span class="n">ax</span><span class="o">.</span><span class="n">xaxis</span><span class="o">.</span><span class="n">set_tick_params</span><span class="p">(</span><span class="n">direction</span><span class="o">=</span><span class="s1">&#39;in&#39;</span><span class="p">,</span> <span class="n">which</span><span class="o">=</span><span class="s1">&#39;both&#39;</span><span class="p">,</span> <span class="n">labelsize</span><span class="o">=</span><span class="mi">12</span><span class="p">)</span>
+<span class="n">ax</span><span class="o">.</span><span class="n">yaxis</span><span class="o">.</span><span class="n">set_tick_params</span><span class="p">(</span><span class="n">direction</span><span class="o">=</span><span class="s1">&#39;in&#39;</span><span class="p">,</span> <span class="n">which</span><span class="o">=</span><span class="s1">&#39;both&#39;</span><span class="p">,</span> <span class="n">labelsize</span><span class="o">=</span><span class="mi">12</span><span class="p">)</span>
+<span class="n">ax</span><span class="o">.</span><span class="n">xaxis</span><span class="o">.</span><span class="n">set_major_formatter</span><span class="p">(</span><span class="n">mdates</span><span class="o">.</span><span class="n">DateFormatter</span><span class="p">(</span><span class="s1">&#39;%Y-%m-</span><span class="si">%d</span><span class="s1">&#39;</span><span class="p">))</span>
+<span class="n">ax</span><span class="o">.</span><span class="n">legend</span><span class="p">(</span><span class="n">fontsize</span><span class="o">=</span><span class="mi">12</span><span class="p">,</span> <span class="n">loc</span><span class="o">=</span><span class="s1">&#39;upper right&#39;</span><span class="p">)</span>
+<span class="n">ax</span><span class="o">.</span><span class="n">margins</span><span class="p">(</span><span class="n">x</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+<span class="n">ax</span><span class="o">.</span><span class="n">grid</span><span class="p">(</span><span class="n">alpha</span><span class="o">=</span><span class="mf">0.2</span><span class="p">)</span>
+<span class="n">ax</span><span class="o">.</span><span class="n">set_xticks</span><span class="p">([</span><span class="n">utc_times</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">ticks</span><span class="p">])</span>
+
+<span class="c1">#Planetary contributions</span>
+<span class="n">ax</span> <span class="o">=</span> <span class="n">axs</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span>
+<span class="n">ax</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">utc_times</span><span class="p">,</span> <span class="n">tgp_earth_bodies</span><span class="p">[:,</span><span class="mi">2</span><span class="p">]</span><span class="o">*</span><span class="mf">1e6</span><span class="p">,</span> <span class="n">label</span><span class="o">=</span><span class="s1">&#39;Mercury&#39;</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="n">body_colors</span><span class="p">[</span><span class="s1">&#39;Mercury&#39;</span><span class="p">])</span>
+<span class="n">ax</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">utc_times</span><span class="p">,</span> <span class="n">tgp_earth_bodies</span><span class="p">[:,</span><span class="mi">3</span><span class="p">]</span><span class="o">*</span><span class="mf">1e6</span><span class="p">,</span> <span class="n">label</span><span class="o">=</span><span class="s1">&#39;Venus&#39;</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="n">body_colors</span><span class="p">[</span><span class="s1">&#39;Venus&#39;</span><span class="p">])</span>
+<span class="n">ax</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">utc_times</span><span class="p">,</span> <span class="n">tgp_earth_bodies</span><span class="p">[:,</span><span class="mi">4</span><span class="p">]</span><span class="o">*</span><span class="mf">1e6</span><span class="p">,</span> <span class="n">label</span><span class="o">=</span><span class="s1">&#39;Mars&#39;</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="n">body_colors</span><span class="p">[</span><span class="s1">&#39;Mars&#39;</span><span class="p">])</span>
+<span class="n">ax</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">utc_times</span><span class="p">,</span> <span class="n">tgp_earth_bodies</span><span class="p">[:,</span><span class="mi">5</span><span class="p">]</span><span class="o">*</span><span class="mf">1e6</span><span class="p">,</span> <span class="n">label</span><span class="o">=</span><span class="s1">&#39;Jupiter&#39;</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="n">body_colors</span><span class="p">[</span><span class="s1">&#39;Jupiter&#39;</span><span class="p">])</span>
+<span class="n">ax</span><span class="o">.</span><span class="n">set_xlabel</span><span class="p">(</span><span class="s1">&#39;Time [UTC]&#39;</span><span class="p">,</span> <span class="n">fontsize</span><span class="o">=</span><span class="mi">12</span><span class="p">)</span>
+<span class="n">ax</span><span class="o">.</span><span class="n">set_ylabel</span><span class="p">(</span><span class="sa">r</span><span class="s1">&#39;$V_</span><span class="si">{tid}</span><span class="s1">/g$ [nm]&#39;</span><span class="p">,</span> <span class="n">fontsize</span><span class="o">=</span><span class="mi">12</span><span class="p">)</span>
+<span class="n">ax</span><span class="o">.</span><span class="n">xaxis</span><span class="o">.</span><span class="n">set_tick_params</span><span class="p">(</span><span class="n">direction</span><span class="o">=</span><span class="s1">&#39;in&#39;</span><span class="p">,</span> <span class="n">which</span><span class="o">=</span><span class="s1">&#39;both&#39;</span><span class="p">,</span> <span class="n">labelsize</span><span class="o">=</span><span class="mi">12</span><span class="p">)</span>
+<span class="n">ax</span><span class="o">.</span><span class="n">yaxis</span><span class="o">.</span><span class="n">set_tick_params</span><span class="p">(</span><span class="n">direction</span><span class="o">=</span><span class="s1">&#39;in&#39;</span><span class="p">,</span> <span class="n">which</span><span class="o">=</span><span class="s1">&#39;both&#39;</span><span class="p">,</span> <span class="n">labelsize</span><span class="o">=</span><span class="mi">12</span><span class="p">)</span>
+<span class="n">ax</span><span class="o">.</span><span class="n">xaxis</span><span class="o">.</span><span class="n">set_major_formatter</span><span class="p">(</span><span class="n">mdates</span><span class="o">.</span><span class="n">DateFormatter</span><span class="p">(</span><span class="s1">&#39;%Y-%m-</span><span class="si">%d</span><span class="s1">&#39;</span><span class="p">))</span>
+<span class="n">ax</span><span class="o">.</span><span class="n">legend</span><span class="p">(</span><span class="n">fontsize</span><span class="o">=</span><span class="mi">12</span><span class="p">,</span> <span class="n">loc</span><span class="o">=</span><span class="s1">&#39;upper right&#39;</span><span class="p">)</span>
+<span class="n">ax</span><span class="o">.</span><span class="n">margins</span><span class="p">(</span><span class="n">x</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+<span class="n">ax</span><span class="o">.</span><span class="n">grid</span><span class="p">(</span><span class="n">alpha</span><span class="o">=</span><span class="mf">0.2</span><span class="p">)</span>
+<span class="n">ax</span><span class="o">.</span><span class="n">set_xticks</span><span class="p">([</span><span class="n">utc_times</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">ticks</span><span class="p">])</span>
+
+<span class="n">fig</span><span class="o">.</span><span class="n">suptitle</span><span class="p">(</span><span class="s1">&#39;Lon $= </span><span class="si">%.2f</span><span class="s1">$°; Lat $= </span><span class="si">%.2f</span><span class="s1">$°; Depth $= </span><span class="si">%.2f</span><span class="s1">$ km&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">loc</span><span class="p">[</span><span class="s1">&#39;lon&#39;</span><span class="p">],</span> <span class="n">loc</span><span class="p">[</span><span class="s1">&#39;lat&#39;</span><span class="p">],</span> <span class="n">loc</span><span class="p">[</span><span class="s1">&#39;depth&#39;</span><span class="p">]),</span> <span class="n">fontsize</span><span class="o">=</span><span class="mi">12</span><span class="p">)</span>
+<span class="n">fig</span><span class="o">.</span><span class="n">subplots_adjust</span><span class="p">(</span><span class="n">hspace</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">wspace</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+<span class="n">fig</span><span class="o">.</span><span class="n">tight_layout</span><span class="p">()</span>
+
+<span class="n">fig</span><span class="o">.</span><span class="n">savefig</span><span class="p">(</span><span class="s1">&#39;./gallery/tgp-earth-bodies-details.png&#39;</span><span class="p">,</span> <span class="n">bbox_inches</span><span class="o">=</span><span class="s1">&#39;tight&#39;</span><span class="p">,</span> <span class="n">dpi</span><span class="o">=</span><span class="mi">300</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<img alt="../_images/examples_tidal_potential_quickstart_27_0.png" src="../_images/examples_tidal_potential_quickstart_27_0.png" />
+</div>
+</div>
+<hr class="docutils" />
+<p><strong>Copyright</strong>: 2026, Deivy Mercado, Jorge I. Zuluaga, Gloria Moncayom</p>
+</section>
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="../examples.html" class="btn btn-neutral float-left" title="Tutorials and Examples" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="tidal_potential_indepth.html" class="btn btn-neutral float-right" title="Tidal Gravitational Potential using tSPICE: In depth" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2025, Deivy Mercado, Jorge I. Zuluaga, Gloria Moncayo.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>
