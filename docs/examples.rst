@@ -11,4 +11,3 @@ Tutorials and Examples
    examples/love_numbers_quickstart
    examples/love_numbers_indepth
    examples/love_numbers_tutorial
-   examples/planet_interior_indepth
