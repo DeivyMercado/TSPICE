@@ -192,8 +192,20 @@ print(f"k_2 = {earth_interior.k_n}, h_2 = {earth_interior.h_n}, l_2 = {earth_int
 # Output: k_2 = 0.2990433851603629, h_2 = 0.6093161139942496, l_2 = 0.08564339441970326
 ```
 
-
 ### Spectral Analysis (Lomb-Scargle)
+
+Calculate the tidal signal required for spectral analysis:
+
+```python
+# Create the Moon body object
+moon = tspice.Body('Moon')
+
+# Define location on the Moon (e.g., Tycho crater)
+loc_moon = {'lat': -43.30, 'lon': -73.14, 'depth': 0}
+
+# Calculate the signal tgp_one produced by the tides of the Earth on the Moon.
+tgp_one, et_utc = moon.tgp_one_body('Earth', loc_sta=loc_moon, dates=date, nmax=6, time_array=True)
+```
 
 You can also analyze the spectral content of the tidal signal to identify the main tidal modes (e.g., monthly, fortnightly). Here is how to compute the Lomb-Scargle periodogram for the Moon's potential:
 
