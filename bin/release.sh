@@ -197,5 +197,5 @@ fi
 
 # If we got here, everything succeeded.
 trap - ERR INT TERM
-rm -rf "$BACKUP_DIR" 2>/dev/null || true
+#rm -rf "$BACKUP_DIR" 2>/dev/null || true
 log "Done. Release completed: $VERSION_NEW"
