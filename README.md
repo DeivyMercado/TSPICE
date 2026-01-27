@@ -115,7 +115,7 @@ earth.plot_one_signal(et_utc, tgp_one*100, loc=loc, colors=['blue','red'], mean_
                       savepath='./tgp-earth-moon.png')
 ```
 
-![TGP Earth Moon](examples/gallery/tgp-earth-moon.png)
+![TGP Earth Moon](https://raw.githubusercontent.com/seap-udea/tspice/main/examples/gallery/tgp-earth-moon.png)
 
 ### Multiple Bodies
 
@@ -133,7 +133,7 @@ earth.plot_one_signal(et_utc, tgp_many*100, loc=loc, colors=['blue','red'], mean
                       savepath='./tgp-earth-planets.png')
 ```
 
-![TGP Earth Planets](examples/gallery/tgp-earth-planets.png)
+![TGP Earth Planets](https://raw.githubusercontent.com/seap-udea/tspice/main/examples/gallery/tgp-earth-planets.png)
 
 ### Calculating Planetary Response (Love Numbers)
 
@@ -191,6 +191,41 @@ earth_interior.integrate_internal_solutions_ad(verbose=True)
 print(f"k_2 = {earth_interior.k_n}, h_2 = {earth_interior.h_n}, l_2 = {earth_interior.l_n}")
 # Output: k_2 = 0.2990433851603629, h_2 = 0.6093161139942496, l_2 = 0.08564339441970326
 ```
+
+
+### Spectral Analysis (Lomb-Scargle)
+
+You can also analyze the spectral content of the tidal signal to identify the main tidal modes (e.g., monthly, fortnightly). Here is how to compute the Lomb-Scargle periodogram for the Moon's potential:
+
+```python
+from astropy.timeseries import LombScargle
+import astropy.units as u
+from scipy.signal import find_peaks
+import pandas as pd
+
+# Prepare time array in days
+t = (et_utc - et_utc.min()) / (3600 * 24)
+
+# Compute Periodogram (assuming tgp_one is the Moon's potential)
+frequency, power = LombScargle(t * u.day, tgp_one * u.m).autopower(maximum_frequency=0.2 * u.day**-1)
+amplitude = (power.value)**0.5
+
+# Find peaks
+peaks_ind, _ = find_peaks(amplitude, height=0.06, prominence=0.076)
+peaks_freq = frequency.value[peaks_ind]
+peaks_amp = amplitude[peaks_ind]
+peaks_period = 1 / peaks_freq
+
+# Show main modes
+df = pd.DataFrame({'Frequency (1/d)': peaks_freq, 
+                   'Period (d)': peaks_period, 
+                   'Amplitude': peaks_amp})
+print(df.sort_values('Amplitude', ascending=False))
+```
+
+Visualizing the spectrum reveals the dominant periods (e.g., ~27 days for the Moon):
+
+![Moon Tides Spectrum](https://raw.githubusercontent.com/seap-udea/tspice/main/examples/gallery/moon_tides.png)
 
 ## Authors
 
