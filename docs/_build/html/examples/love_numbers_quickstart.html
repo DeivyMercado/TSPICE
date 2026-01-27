@@ -105,7 +105,7 @@
 <h1>Planetary Tidal Response using <code class="docutils literal notranslate"><span class="pre">tSPICE</span></code>: Quickstart<a class="headerlink" href="#Planetary-Tidal-Response-using-tSPICE:-Quickstart" title="Link to this heading"></a></h1>
 <p>This notebook demonstrates the calculation of Love numbers for a planetary body using <code class="docutils literal notranslate"><span class="pre">tSPICE</span></code>.</p>
 <div class="nbinput docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[2]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[1]:
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="k">try</span><span class="p">:</span>
@@ -127,13 +127,11 @@
 <div class="output_area docutils container">
 <div class="highlight"><pre>
 Not running in Colab, skipping installation
-The autoreload extension is already loaded. To reload it, use:
-  %reload_ext autoreload
 </pre></div></div>
 </div>
 <p>Import package and initialize it (load data required for computations)</p>
 <div class="nbinput docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[8]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[3]:
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1">#Import TSPICE and initialize the kernels</span>
@@ -147,6 +145,7 @@ The autoreload extension is already loaded. To reload it, use:
 </div>
 <div class="output_area docutils container">
 <div class="highlight"><pre>
+Welcome to tSPICE v0.0.2
 TSPICE initialized successfully. Kernels loaded from: /Users/jzuluaga/dev/tspice/examples/tspice_data/meta_kernel
 </pre></div></div>
 </div>
@@ -154,7 +153,7 @@ TSPICE initialized successfully. Kernels loaded from: /Users/jzuluaga/dev/tspice
 <h2>Responding body<a class="headerlink" href="#Responding-body" title="Link to this heading"></a></h2>
 <p>We start by defining our responding body:</p>
 <div class="nbinput docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[13]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[4]:
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">earth_interior</span> <span class="o">=</span> <span class="n">tsp</span><span class="o">.</span><span class="n">BodyResponse</span><span class="p">(</span><span class="s1">&#39;Earth&#39;</span><span class="p">)</span>
@@ -183,7 +182,7 @@ Gravity scale Gad = 9.82e+00 m/s^2
 <h2>Planetary profile<a class="headerlink" href="#Planetary-profile" title="Link to this heading"></a></h2>
 <p>The profile we use to test the Love Numbers calculation is a modification of the PREM suggested by <a class="reference external" href="https://doi.org/10.1016/j.pepi.2024.107304">Amorín &amp; Gudkova (2025)</a>. The integration methodology also follows the method outlined in their previous paper <a class="reference external" href="https://doi.org/10.1016/j.pepi.2024.107144">(Amorín &amp; Gudkova, 2024)</a>.</p>
 <div class="nbinput nblast docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[14]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[5]:
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span><span class="w"> </span><span class="nn">tspice.planet</span><span class="w"> </span><span class="kn">import</span> <span class="n">Earth</span>
@@ -197,7 +196,7 @@ Gravity scale Gad = 9.82e+00 m/s^2
 <h2>Response integration<a class="headerlink" href="#Response-integration" title="Link to this heading"></a></h2>
 <p>Now we add layers:</p>
 <div class="nbinput nblast docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[15]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[6]:
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">layers_list</span> <span class="o">=</span> <span class="p">[</span><span class="nb">dict</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="s1">&#39;Outer Core&#39;</span><span class="p">,</span> <span class="nb">type</span><span class="o">=</span><span class="s1">&#39;fluid&#39;</span><span class="p">,</span> <span class="n">r0</span><span class="o">=</span><span class="mf">1221500.0</span><span class="p">,</span> <span class="n">rf</span><span class="o">=</span><span class="mf">3480000.0</span><span class="p">),</span>
@@ -208,7 +207,7 @@ Gravity scale Gad = 9.82e+00 m/s^2
 </div>
 <p>Choose mode:</p>
 <div class="nbinput nblast docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[ ]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[7]:
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">f_day</span> <span class="o">=</span> <span class="mf">1.93502</span>  <span class="c1"># M2 tide in cycles/day</span>
@@ -218,7 +217,7 @@ Gravity scale Gad = 9.82e+00 m/s^2
 </div>
 <p>Set integration parameters:</p>
 <div class="nbinput nblast docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[16]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[8]:
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">r0_ini</span> <span class="o">=</span> <span class="mf">6e3</span>
@@ -228,7 +227,7 @@ Gravity scale Gad = 9.82e+00 m/s^2
 </div>
 <p>Integrate:</p>
 <div class="nbinput docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[17]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[9]:
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">earth_interior</span><span class="o">.</span><span class="n">integrate_internal_solutions_ad</span><span class="p">(</span><span class="n">verbose</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
@@ -253,7 +252,7 @@ delta_2 = 1.160751
 </div>
 <p>Love numbers are now attributes of the planet:</p>
 <div class="nbinput docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[19]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[10]:
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">earth_interior</span><span class="o">.</span><span class="n">k_n</span><span class="p">,</span> <span class="n">earth_interior</span><span class="o">.</span><span class="n">h_n</span><span class="p">,</span> <span class="n">earth_interior</span><span class="o">.</span><span class="n">l_n</span>
@@ -261,7 +260,7 @@ delta_2 = 1.160751
 </div>
 </div>
 <div class="nboutput nblast docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[19]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[10]:
 </pre></div>
 </div>
 <div class="output_area docutils container">

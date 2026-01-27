@@ -97,7 +97,7 @@
 <section id="description">
 <h2>Description<a class="headerlink" href="#description" title="Link to this heading"></a></h2>
 <p>tSPICE develops a coherent pathway from the fundamentals of tidal potential theory and elasticity to practical computations of tidal signals and elastic responses. The package uses SPICE’s kernels and modular routines to compute tidal signals and integrate planetary interior models.</p>
-<p>This work was developed as part of the Bachelor’s thesis <strong>“Planetary Tides and Elastic Response: From Theory to Calculations”</strong> by Deivy J. Mercado R. (2026).</p>
+<p>This work was developed as part of the Bachelor’s thesis <strong>“Planetary Tides and Elastic Response: From Theory to Calculations”</strong> by Deivy J. Mercado R. under the supervision of Prof. Jorge I. Zuluaga and Prof. Gloria Moncayo (2026).</p>
 <p>Key features:</p>
 <ul class="simple">
 <li><p><strong>Tidal Potential</strong>: Implements Tide-Generating Potentials (TGPs) in spherical-harmonic form.</p></li>
@@ -105,6 +105,35 @@
 <li><p><strong>Integration</strong>: Solves coupled first-order ODEs for displacement, strain, stress, and perturbing potential fields.</p></li>
 <li><p><strong>Validation</strong>: Reproduces tidal signals on Earth consistent with ETERNA-x and computes Love numbers in agreement with literature (e.g., using a modified PREM Earth model).</p></li>
 </ul>
+</section>
+<section id="theoretical-background">
+<h2>Theoretical Background<a class="headerlink" href="#theoretical-background" title="Link to this heading"></a></h2>
+<p>Tides are not merely the rise and fall of oceans; they are a fundamental consequence of the differential gravitational forces exerted by external bodies on an extended planetary body. <strong>tSPICE</strong> provides a computational framework to explore this phenomenon from first principles.</p>
+<section id="the-tide-generating-potential-tgp">
+<h3>The Tide-Generating Potential (TGP)<a class="headerlink" href="#the-tide-generating-potential-tgp" title="Link to this heading"></a></h3>
+<p>The gravitational field of an external body (like the Moon or Sun) varies across a planet’s volume. By subtracting the orbital acceleration (the force felt by the planet as a whole), we isolate the <strong>Tide-Generating Potential (TGP)</strong>. This potential is mathematically expanded using <strong>Spherical Harmonics</strong>, allowing us to decompose the complex tidal signal into precise spatial patterns and temporal frequencies (semidiurnal, diurnal, and long-period bands).</p>
+</section>
+<section id="planetary-elastic-response">
+<h3>Planetary Elastic Response<a class="headerlink" href="#planetary-elastic-response" title="Link to this heading"></a></h3>
+<p>Planets are not rigid; they deform under the influence of the TGP. <strong>tSPICE</strong> models the planet as a <strong>self-gravitating, elastic, transversely isotropic sphere</strong>. This means we account for:</p>
+<ul class="simple">
+<li><p><strong>Self-gravity</strong>: How the planet’s own gravity resists deformation.</p></li>
+<li><p><strong>Elasticity</strong>: The material’s tendency to return to its original shape, governed by stress-strain relations.</p></li>
+<li><p><strong>Transverse Isotropy</strong>: A realistic approximation for layered planets where material properties (density, elastic moduli) change radially.</p></li>
+</ul>
+</section>
+<section id="love-numbers">
+<h3>Love Numbers<a class="headerlink" href="#love-numbers" title="Link to this heading"></a></h3>
+<p>The deformation is quantified using dimensionless coefficients known as <strong>Love Numbers</strong> ($h_n, l_n, k_n$). These numbers act as transfer functions, connecting the external potential to:</p>
+<ul class="simple">
+<li><p><strong>Radial and Tangential Displacement</strong> ($h_n, l_n$): How much the surface moves up/down and sideways.</p></li>
+<li><p><strong>Potential Perturbation</strong> ($k_n$): How the planet’s redistribution of mass changes its own gravitational field.</p></li>
+</ul>
+</section>
+<section id="numerical-integration">
+<h3>Numerical Integration<a class="headerlink" href="#numerical-integration" title="Link to this heading"></a></h3>
+<p>To compute these values, <strong>tSPICE</strong> solves a system of coupled first-order Ordinary Differential Equations (ODEs) derived from the <strong>Navier-Cauchy equation of motion</strong> and <strong>Poisson’s equation</strong> for gravity. The package integrates these equations from the planet’s center to the surface, applying rigorous boundary conditions to ensure physical consistency.</p>
+</section>
 </section>
 <section id="installation">
 <h2>Installation<a class="headerlink" href="#installation" title="Link to this heading"></a></h2>
@@ -127,7 +156,109 @@
 </section>
 <section id="examples">
 <h2>Examples<a class="headerlink" href="#examples" title="Link to this heading"></a></h2>
-<p><em>(Examples to be added)</em></p>
+<section id="calculating-the-tide-generating-potential-tgp">
+<h3>Calculating the Tide-Generating Potential (TGP)<a class="headerlink" href="#calculating-the-tide-generating-potential-tgp" title="Link to this heading"></a></h3>
+<p>Here is a quick example of how to calculate the tidal potential generated by the Moon on Earth.</p>
+<p>First, initialize the package and define the location on the planetary body:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span><span class="w"> </span><span class="nn">tspice</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">matplotlib.pyplot</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">plt</span>
+
+<span class="c1"># Initialize tSPICE (loads kernels)</span>
+<span class="n">tspice</span><span class="o">.</span><span class="n">initialize</span><span class="p">(</span><span class="n">verbose</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+
+<span class="c1"># Define the location (lat, lon, depth)</span>
+<span class="n">loc</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">(</span><span class="n">lat</span> <span class="o">=</span> <span class="mf">4.49</span><span class="p">,</span> <span class="n">lon</span> <span class="o">=</span> <span class="o">-</span><span class="mf">73.14</span><span class="p">,</span> <span class="n">depth</span> <span class="o">=</span> <span class="mi">0</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>Define the time range and the body object:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="c1"># Define the time range</span>
+<span class="n">date</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">(</span><span class="n">start</span> <span class="o">=</span> <span class="s1">&#39;2025-05-25 13:08:05&#39;</span><span class="p">,</span>
+            <span class="n">stop</span> <span class="o">=</span> <span class="s1">&#39;2025-06-22 13:08:05&#39;</span><span class="p">,</span>
+            <span class="n">step</span> <span class="o">=</span> <span class="s1">&#39;1h&#39;</span><span class="p">,</span>
+            <span class="n">time_frame</span> <span class="o">=</span> <span class="s1">&#39;UTC&#39;</span><span class="p">)</span>
+
+<span class="c1"># Create a planetary body object (Earth)</span>
+<span class="n">earth</span> <span class="o">=</span> <span class="n">tspice</span><span class="o">.</span><span class="n">Body</span><span class="p">(</span><span class="s1">&#39;Earth&#39;</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>Calculate the TGP for a single body (in this case, the Moon):</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="c1"># Calculate TGP for a single body (Moon)</span>
+<span class="n">tgp_one</span><span class="p">,</span> <span class="n">et_utc</span> <span class="o">=</span> <span class="n">earth</span><span class="o">.</span><span class="n">tgp_one_body</span><span class="p">(</span><span class="s1">&#39;Moon&#39;</span><span class="p">,</span> <span class="n">loc_sta</span><span class="o">=</span><span class="n">loc</span><span class="p">,</span> <span class="n">dates</span><span class="o">=</span><span class="n">date</span><span class="p">,</span> <span class="n">nmax</span><span class="o">=</span><span class="mi">6</span><span class="p">,</span> <span class="n">time_array</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>Finally, plot the resulting signal:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="c1"># Plot the signal</span>
+<span class="n">earth</span><span class="o">.</span><span class="n">plot_one_signal</span><span class="p">(</span><span class="n">et_utc</span><span class="p">,</span> <span class="n">tgp_one</span><span class="o">*</span><span class="mi">100</span><span class="p">,</span> <span class="n">loc</span><span class="o">=</span><span class="n">loc</span><span class="p">,</span> <span class="n">colors</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;blue&#39;</span><span class="p">,</span><span class="s1">&#39;red&#39;</span><span class="p">],</span> <span class="n">mean_value</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+                      <span class="n">savepath</span><span class="o">=</span><span class="s1">&#39;./tgp-earth-moon.png&#39;</span><span class="p">)</span>
+</pre></div>
+</div>
+<a class="reference external image-reference" href="examples/gallery/tgp-earth-moon.png"><img alt="TGP Earth Moon" src="examples/gallery/tgp-earth-moon.png" />
+</a>
+</section>
+<section id="multiple-bodies">
+<h3>Multiple Bodies<a class="headerlink" href="#multiple-bodies" title="Link to this heading"></a></h3>
+<p>You can also calculate the combined tidal potential from multiple celestial bodies:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="c1"># List of bodies</span>
+<span class="n">bodylist</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;Moon&#39;</span><span class="p">,</span> <span class="s1">&#39;Sun&#39;</span><span class="p">,</span> <span class="s1">&#39;Mercury&#39;</span><span class="p">,</span> <span class="s1">&#39;Venus&#39;</span><span class="p">,</span> <span class="s1">&#39;Mars Barycenter&#39;</span><span class="p">,</span> <span class="s1">&#39;Jupiter Barycenter&#39;</span><span class="p">]</span>
+
+<span class="c1"># Calculate combined TGP</span>
+<span class="n">tgp_many</span> <span class="o">=</span> <span class="n">earth</span><span class="o">.</span><span class="n">tgp_many_bodies</span><span class="p">(</span><span class="n">bodylist</span><span class="p">,</span> <span class="n">loc_sta</span><span class="o">=</span><span class="n">loc</span><span class="p">,</span> <span class="n">dates</span><span class="o">=</span><span class="n">date</span><span class="p">,</span> <span class="n">nmax</span><span class="o">=</span><span class="mi">6</span><span class="p">,</span> <span class="n">body_signal</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">time_array</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+
+<span class="c1"># Plot the combined signal</span>
+<span class="n">earth</span><span class="o">.</span><span class="n">plot_one_signal</span><span class="p">(</span><span class="n">et_utc</span><span class="p">,</span> <span class="n">tgp_many</span><span class="o">*</span><span class="mi">100</span><span class="p">,</span> <span class="n">loc</span><span class="o">=</span><span class="n">loc</span><span class="p">,</span> <span class="n">colors</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;blue&#39;</span><span class="p">,</span><span class="s1">&#39;red&#39;</span><span class="p">],</span> <span class="n">mean_value</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+                      <span class="n">savepath</span><span class="o">=</span><span class="s1">&#39;./tgp-earth-planets.png&#39;</span><span class="p">)</span>
+</pre></div>
+</div>
+<a class="reference external image-reference" href="examples/gallery/tgp-earth-planets.png"><img alt="TGP Earth Planets" src="examples/gallery/tgp-earth-planets.png" />
+</a>
+</section>
+<section id="calculating-planetary-response-love-numbers">
+<h3>Calculating Planetary Response (Love Numbers)<a class="headerlink" href="#calculating-planetary-response-love-numbers" title="Link to this heading"></a></h3>
+<p>tSPICE can also calculate the elastic response of a planetary body (Love numbers) by integrating interior models. Here is how to calculate the Love numbers $k_2, h_2, l_2$ for Earth using a modified PREM model:</p>
+<p>First, initialize the package and define the responding body with its characteristic scales:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span><span class="w"> </span><span class="nn">tspice</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">tsp</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">tspice.planet</span><span class="w"> </span><span class="kn">import</span> <span class="n">Earth</span>
+
+<span class="c1"># Initialize</span>
+<span class="n">tsp</span><span class="o">.</span><span class="n">initialize</span><span class="p">(</span><span class="n">verbose</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+
+<span class="c1"># Define responding body and characteristic scales</span>
+<span class="n">earth_interior</span> <span class="o">=</span> <span class="n">tsp</span><span class="o">.</span><span class="n">BodyResponse</span><span class="p">(</span><span class="s1">&#39;Earth&#39;</span><span class="p">)</span>
+<span class="n">earth_interior</span><span class="o">.</span><span class="n">scale_constants</span><span class="p">()</span>
+</pre></div>
+</div>
+<p>Next, load a planetary profile. In this case, we use the Modified PREM for Earth:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">earth_model</span> <span class="o">=</span> <span class="n">Earth</span><span class="p">()</span>
+<span class="n">planet_profile</span> <span class="o">=</span> <span class="n">earth_model</span><span class="o">.</span><span class="n">planet_profile</span>
+</pre></div>
+</div>
+<p>Define the internal layers of the planet (boundaries between fluid and solid regions matter):</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="c1"># The fluid outer core is sandwiched between the solid inner core and mantle</span>
+<span class="n">layers_list</span> <span class="o">=</span> <span class="p">[</span>
+    <span class="nb">dict</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="s1">&#39;Outer Core&#39;</span><span class="p">,</span> <span class="nb">type</span><span class="o">=</span><span class="s1">&#39;fluid&#39;</span><span class="p">,</span> <span class="n">r0</span><span class="o">=</span><span class="mf">1221500.0</span><span class="p">,</span> <span class="n">rf</span><span class="o">=</span><span class="mf">3480000.0</span><span class="p">),</span>
+    <span class="nb">dict</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="s1">&#39;Inner Core&#39;</span><span class="p">,</span> <span class="nb">type</span><span class="o">=</span><span class="s1">&#39;solid&#39;</span><span class="p">,</span> <span class="n">r0</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">rf</span><span class="o">=</span><span class="mf">1221500.0</span><span class="p">),</span>
+    <span class="nb">dict</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="s1">&#39;Mantle + crust&#39;</span><span class="p">,</span> <span class="nb">type</span><span class="o">=</span><span class="s1">&#39;solid&#39;</span><span class="p">,</span> <span class="n">r0</span><span class="o">=</span><span class="mf">3480000.0</span><span class="p">,</span> <span class="n">rf</span><span class="o">=</span><span class="n">earth_interior</span><span class="o">.</span><span class="n">L</span><span class="p">)</span>
+<span class="p">]</span>
+</pre></div>
+</div>
+<p>Set the integration parameters for the desired tidal frequency (e.g., M2 tide) and spherical harmonic degree (n=2):</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">f_day</span> <span class="o">=</span> <span class="mf">1.93502</span>  <span class="c1"># cycles/day</span>
+<span class="n">earth_interior</span><span class="o">.</span><span class="n">set_integration_parameters_ad</span><span class="p">(</span><span class="n">n</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span> <span class="n">f_days</span><span class="o">=</span><span class="n">f_day</span><span class="p">,</span>
+                                             <span class="n">layers_list</span><span class="o">=</span><span class="n">layers_list</span><span class="p">,</span>
+                                             <span class="n">planet_profile</span><span class="o">=</span><span class="n">planet_profile</span><span class="p">,</span>
+                                             <span class="n">r0_ini</span><span class="o">=</span><span class="mf">6e3</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>Finally, integrate the coupled ODEs and print the results:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="c1"># Integrate</span>
+<span class="n">earth_interior</span><span class="o">.</span><span class="n">integrate_internal_solutions_ad</span><span class="p">(</span><span class="n">verbose</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+
+<span class="c1"># Access computed Love numbers</span>
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;k_2 = </span><span class="si">{</span><span class="n">earth_interior</span><span class="o">.</span><span class="n">k_n</span><span class="si">}</span><span class="s2">, h_2 = </span><span class="si">{</span><span class="n">earth_interior</span><span class="o">.</span><span class="n">h_n</span><span class="si">}</span><span class="s2">, l_2 = </span><span class="si">{</span><span class="n">earth_interior</span><span class="o">.</span><span class="n">l_n</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+<span class="c1"># Output: k_2 = 0.2990433851603629, h_2 = 0.6093161139942496, l_2 = 0.08564339441970326</span>
+</pre></div>
+</div>
+</section>
 </section>
 <section id="authors">
 <h2>Authors<a class="headerlink" href="#authors" title="Link to this heading"></a></h2>

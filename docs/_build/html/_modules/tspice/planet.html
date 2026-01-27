@@ -105,16 +105,38 @@
 <span class="sd">&gt;&gt;&gt; profile = earth.planet_profile</span>
 <span class="sd">&gt;&gt;&gt; print(f&quot;Density at center: {profile[&#39;rho&#39;](0):.2f} kg/m^3&quot;)</span>
 
-<span class="sd">Use Earth model for Love number calculations:</span>
+<span class="sd">Use Earth model for Love number calculations (integration):</span>
 
-<span class="sd">&gt;&gt;&gt; from tspice import BodyResponse</span>
-<span class="sd">&gt;&gt;&gt; earth_response = BodyResponse(&#39;Earth&#39;)</span>
+<span class="sd">&gt;&gt;&gt; import tspice as tsp</span>
+<span class="sd">&gt;&gt;&gt; from tspice.planet import Earth</span>
+<span class="sd">&gt;&gt;&gt; </span>
+<span class="sd">&gt;&gt;&gt; # 1. Define responding body and characteristic scales</span>
+<span class="sd">&gt;&gt;&gt; earth_interior = tsp.BodyResponse(&#39;Earth&#39;)</span>
+<span class="sd">&gt;&gt;&gt; earth_interior.scale_constants()</span>
+<span class="sd">&gt;&gt;&gt; </span>
+<span class="sd">&gt;&gt;&gt; # 2. Load planet profile (Modified PREM)</span>
 <span class="sd">&gt;&gt;&gt; earth_model = Earth()</span>
-<span class="sd">&gt;&gt;&gt; earth_response.set_integration_parameters_ad(</span>
-<span class="sd">...     n=2, f_days=1.0,</span>
-<span class="sd">...     layers_list=[...],</span>
-<span class="sd">...     planet_profile=earth_model.planet_profile</span>
+<span class="sd">&gt;&gt;&gt; planet_profile = earth_model.planet_profile</span>
+<span class="sd">&gt;&gt;&gt; </span>
+<span class="sd">&gt;&gt;&gt; # 3. Define internal layers (Fluid Outer Core sandwiched between Solid Inner Core and Mantle)</span>
+<span class="sd">&gt;&gt;&gt; layers_list = [</span>
+<span class="sd">...     dict(name=&#39;Outer Core&#39;, type=&#39;fluid&#39;, r0=1221500.0, rf=3480000.0),</span>
+<span class="sd">...     dict(name=&#39;Inner Core&#39;, type=&#39;solid&#39;, r0=0, rf=1221500.0),</span>
+<span class="sd">...     dict(name=&#39;Mantle + crust&#39;, type=&#39;solid&#39;, r0=3480000.0, rf=earth_interior.L)</span>
+<span class="sd">... ]</span>
+<span class="sd">&gt;&gt;&gt; </span>
+<span class="sd">&gt;&gt;&gt; # 4. Set integration parameters (e.g., M2 tide, n=2)</span>
+<span class="sd">&gt;&gt;&gt; f_day = 1.93502</span>
+<span class="sd">&gt;&gt;&gt; earth_interior.set_integration_parameters_ad(</span>
+<span class="sd">...     n=2, f_days=f_day,</span>
+<span class="sd">...     layers_list=layers_list,</span>
+<span class="sd">...     planet_profile=planet_profile,</span>
+<span class="sd">...     r0_ini=6e3</span>
 <span class="sd">... )</span>
+<span class="sd">&gt;&gt;&gt; </span>
+<span class="sd">&gt;&gt;&gt; # 5. Integrate coupled ODEs</span>
+<span class="sd">&gt;&gt;&gt; earth_interior.integrate_internal_solutions_ad(verbose=True)</span>
+<span class="sd">&gt;&gt;&gt; print(f&quot;k_2 = {earth_interior.k_n}, h_2 = {earth_interior.h_n}, l_2 = {earth_interior.l_n}&quot;)</span>
 <span class="sd">&quot;&quot;&quot;</span>
 
 <span class="kn">import</span><span class="w"> </span><span class="nn">numpy</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">np</span>
@@ -130,7 +152,11 @@
 <span class="k">class</span><span class="w"> </span><span class="nc">Earth</span><span class="p">:</span>
     <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">        Earth class implementing the PREM model with modifications from Amorin &amp; Gudkova (2025).</span>
+<span class="sd">        Initialize the Earth interior model.</span>
+
+<span class="sd">        This method loads the PREM model data, applies the crustal modifications</span>
+<span class="sd">        suggested by Amorin &amp; Gudkova (2025), and calculates the gravity profile</span>
+<span class="sd">        and mass distribution required for tidal response integration.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="c1"># New density, mu and K parameters</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">rho_new</span> <span class="o">=</span> <span class="mf">2178.9</span>  <span class="c1"># kg/m^3</span>
@@ -296,6 +322,26 @@
     <span class="k">def</span><span class="w"> </span><span class="nf">planet_profile</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Returns the planet profile dictionary compatible with BodyResponse.</span>
+
+<span class="sd">        The profile contains vectorized interpolators for physical properties</span>
+<span class="sd">        as a function of radius `r` (in meters).</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        dict</span>
+<span class="sd">            Dictionary containing the following keys (values are callable interpolators):</span>
+<span class="sd">            - &#39;rho&#39; : Density [kg/m^3]</span>
+<span class="sd">            - &#39;lamb&#39;: First Lamé parameter [Pa]</span>
+<span class="sd">            - &#39;mu&#39;  : Shear modulus (Second Lamé parameter) [Pa]</span>
+<span class="sd">            - &#39;g&#39;   : Gravitational acceleration [m/s^2]</span>
+<span class="sd">            - &#39;dimensionless&#39;: Boolean flag (False for this dimensional model)</span>
+<span class="sd">        </span>
+<span class="sd">        Examples</span>
+<span class="sd">        --------</span>
+<span class="sd">        &gt;&gt;&gt; earth = Earth()</span>
+<span class="sd">        &gt;&gt;&gt; profile = earth.planet_profile</span>
+<span class="sd">        &gt;&gt;&gt; rho_surface = profile[&#39;rho&#39;](6371000)</span>
+<span class="sd">        &gt;&gt;&gt; g_surface = profile[&#39;g&#39;](6371000)</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="p">{</span>
             <span class="s1">&#39;rho&#39;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">rho_r_interp</span><span class="p">,</span>

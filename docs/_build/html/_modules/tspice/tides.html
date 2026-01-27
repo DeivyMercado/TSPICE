@@ -145,393 +145,487 @@
 
 <span class="c1"># File paths</span>
 <span class="n">file_dir</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">dirname</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">abspath</span><span class="p">(</span><span class="vm">__file__</span><span class="p">))</span> <span class="c1">#Current file location</span>
-<span class="n">data_dir</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">file_dir</span><span class="p">,</span> <span class="s1">&#39;data&#39;</span><span class="p">)</span>	<span class="c1">#Data files</span>
+<span class="n">data_dir</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">file_dir</span><span class="p">,</span> <span class="s1">&#39;data&#39;</span><span class="p">)</span>   <span class="c1">#Data files</span>
 
 <div class="viewcode-block" id="Body">
 <a class="viewcode-back" href="../../tides.html#tspice.tides.Body">[docs]</a>
 <span class="k">class</span><span class="w"> </span><span class="nc">Body</span><span class="p">():</span>
-	<span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="n">solar_system</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
-<span class="w">		</span>
-<span class="w">		</span><span class="sd">&#39;&#39;&#39;</span>
-<span class="sd">		This class defines the Body for tidal calculations. The body could be a Solar System body or an exoplanet from a real or hypothetical system.</span>
-<span class="sd">            </span>
-<span class="sd">		Input:</span>
-<span class="sd">		- name: Name of the body, e.g. &#39;Earth&#39;, &#39;Mars&#39;, &#39;Io&#39;, &#39;Wasp-12b&#39;, etc.</span>
-<span class="sd">		- solar_system: Boolean to indicate if the body is in the solar system and made part of the SPICE kernels (default True) or an exoplanet from a real or hypothetical system (False). In the case of exoplanets, the user should provide the necessary physical and orbital parameters later for the tidal calculations.</span>
-<span class="sd">        </span>
-<span class="sd">        Output:</span>
-<span class="sd">		- Body object with the physical parameters of the body.</span>
-<span class="sd">		&#39;&#39;&#39;</span>
+    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="n">solar_system</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Initialize the Body object.</span>
 
-		<span class="c1">#By default, the bodies are from the solar system</span>
-		<span class="k">if</span> <span class="n">solar_system</span><span class="p">:</span>
-		
-		<span class="c1">#Check if kernels are loaded before allowing creation of a Body</span>
-			<span class="kn">import</span><span class="w"> </span><span class="nn">tspice</span>
-			<span class="k">if</span> <span class="ow">not</span> <span class="n">tspice</span><span class="o">.</span><span class="n">kernels_loaded</span><span class="p">:</span>
-				<span class="k">raise</span> <span class="ne">RuntimeError</span><span class="p">(</span>
-					<span class="s2">&quot;SPICE kernels not loaded. Please call tspice.initialize() first. &quot;</span>
-					<span class="s2">&quot;Example:</span><span class="se">\n\n</span><span class="s2">&quot;</span>
-					<span class="s2">&quot;import tspice</span><span class="se">\n</span><span class="s2">&quot;</span>
-					<span class="s2">&quot;tspice.initialize()</span><span class="se">\n</span><span class="s2">&quot;</span>
-					<span class="s2">&quot;# or specify a custom directory: tspice.initialize(&#39;/path/to/my/kernels&#39;)</span><span class="se">\n</span><span class="s2">&quot;</span>
-					<span class="s2">&quot;body = tspice.Body(&#39;Moon&#39;)&quot;</span>
-				<span class="p">)</span>
-			
-			<span class="c1">#Name, Id and body-fixed frame of the (target) body</span>
-			<span class="bp">self</span><span class="o">.</span><span class="n">body_name</span> <span class="o">=</span> <span class="n">name</span>
-			<span class="bp">self</span><span class="o">.</span><span class="n">body_id</span> <span class="o">=</span> <span class="n">spy</span><span class="o">.</span><span class="n">bodn2c</span><span class="p">(</span><span class="n">name</span><span class="p">)</span>
-			<span class="bp">self</span><span class="o">.</span><span class="n">body_frame</span> <span class="o">=</span> <span class="n">spy</span><span class="o">.</span><span class="n">cidfrm</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">body_id</span><span class="p">)[</span><span class="mi">1</span><span class="p">]</span>
-			
-			<span class="k">try</span><span class="p">:</span>
-				<span class="c1">#GM for the body</span>
-				<span class="bp">self</span><span class="o">.</span><span class="n">GM</span> <span class="o">=</span> <span class="n">spy</span><span class="o">.</span><span class="n">bodvrd</span><span class="p">(</span><span class="n">name</span><span class="p">,</span> <span class="s1">&#39;GM&#39;</span><span class="p">,</span> <span class="mi">1</span><span class="p">)[</span><span class="mi">1</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span>    <span class="c1">#in [km^3/s^2]</span>
-			<span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
-				<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Error getting GM for </span><span class="si">{</span><span class="n">name</span><span class="si">}</span><span class="s2">: </span><span class="si">{</span><span class="n">e</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
-				<span class="bp">self</span><span class="o">.</span><span class="n">GM</span> <span class="o">=</span> <span class="kc">None</span>
-				
-			<span class="k">try</span><span class="p">:</span>
-				<span class="c1">#a_p is the mean radius for the body</span>
-				<span class="bp">self</span><span class="o">.</span><span class="n">a_ellips</span> <span class="o">=</span> <span class="n">spy</span><span class="o">.</span><span class="n">bodvrd</span><span class="p">(</span><span class="n">name</span><span class="p">,</span> <span class="s1">&#39;RADII&#39;</span><span class="p">,</span> <span class="mi">3</span><span class="p">)[</span><span class="mi">1</span><span class="p">]</span>		<span class="c1">#in [km]</span>
-				<span class="bp">self</span><span class="o">.</span><span class="n">a_p</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">a_ellips</span><span class="o">.</span><span class="n">mean</span><span class="p">()</span>	<span class="c1">#in [km]</span>
-				<span class="c1">#Flattening of the body</span>
-				<span class="bp">self</span><span class="o">.</span><span class="n">f</span> <span class="o">=</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">a_ellips</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">-</span><span class="bp">self</span><span class="o">.</span><span class="n">a_ellips</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">])</span><span class="o">/</span><span class="bp">self</span><span class="o">.</span><span class="n">a_ellips</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
-			<span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
-				<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Error getting RADII for </span><span class="si">{</span><span class="n">name</span><span class="si">}</span><span class="s2">: </span><span class="si">{</span><span class="n">e</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
-				<span class="bp">self</span><span class="o">.</span><span class="n">a_p</span> <span class="o">=</span> <span class="kc">None</span>
+<span class="sd">        This class defines a celestial body for tidal calculations. It loads physical properties</span>
+<span class="sd">        (GM, radii) from SPICE kernels if available.</span>
 
-			<span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">GM</span> <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">a_p</span><span class="p">:</span>
-				<span class="bp">self</span><span class="o">.</span><span class="n">g_ref</span> <span class="o">=</span> <span class="mf">1e3</span><span class="o">*</span><span class="bp">self</span><span class="o">.</span><span class="n">GM</span><span class="o">/</span><span class="bp">self</span><span class="o">.</span><span class="n">a_p</span><span class="o">**</span><span class="mi">2</span>	<span class="c1">#in [m/s^2]</span>
-		
-		<span class="k">else</span><span class="p">:</span>
-			<span class="c1">#[PENDING] Add functionality for other bodies outside the solar system</span>
-			<span class="k">raise</span> <span class="ne">NotImplementedError</span><span class="p">(</span><span class="s2">&quot;Currently, only solar system bodies are supported.&quot;</span><span class="p">)</span>
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        name : str</span>
+<span class="sd">            Name of the body, e.g., &#39;Earth&#39;, &#39;Mars&#39;, &#39;Io&#39;.</span>
+<span class="sd">        solar_system : bool, optional</span>
+<span class="sd">            If True, assumes the body is in the Solar System and managed by SPICE kernels.</span>
+<span class="sd">            If False, it treats the body as an exoplanet (parameters must be set manually).</span>
+<span class="sd">            Default is True.</span>
 
-			<span class="c1">#[PENDING] Add physical parameters for exoplanets or hypothetical bodies</span>
+<span class="sd">        Raises</span>
+<span class="sd">        ------</span>
+<span class="sd">        RuntimeError</span>
+<span class="sd">            If SPICE kernels are not initialized via `tspice.initialize()`.</span>
+<span class="sd">        NotImplementedError</span>
+<span class="sd">            If `solar_system` is False (exoplanet support currently pending).</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="c1">#By default, the bodies are from the solar system</span>
+        <span class="k">if</span> <span class="n">solar_system</span><span class="p">:</span>
+        
+        <span class="c1">#Check if kernels are loaded before allowing creation of a Body</span>
+            <span class="kn">import</span><span class="w"> </span><span class="nn">tspice</span>
+            <span class="k">if</span> <span class="ow">not</span> <span class="n">tspice</span><span class="o">.</span><span class="n">kernels_loaded</span><span class="p">:</span>
+                <span class="k">raise</span> <span class="ne">RuntimeError</span><span class="p">(</span>
+                    <span class="s2">&quot;SPICE kernels not loaded. Please call tspice.initialize() first. &quot;</span>
+                    <span class="s2">&quot;Example:</span><span class="se">\n\n</span><span class="s2">&quot;</span>
+                    <span class="s2">&quot;import tspice</span><span class="se">\n</span><span class="s2">&quot;</span>
+                    <span class="s2">&quot;tspice.initialize()</span><span class="se">\n</span><span class="s2">&quot;</span>
+                    <span class="s2">&quot;# or specify a custom directory: tspice.initialize(&#39;/path/to/my/kernels&#39;)</span><span class="se">\n</span><span class="s2">&quot;</span>
+                    <span class="s2">&quot;body = tspice.Body(&#39;Moon&#39;)&quot;</span>
+                <span class="p">)</span>
+            
+            <span class="c1">#Name, Id and body-fixed frame of the (target) body</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">body_name</span> <span class="o">=</span> <span class="n">name</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">body_id</span> <span class="o">=</span> <span class="n">spy</span><span class="o">.</span><span class="n">bodn2c</span><span class="p">(</span><span class="n">name</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">body_frame</span> <span class="o">=</span> <span class="n">spy</span><span class="o">.</span><span class="n">cidfrm</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">body_id</span><span class="p">)[</span><span class="mi">1</span><span class="p">]</span>
+            
+            <span class="k">try</span><span class="p">:</span>
+                <span class="c1">#GM for the body</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">GM</span> <span class="o">=</span> <span class="n">spy</span><span class="o">.</span><span class="n">bodvrd</span><span class="p">(</span><span class="n">name</span><span class="p">,</span> <span class="s1">&#39;GM&#39;</span><span class="p">,</span> <span class="mi">1</span><span class="p">)[</span><span class="mi">1</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span>    <span class="c1">#in [km^3/s^2]</span>
+            <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+                <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Error getting GM for </span><span class="si">{</span><span class="n">name</span><span class="si">}</span><span class="s2">: </span><span class="si">{</span><span class="n">e</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">GM</span> <span class="o">=</span> <span class="kc">None</span>
+                
+            <span class="k">try</span><span class="p">:</span>
+                <span class="c1">#a_p is the mean radius for the body</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">a_ellips</span> <span class="o">=</span> <span class="n">spy</span><span class="o">.</span><span class="n">bodvrd</span><span class="p">(</span><span class="n">name</span><span class="p">,</span> <span class="s1">&#39;RADII&#39;</span><span class="p">,</span> <span class="mi">3</span><span class="p">)[</span><span class="mi">1</span><span class="p">]</span>     <span class="c1">#in [km]</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">a_p</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">a_ellips</span><span class="o">.</span><span class="n">mean</span><span class="p">()</span> <span class="c1">#in [km]</span>
+                <span class="c1">#Flattening of the body</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">f</span> <span class="o">=</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">a_ellips</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">-</span><span class="bp">self</span><span class="o">.</span><span class="n">a_ellips</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">])</span><span class="o">/</span><span class="bp">self</span><span class="o">.</span><span class="n">a_ellips</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+            <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+                <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Error getting RADII for </span><span class="si">{</span><span class="n">name</span><span class="si">}</span><span class="s2">: </span><span class="si">{</span><span class="n">e</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">a_p</span> <span class="o">=</span> <span class="kc">None</span>
+
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">GM</span> <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">a_p</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">g_ref</span> <span class="o">=</span> <span class="mf">1e3</span><span class="o">*</span><span class="bp">self</span><span class="o">.</span><span class="n">GM</span><span class="o">/</span><span class="bp">self</span><span class="o">.</span><span class="n">a_p</span><span class="o">**</span><span class="mi">2</span>    <span class="c1">#in [m/s^2]</span>
+        
+        <span class="k">else</span><span class="p">:</span>
+            <span class="c1">#[PENDING] Add functionality for other bodies outside the solar system</span>
+            <span class="k">raise</span> <span class="ne">NotImplementedError</span><span class="p">(</span><span class="s2">&quot;Currently, only solar system bodies are supported.&quot;</span><span class="p">)</span>
+
+            <span class="c1">#[PENDING] Add physical parameters for exoplanets or hypothetical bodies</span>
 
 <div class="viewcode-block" id="Body.array_et_utc">
 <a class="viewcode-back" href="../../tides.html#tspice.tides.Body.array_et_utc">[docs]</a>
-	<span class="k">def</span><span class="w"> </span><span class="nf">array_et_utc</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">date</span><span class="p">,</span> <span class="n">return_step_seconds</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">array_et_utc</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">date</span><span class="p">,</span> <span class="n">return_step_seconds</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Generate an array of Ephemeris Times (ET) based on a date dictionary.</span>
 
-<span class="w">		</span><span class="sd">&#39;&#39;&#39;</span>
-<span class="sd">		This function creates an array of times in ET from a dictionary with start, stop, step, and time_frame (UTC or TDB).</span>
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        date : dict</span>
+<span class="sd">            Dictionary containing time range parameters:</span>
+<span class="sd">            - &#39;start&#39;: Start date string (e.g., &#39;2025-01-01&#39;).</span>
+<span class="sd">            - &#39;stop&#39;: Stop date string.</span>
+<span class="sd">            - &#39;step&#39;: Time step string (e.g., &#39;1h&#39;, &#39;30m&#39;).</span>
+<span class="sd">            - &#39;time_frame&#39;: Time frame, currently only &#39;UTC&#39; is supported.</span>
+<span class="sd">        return_step_seconds : bool, optional</span>
+<span class="sd">            If True, returns the step size in seconds along with the ET array.</span>
 
-<span class="sd">		Input:</span>
-<span class="sd">		- date: Dictionary with start, stop, step, and time_frame (UTC or TDB).</span>
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        np.ndarray</span>
+<span class="sd">            Array of times in Ephemeris Time (ET/TDB seconds past J2000).</span>
+<span class="sd">        float (optional)</span>
+<span class="sd">            Step size in seconds (if `return_step_seconds` is True).</span>
 
-<span class="sd">		Output:</span>
-<span class="sd">		- et_utc: Array of times in ET.</span>
-<span class="sd">		&#39;&#39;&#39;</span>
+<span class="sd">        Examples</span>
+<span class="sd">        --------</span>
+<span class="sd">        &gt;&gt;&gt; body = Body(&#39;Earth&#39;)</span>
+<span class="sd">        &gt;&gt;&gt; date = {&#39;start&#39;: &#39;2025-01-01&#39;, &#39;stop&#39;: &#39;2025-01-02&#39;, &#39;step&#39;: &#39;1h&#39;}</span>
+<span class="sd">        &gt;&gt;&gt; et_array = body.array_et_utc(date)</span>
+<span class="sd">        &quot;&quot;&quot;</span>
 
-		<span class="k">if</span> <span class="n">date</span><span class="p">[</span><span class="s1">&#39;time_frame&#39;</span><span class="p">]</span> <span class="o">==</span> <span class="s1">&#39;UTC&#39;</span> <span class="ow">or</span> <span class="s1">&#39;time_frame&#39;</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">date</span><span class="o">.</span><span class="n">keys</span><span class="p">():</span>
-			<span class="n">et_utc_start</span> <span class="o">=</span> <span class="n">spy</span><span class="o">.</span><span class="n">utc2et</span><span class="p">(</span><span class="n">date</span><span class="p">[</span><span class="s1">&#39;start&#39;</span><span class="p">])</span>
-			<span class="n">et_utc_stop</span> <span class="o">=</span> <span class="n">spy</span><span class="o">.</span><span class="n">utc2et</span><span class="p">(</span><span class="n">date</span><span class="p">[</span><span class="s1">&#39;stop&#39;</span><span class="p">])</span>
-			<span class="n">step_seconds</span> <span class="o">=</span> <span class="n">convert_step_to_seconds</span><span class="p">(</span><span class="n">date</span><span class="p">[</span><span class="s1">&#39;step&#39;</span><span class="p">])</span>
-			<span class="n">et_utc</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="n">et_utc_start</span><span class="p">,</span> <span class="n">et_utc_stop</span><span class="p">,</span> <span class="n">step_seconds</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">date</span><span class="p">[</span><span class="s1">&#39;time_frame&#39;</span><span class="p">]</span> <span class="o">==</span> <span class="s1">&#39;UTC&#39;</span> <span class="ow">or</span> <span class="s1">&#39;time_frame&#39;</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">date</span><span class="o">.</span><span class="n">keys</span><span class="p">():</span>
+            <span class="n">et_utc_start</span> <span class="o">=</span> <span class="n">spy</span><span class="o">.</span><span class="n">utc2et</span><span class="p">(</span><span class="n">date</span><span class="p">[</span><span class="s1">&#39;start&#39;</span><span class="p">])</span>
+            <span class="n">et_utc_stop</span> <span class="o">=</span> <span class="n">spy</span><span class="o">.</span><span class="n">utc2et</span><span class="p">(</span><span class="n">date</span><span class="p">[</span><span class="s1">&#39;stop&#39;</span><span class="p">])</span>
+            <span class="n">step_seconds</span> <span class="o">=</span> <span class="n">convert_step_to_seconds</span><span class="p">(</span><span class="n">date</span><span class="p">[</span><span class="s1">&#39;step&#39;</span><span class="p">])</span>
+            <span class="n">et_utc</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="n">et_utc_start</span><span class="p">,</span> <span class="n">et_utc_stop</span><span class="p">,</span> <span class="n">step_seconds</span><span class="p">)</span>
 
-		<span class="c1">#[PENDING] Add more conditions later</span>
-		<span class="k">else</span><span class="p">:</span>
-			<span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Currently, only &#39;UTC&#39; time frame is supported.&quot;</span><span class="p">)</span>
+        <span class="c1">#[PENDING] Add more conditions later</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Currently, only &#39;UTC&#39; time frame is supported.&quot;</span><span class="p">)</span>
 
-		<span class="k">if</span> <span class="n">return_step_seconds</span><span class="p">:</span>
-			<span class="k">return</span> <span class="n">step_seconds</span><span class="p">,</span> <span class="n">et_utc</span>
-		<span class="k">else</span><span class="p">:</span>
-			<span class="k">return</span> <span class="n">et_utc</span></div>
+        <span class="k">if</span> <span class="n">return_step_seconds</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">step_seconds</span><span class="p">,</span> <span class="n">et_utc</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">et_utc</span></div>
 
 
-	<span class="c1">#[PENDING] Function to get the body IDs from their names</span>
+    <span class="c1">#[PENDING] Function to get the body IDs from their names</span>
 
 <div class="viewcode-block" id="Body.Kn_func">
 <a class="viewcode-back" href="../../tides.html#tspice.tides.Body.Kn_func">[docs]</a>
-	<span class="k">def</span><span class="w"> </span><span class="nf">Kn_func</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">n</span><span class="p">,</span> <span class="n">M_ext</span><span class="p">,</span> <span class="n">M</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">a_p</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">Kn_func</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">n</span><span class="p">,</span> <span class="n">M_ext</span><span class="p">,</span> <span class="n">M</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">a_p</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Calculate the constant coefficient K_n for the Tide-Generating Potential (TGP).</span>
 
-<span class="w">		</span><span class="sd">&#39;&#39;&#39;</span>
-<span class="sd">		This program calculate the constant Kn in the Tide-Generating Potential expansion.</span>
-<span class="sd">		</span>
-<span class="sd">		Input:</span>
-<span class="sd">		- n: Degree of the term</span>
-<span class="sd">		- a_p: Radius of the target body [m]</span>
-<span class="sd">		- M: Mass of the target body [any mass units]</span>
-<span class="sd">		- M_ext: Mass of the external body [the same as M]</span>
+<span class="sd">        The coefficient is defined as:</span>
+<span class="sd">        K_n = (4 * pi / (2n + 1)) * (M_ext / M) * a_p^(n+2)</span>
 
-<span class="sd">		Output:</span>
-<span class="sd">		- Kn: Constant K_n for a = a_p</span>
-<span class="sd">		</span>
-<span class="sd">		Note:</span>
-<span class="sd">		1. To get the potential for other distance from the COM,</span>
-<span class="sd">		should multiply this value by (a/a_p)^n</span>
-<span class="sd">		2. This definition is different to the one use in Agnew (2015)</span>
-<span class="sd">		that includes the factor 1/r_mean, with r_mean the mean distance</span>
-<span class="sd">		to the external body.&#39;&#39;&#39;</span>
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        n : int</span>
+<span class="sd">            Spherical harmonic degree.</span>
+<span class="sd">        M_ext : float</span>
+<span class="sd">            Mass of the external perturbing body.</span>
+<span class="sd">        M : float, optional</span>
+<span class="sd">            Mass of the central body. Defaults to self.GM (if available).</span>
+<span class="sd">        a_p : float, optional</span>
+<span class="sd">            Radius of the central body. Defaults to self.a_p (if available).</span>
 
-		<span class="k">if</span> <span class="n">M</span> <span class="ow">is</span> <span class="kc">None</span> <span class="ow">and</span> <span class="n">a_p</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
-			<span class="n">M</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">GM</span>
-			<span class="n">a_p</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">a_p</span>
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        float</span>
+<span class="sd">            The calculated K_n constant (in units compatible with input, typically km^(n+2)).</span>
 
-		<span class="n">Kn</span> <span class="o">=</span> <span class="p">(</span><span class="mi">4</span><span class="o">*</span><span class="n">np</span><span class="o">.</span><span class="n">pi</span><span class="o">/</span><span class="p">(</span><span class="mi">2</span><span class="o">*</span><span class="n">n</span><span class="o">+</span><span class="mi">1</span><span class="p">))</span><span class="o">*</span><span class="p">(</span><span class="n">M_ext</span><span class="o">/</span><span class="n">M</span><span class="p">)</span><span class="o">*</span><span class="n">a_p</span><span class="o">**</span><span class="p">(</span><span class="n">n</span><span class="o">+</span><span class="mi">2</span><span class="p">)</span>	<span class="c1">#in [km^(n+2)]</span>
-		<span class="k">return</span> <span class="n">Kn</span></div>
+<span class="sd">        Notes</span>
+<span class="sd">        -----</span>
+<span class="sd">        To obtain the potential at a distance `a` from the center of mass, multiply this value by (a/a_p)^n.</span>
+<span class="sd">        This definition differs from Agnew (2015) by a factor of 1/r_mean.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
 
-	
+        <span class="k">if</span> <span class="n">M</span> <span class="ow">is</span> <span class="kc">None</span> <span class="ow">and</span> <span class="n">a_p</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">M</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">GM</span>
+            <span class="n">a_p</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">a_p</span>
+
+        <span class="n">Kn</span> <span class="o">=</span> <span class="p">(</span><span class="mi">4</span><span class="o">*</span><span class="n">np</span><span class="o">.</span><span class="n">pi</span><span class="o">/</span><span class="p">(</span><span class="mi">2</span><span class="o">*</span><span class="n">n</span><span class="o">+</span><span class="mi">1</span><span class="p">))</span><span class="o">*</span><span class="p">(</span><span class="n">M_ext</span><span class="o">/</span><span class="n">M</span><span class="p">)</span><span class="o">*</span><span class="n">a_p</span><span class="o">**</span><span class="p">(</span><span class="n">n</span><span class="o">+</span><span class="mi">2</span><span class="p">)</span> <span class="c1">#in [km^(n+2)]</span>
+        <span class="k">return</span> <span class="n">Kn</span></div>
+
+    
 <div class="viewcode-block" id="Body.subpoint_coordinates">
 <a class="viewcode-back" href="../../tides.html#tspice.tides.Body.subpoint_coordinates">[docs]</a>
-	<span class="k">def</span><span class="w"> </span><span class="nf">subpoint_coordinates</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">et_utc</span><span class="p">,</span> <span class="n">body</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">subpoint_coordinates</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">et_utc</span><span class="p">,</span> <span class="n">body</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Calculate geographical coordinates of the sub-body point.</span>
 
-<span class="w">		</span><span class="sd">&#39;&#39;&#39;</span>
-<span class="sd">		This function calculates the geographical coordinates of the subpoint</span>
-<span class="sd">		of an external body on the target body for an array of times in ET.</span>
-<span class="sd">		</span>
-<span class="sd">		Input:</span>
-<span class="sd">		- et_utc: Array of times in ET.</span>
-<span class="sd">		- body: Name of the external body, e.g. &#39;Moon&#39;, &#39;Sun&#39;, &#39;Mercury&#39;, etc.</span>
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        et_utc : np.ndarray</span>
+<span class="sd">            Array of times in Ephemeris Time (ET).</span>
+<span class="sd">        body : str</span>
+<span class="sd">            Name of the external body (e.g., &#39;Moon&#39;, &#39;Sun&#39;).</span>
 
-<span class="sd">		Output:</span>
-<span class="sd">		- phis_ext: Array of longitudes of the subpoint [rad].</span>
-<span class="sd">		- thetas_ext: Array of colatitudes of the subpoint [rad].</span>
-<span class="sd">		- alts_ext: Array of altitudes of the subpoint above the reference ellipsoid [km].</span>
-<span class="sd">		&#39;&#39;&#39;</span>
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        phis_ext : np.ndarray</span>
+<span class="sd">            Longitudes of the subpoint [rad].</span>
+<span class="sd">        thetas_ext : np.ndarray</span>
+<span class="sd">            Colatitudes of the subpoint [rad].</span>
+<span class="sd">        alts_ext : np.ndarray</span>
+<span class="sd">            Altitudes of the subpoint above the reference ellipsoid [km].</span>
+<span class="sd">        &quot;&quot;&quot;</span>
 
-		<span class="c1">#Loop over the times to get the coordinates of the external body subpoint</span>
-		<span class="n">lons_ext</span><span class="p">,</span> <span class="n">lats_ext</span><span class="p">,</span> <span class="n">alts_ext</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">et_utc</span><span class="p">)),</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">et_utc</span><span class="p">)),</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">et_utc</span><span class="p">))</span>
-		<span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">t</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">et_utc</span><span class="p">):</span>
+        <span class="c1">#Loop over the times to get the coordinates of the external body subpoint</span>
+        <span class="n">lons_ext</span><span class="p">,</span> <span class="n">lats_ext</span><span class="p">,</span> <span class="n">alts_ext</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">et_utc</span><span class="p">)),</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">et_utc</span><span class="p">)),</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">et_utc</span><span class="p">))</span>
+        <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">t</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">et_utc</span><span class="p">):</span>
 
-			<span class="c1">#Rectangular coordinates of the subpoint</span>
-			<span class="n">subp</span><span class="p">,</span> <span class="n">et</span><span class="p">,</span> <span class="n">pos</span> <span class="o">=</span> <span class="n">spy</span><span class="o">.</span><span class="n">subpnt</span><span class="p">(</span><span class="s1">&#39;INTERCEPT/ELLIPSOID&#39;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">body_name</span><span class="p">,</span> <span class="n">t</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">body_frame</span><span class="p">,</span> <span class="s1">&#39;XCN+S&#39;</span><span class="p">,</span> <span class="n">body</span><span class="p">)</span>
+            <span class="c1">#Rectangular coordinates of the subpoint</span>
+            <span class="n">subp</span><span class="p">,</span> <span class="n">et</span><span class="p">,</span> <span class="n">pos</span> <span class="o">=</span> <span class="n">spy</span><span class="o">.</span><span class="n">subpnt</span><span class="p">(</span><span class="s1">&#39;INTERCEPT/ELLIPSOID&#39;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">body_name</span><span class="p">,</span> <span class="n">t</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">body_frame</span><span class="p">,</span> <span class="s1">&#39;XCN+S&#39;</span><span class="p">,</span> <span class="n">body</span><span class="p">)</span>
 
-			<span class="c1">#Geographical coordinates of the subpoint</span>
-			<span class="n">lon</span><span class="p">,</span> <span class="n">lat</span><span class="p">,</span> <span class="n">alt</span> <span class="o">=</span> <span class="n">spy</span><span class="o">.</span><span class="n">recgeo</span><span class="p">(</span><span class="n">subp</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">a_p</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">f</span><span class="p">)</span> <span class="c1">#in [rad, rad, km]</span>
-			<span class="n">lons_ext</span><span class="p">[</span><span class="n">i</span><span class="p">],</span> <span class="n">lats_ext</span><span class="p">[</span><span class="n">i</span><span class="p">],</span> <span class="n">alts_ext</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="n">lon</span><span class="p">,</span> <span class="n">lat</span><span class="p">,</span> <span class="n">alt</span>
-		
-		<span class="c1">#Final coordinates arrays</span>
-		<span class="n">phis_ext</span><span class="p">,</span> <span class="n">thetas_ext</span> <span class="o">=</span> <span class="n">lons_ext</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">pi</span><span class="o">/</span><span class="mi">2</span> <span class="o">-</span> <span class="n">lats_ext</span>
+            <span class="c1">#Geographical coordinates of the subpoint</span>
+            <span class="n">lon</span><span class="p">,</span> <span class="n">lat</span><span class="p">,</span> <span class="n">alt</span> <span class="o">=</span> <span class="n">spy</span><span class="o">.</span><span class="n">recgeo</span><span class="p">(</span><span class="n">subp</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">a_p</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">f</span><span class="p">)</span> <span class="c1">#in [rad, rad, km]</span>
+            <span class="n">lons_ext</span><span class="p">[</span><span class="n">i</span><span class="p">],</span> <span class="n">lats_ext</span><span class="p">[</span><span class="n">i</span><span class="p">],</span> <span class="n">alts_ext</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="n">lon</span><span class="p">,</span> <span class="n">lat</span><span class="p">,</span> <span class="n">alt</span>
+        
+        <span class="c1">#Final coordinates arrays</span>
+        <span class="n">phis_ext</span><span class="p">,</span> <span class="n">thetas_ext</span> <span class="o">=</span> <span class="n">lons_ext</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">pi</span><span class="o">/</span><span class="mi">2</span> <span class="o">-</span> <span class="n">lats_ext</span>
 
-		<span class="k">return</span> <span class="n">phis_ext</span><span class="p">,</span> <span class="n">thetas_ext</span><span class="p">,</span> <span class="n">alts_ext</span></div>
+        <span class="k">return</span> <span class="n">phis_ext</span><span class="p">,</span> <span class="n">thetas_ext</span><span class="p">,</span> <span class="n">alts_ext</span></div>
 
 
 <div class="viewcode-block" id="Body.tgp_one_body">
 <a class="viewcode-back" href="../../tides.html#tspice.tides.Body.tgp_one_body">[docs]</a>
-	<span class="k">def</span><span class="w"> </span><span class="nf">tgp_one_body</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">body</span><span class="p">,</span> <span class="n">loc_sta</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">dates</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">nmax</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">time_array</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">tgp_one_body</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">body</span><span class="p">,</span> <span class="n">loc_sta</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">dates</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">nmax</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">time_array</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Calculate the Tide-Generating Potential (TGP) due to a single external body.</span>
 
-<span class="w">		</span><span class="sd">&#39;&#39;&#39;</span>
-<span class="sd">		This function calculates the TGP for a point on the target body with geographic coordinates (lon_s, lat_s) at a distance a from the COM,</span>
-<span class="sd">		due to a list of external bodies.</span>
-<span class="sd">		</span>
-<span class="sd">		Input:</span>
-<span class="sd">		- loc_sta: Dictionary with the geographic coordinates of the station, including depth. For example: dict(lat=4.49, lon=-73.14, depth=0)</span>
-<span class="sd">		- dates: Dictionary with start, stop, and step dates. For example: dict(start=&quot;2025-01-01 00:00:00&quot;, stop=&quot;2025-01-29 00:00:00&quot;, step=&quot;1h&quot;)</span>
-<span class="sd">		- bodies: the body to consider, e.g. &#39;Moon&#39;, &#39;Sun&#39;, &#39;Mercury&#39;.</span>
-<span class="sd">		- nmax: Maximum degree to consider in the tidal calculation.</span>
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        body : str</span>
+<span class="sd">            Name of the external body (e.g., &#39;Moon&#39;).</span>
+<span class="sd">        loc_sta : dict, optional</span>
+<span class="sd">            Coordinates of the station (lat, lon, depth). Required if not called within `tgp_many_bodies`.</span>
+<span class="sd">        dates : dict, optional</span>
+<span class="sd">            Time range parameters. Required if not called within `tgp_many_bodies`.</span>
+<span class="sd">        nmax : int, optional</span>
+<span class="sd">            Maximum spherical harmonic degree (default: self.nmax or user specified).</span>
+<span class="sd">        time_array : bool, optional</span>
+<span class="sd">            If True, returns the time array along with the potential.</span>
 
-<span class="sd">		Returns:</span>
-<span class="sd">		- Vtid: Array with the time series of V/g at the station for each body</span>
-<span class="sd">		- tjd: Times in JD of the ephemerides (and of V/g).</span>
-<span class="sd">		&#39;&#39;&#39;</span>
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        Vtid : np.ndarray</span>
+<span class="sd">            Time series of the tidal potential V/g [m] at the station.</span>
+<span class="sd">        et_utc : np.ndarray (optional)</span>
+<span class="sd">            Ephemeris times corresponding to the signal (if `time_array` is True).</span>
 
-		<span class="c1">#Cordinates of the station</span>
-		<span class="k">if</span> <span class="n">loc_sta</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
-			<span class="c1">#If the function is called within tgp_many_bodies</span>
-			<span class="n">phi_sta</span><span class="p">,</span> <span class="n">theta_sta</span><span class="p">,</span> <span class="n">a_sta</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">phi_sta</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">theta_sta</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">a_sta</span>
-		<span class="k">else</span><span class="p">:</span>
-			<span class="n">phi_sta</span><span class="p">,</span> <span class="n">theta_sta</span><span class="p">,</span> <span class="n">a_sta</span> <span class="o">=</span> <span class="n">loc_func</span><span class="p">(</span><span class="n">loc_sta</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">a_ellips</span><span class="p">)</span>
+<span class="sd">        Examples</span>
+<span class="sd">        --------</span>
+<span class="sd">        &gt;&gt;&gt; earth = Body(&#39;Earth&#39;)</span>
+<span class="sd">        &gt;&gt;&gt; loc = {&#39;lat&#39;: 0, &#39;lon&#39;: 0, &#39;depth&#39;: 0}</span>
+<span class="sd">        &gt;&gt;&gt; dates = {&#39;start&#39;: &#39;2025-01-01&#39;, &#39;stop&#39;: &#39;2025-01-02&#39;, &#39;step&#39;: &#39;1h&#39;}</span>
+<span class="sd">        &gt;&gt;&gt; tgp = earth.tgp_one_body(&#39;Moon&#39;, loc, dates, nmax=2)</span>
+<span class="sd">        &quot;&quot;&quot;</span>
 
-		<span class="c1">#Array of UTC times in ET</span>
-		<span class="k">if</span> <span class="n">dates</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
-			<span class="c1">#If the function is called within tgp_many_bodies</span>
-			<span class="n">et_utc</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">et_utc</span>
-		<span class="k">else</span><span class="p">:</span>
-			<span class="n">et_utc</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">array_et_utc</span><span class="p">(</span><span class="n">dates</span><span class="p">)</span>
+        <span class="c1">#Cordinates of the station</span>
+        <span class="k">if</span> <span class="n">loc_sta</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="c1">#If the function is called within tgp_many_bodies</span>
+            <span class="n">phi_sta</span><span class="p">,</span> <span class="n">theta_sta</span><span class="p">,</span> <span class="n">a_sta</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">phi_sta</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">theta_sta</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">a_sta</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">phi_sta</span><span class="p">,</span> <span class="n">theta_sta</span><span class="p">,</span> <span class="n">a_sta</span> <span class="o">=</span> <span class="n">loc_func</span><span class="p">(</span><span class="n">loc_sta</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">a_ellips</span><span class="p">)</span>
 
-		<span class="c1">#Maximum degree</span>
-		<span class="k">if</span> <span class="n">nmax</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
-			<span class="n">nmax</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">nmax</span>
-		<span class="k">else</span><span class="p">:</span>
-			<span class="n">nmax</span> <span class="o">=</span> <span class="n">nmax</span>
+        <span class="c1">#Array of UTC times in ET</span>
+        <span class="k">if</span> <span class="n">dates</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="c1">#If the function is called within tgp_many_bodies</span>
+            <span class="n">et_utc</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">et_utc</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">et_utc</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">array_et_utc</span><span class="p">(</span><span class="n">dates</span><span class="p">)</span>
 
-		<span class="c1">#GM for the external body</span>
-		<span class="n">GM_ext</span> <span class="o">=</span> <span class="n">spy</span><span class="o">.</span><span class="n">bodvrd</span><span class="p">(</span><span class="n">body</span><span class="p">,</span> <span class="s1">&#39;GM&#39;</span><span class="p">,</span> <span class="mi">1</span><span class="p">)[</span><span class="mi">1</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span> <span class="c1">#in [km^3/s^2]</span>
+        <span class="c1">#Maximum degree</span>
+        <span class="k">if</span> <span class="n">nmax</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">nmax</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">nmax</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">nmax</span> <span class="o">=</span> <span class="n">nmax</span>
 
-		<span class="c1">#State vector and light time travel</span>
-		<span class="n">x</span><span class="p">,</span> <span class="n">lt</span> <span class="o">=</span> <span class="n">spy</span><span class="o">.</span><span class="n">spkezr</span><span class="p">(</span><span class="n">body</span><span class="p">,</span> <span class="n">et_utc</span><span class="p">,</span> <span class="s1">&#39;ECLIPJ2000&#39;</span><span class="p">,</span> <span class="s1">&#39;XCN+S&#39;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">body_name</span><span class="p">)</span>	<span class="c1">#in [km]</span>
+        <span class="c1">#GM for the external body</span>
+        <span class="n">GM_ext</span> <span class="o">=</span> <span class="n">spy</span><span class="o">.</span><span class="n">bodvrd</span><span class="p">(</span><span class="n">body</span><span class="p">,</span> <span class="s1">&#39;GM&#39;</span><span class="p">,</span> <span class="mi">1</span><span class="p">)[</span><span class="mi">1</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span> <span class="c1">#in [km^3/s^2]</span>
 
-		<span class="c1">#Position vector</span>
-		<span class="n">r_ext</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">x</span><span class="p">)[:,:</span><span class="mi">3</span><span class="p">]</span>	<span class="c1">#in [km]</span>
-		<span class="n">r</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">linalg</span><span class="o">.</span><span class="n">norm</span><span class="p">(</span><span class="n">r_ext</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
-		<span class="c1">#r_mean = r.mean()</span>
-		<span class="c1">#xit = r/r_mean	#Distance variation in time</span>
+        <span class="c1">#State vector and light time travel</span>
+        <span class="n">x</span><span class="p">,</span> <span class="n">lt</span> <span class="o">=</span> <span class="n">spy</span><span class="o">.</span><span class="n">spkezr</span><span class="p">(</span><span class="n">body</span><span class="p">,</span> <span class="n">et_utc</span><span class="p">,</span> <span class="s1">&#39;ECLIPJ2000&#39;</span><span class="p">,</span> <span class="s1">&#39;XCN+S&#39;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">body_name</span><span class="p">)</span> <span class="c1">#in [km]</span>
 
-		<span class="c1">#Subpoint coordinates of the external body</span>
-		<span class="n">phis_ext</span><span class="p">,</span> <span class="n">thetas_ext</span><span class="p">,</span> <span class="n">alts_ext</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">subpoint_coordinates</span><span class="p">(</span><span class="n">et_utc</span><span class="p">,</span> <span class="n">body</span><span class="p">)</span>
+        <span class="c1">#Position vector</span>
+        <span class="n">r_ext</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">x</span><span class="p">)[:,:</span><span class="mi">3</span><span class="p">]</span>   <span class="c1">#in [km]</span>
+        <span class="n">r</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">linalg</span><span class="o">.</span><span class="n">norm</span><span class="p">(</span><span class="n">r_ext</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+        <span class="c1">#r_mean = r.mean()</span>
+        <span class="c1">#xit = r/r_mean #Distance variation in time</span>
 
-		<span class="c1">#Vtid/g for all the times</span>
-		<span class="n">V_g_tid_body</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">et_utc</span><span class="p">))</span>
+        <span class="c1">#Subpoint coordinates of the external body</span>
+        <span class="n">phis_ext</span><span class="p">,</span> <span class="n">thetas_ext</span><span class="p">,</span> <span class="n">alts_ext</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">subpoint_coordinates</span><span class="p">(</span><span class="n">et_utc</span><span class="p">,</span> <span class="n">body</span><span class="p">)</span>
 
-		<span class="c1">#Sum over the degrees</span>
-		<span class="n">n_init</span> <span class="o">=</span> <span class="mi">2</span>
-		<span class="n">n_final</span> <span class="o">=</span> <span class="n">nmax</span>
-		<span class="k">for</span> <span class="n">n</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">n_init</span><span class="p">,</span><span class="n">n_final</span><span class="o">+</span><span class="mi">1</span><span class="p">):</span>
-			<span class="n">Kn</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">Kn_func</span><span class="p">(</span><span class="n">n</span><span class="p">,</span> <span class="n">GM_ext</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">GM</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">a_p</span><span class="p">)</span>
-			<span class="n">aamain_n</span> <span class="o">=</span> <span class="p">(</span><span class="n">a_sta</span><span class="o">/</span><span class="bp">self</span><span class="o">.</span><span class="n">a_p</span><span class="p">)</span><span class="o">**</span><span class="n">n</span>	<span class="c1">#For a != a_p</span>
-			<span class="n">fn</span> <span class="o">=</span> <span class="n">aamain_n</span><span class="o">*</span><span class="n">Kn</span><span class="o">/</span><span class="n">r</span><span class="o">**</span><span class="p">(</span><span class="n">n</span><span class="o">+</span><span class="mi">1</span><span class="p">)</span>	<span class="c1">#in [km] because a and r is in [km]</span>
+        <span class="c1">#Vtid/g for all the times</span>
+        <span class="n">V_g_tid_body</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">et_utc</span><span class="p">))</span>
 
-			<span class="c1">#Sum over the orders</span>
-			<span class="n">sigma_n</span> <span class="o">=</span> <span class="mi">0</span>
-			<span class="k">for</span> <span class="n">m</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="o">-</span><span class="n">n</span><span class="p">,</span><span class="n">n</span><span class="o">+</span><span class="mi">1</span><span class="p">):</span>
-					<span class="n">Ynm_ext</span> <span class="o">=</span> <span class="n">sps</span><span class="o">.</span><span class="n">sph_harm</span><span class="p">(</span><span class="n">m</span><span class="p">,</span> <span class="n">n</span><span class="p">,</span> <span class="n">phis_ext</span><span class="p">,</span> <span class="n">thetas_ext</span><span class="p">)</span>  <span class="c1">#External body</span>
-					<span class="n">Ynm_sta</span> <span class="o">=</span> <span class="n">sps</span><span class="o">.</span><span class="n">sph_harm</span><span class="p">(</span><span class="n">m</span><span class="p">,</span> <span class="n">n</span><span class="p">,</span> <span class="n">phi_sta</span><span class="p">,</span> <span class="n">theta_sta</span><span class="p">)</span>  <span class="c1">#Earth (station)</span>
-					<span class="n">YeYs</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">conjugate</span><span class="p">(</span><span class="n">Ynm_ext</span><span class="p">)</span><span class="o">*</span><span class="n">Ynm_sta</span>
-					<span class="n">sigma_n</span> <span class="o">+=</span> <span class="n">YeYs</span><span class="o">.</span><span class="n">real</span>
+        <span class="c1">#Sum over the degrees</span>
+        <span class="n">n_init</span> <span class="o">=</span> <span class="mi">2</span>
+        <span class="n">n_final</span> <span class="o">=</span> <span class="n">nmax</span>
+        <span class="k">for</span> <span class="n">n</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">n_init</span><span class="p">,</span><span class="n">n_final</span><span class="o">+</span><span class="mi">1</span><span class="p">):</span>
+            <span class="n">Kn</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">Kn_func</span><span class="p">(</span><span class="n">n</span><span class="p">,</span> <span class="n">GM_ext</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">GM</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">a_p</span><span class="p">)</span>
+            <span class="n">aamain_n</span> <span class="o">=</span> <span class="p">(</span><span class="n">a_sta</span><span class="o">/</span><span class="bp">self</span><span class="o">.</span><span class="n">a_p</span><span class="p">)</span><span class="o">**</span><span class="n">n</span>  <span class="c1">#For a != a_p</span>
+            <span class="n">fn</span> <span class="o">=</span> <span class="n">aamain_n</span><span class="o">*</span><span class="n">Kn</span><span class="o">/</span><span class="n">r</span><span class="o">**</span><span class="p">(</span><span class="n">n</span><span class="o">+</span><span class="mi">1</span><span class="p">)</span>   <span class="c1">#in [km] because a and r is in [km]</span>
 
-			<span class="c1">#Potential contribution of degree n</span>
-			<span class="n">V_g_tid_body</span> <span class="o">+=</span> <span class="n">fn</span><span class="o">*</span><span class="n">sigma_n</span>	
-		
-		<span class="c1">#Factor 1e3 to return in [m]</span>
-		<span class="n">V_g_tid_body</span> <span class="o">=</span> <span class="n">V_g_tid_body</span><span class="o">*</span><span class="mf">1e3</span>
+            <span class="c1">#Sum over the orders</span>
+            <span class="n">sigma_n</span> <span class="o">=</span> <span class="mi">0</span>
+            <span class="k">for</span> <span class="n">m</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="o">-</span><span class="n">n</span><span class="p">,</span><span class="n">n</span><span class="o">+</span><span class="mi">1</span><span class="p">):</span>
+                    <span class="n">Ynm_ext</span> <span class="o">=</span> <span class="n">sps</span><span class="o">.</span><span class="n">sph_harm</span><span class="p">(</span><span class="n">m</span><span class="p">,</span> <span class="n">n</span><span class="p">,</span> <span class="n">phis_ext</span><span class="p">,</span> <span class="n">thetas_ext</span><span class="p">)</span>  <span class="c1">#External body</span>
+                    <span class="n">Ynm_sta</span> <span class="o">=</span> <span class="n">sps</span><span class="o">.</span><span class="n">sph_harm</span><span class="p">(</span><span class="n">m</span><span class="p">,</span> <span class="n">n</span><span class="p">,</span> <span class="n">phi_sta</span><span class="p">,</span> <span class="n">theta_sta</span><span class="p">)</span>  <span class="c1">#Earth (station)</span>
+                    <span class="n">YeYs</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">conjugate</span><span class="p">(</span><span class="n">Ynm_ext</span><span class="p">)</span><span class="o">*</span><span class="n">Ynm_sta</span>
+                    <span class="n">sigma_n</span> <span class="o">+=</span> <span class="n">YeYs</span><span class="o">.</span><span class="n">real</span>
 
-		<span class="k">if</span> <span class="n">time_array</span><span class="p">:</span>
-			<span class="k">return</span> <span class="n">V_g_tid_body</span><span class="p">,</span> <span class="n">et_utc</span>
-		<span class="k">else</span><span class="p">:</span>
-			<span class="k">return</span> <span class="n">V_g_tid_body</span></div>
+            <span class="c1">#Potential contribution of degree n</span>
+            <span class="n">V_g_tid_body</span> <span class="o">+=</span> <span class="n">fn</span><span class="o">*</span><span class="n">sigma_n</span>  
+        
+        <span class="c1">#Factor 1e3 to return in [m]</span>
+        <span class="n">V_g_tid_body</span> <span class="o">=</span> <span class="n">V_g_tid_body</span><span class="o">*</span><span class="mf">1e3</span>
 
-	
+        <span class="k">if</span> <span class="n">time_array</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">V_g_tid_body</span><span class="p">,</span> <span class="n">et_utc</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">V_g_tid_body</span></div>
+
+    
 <div class="viewcode-block" id="Body.tgp_many_bodies">
 <a class="viewcode-back" href="../../tides.html#tspice.tides.Body.tgp_many_bodies">[docs]</a>
-	<span class="k">def</span><span class="w"> </span><span class="nf">tgp_many_bodies</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">bodies</span><span class="p">,</span> <span class="n">loc_sta</span><span class="p">,</span> <span class="n">dates</span><span class="p">,</span> <span class="n">nmax</span><span class="o">=</span><span class="mi">6</span><span class="p">,</span> <span class="n">time_array</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">body_signal</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">verbose</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">tgp_many_bodies</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">bodies</span><span class="p">,</span> <span class="n">loc_sta</span><span class="p">,</span> <span class="n">dates</span><span class="p">,</span> <span class="n">nmax</span><span class="o">=</span><span class="mi">6</span><span class="p">,</span> <span class="n">time_array</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">body_signal</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">verbose</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Calculate the combined Tide-Generating Potential (TGP) from multiple external bodies.</span>
 
-<span class="w">		</span><span class="sd">&#39;&#39;&#39;</span>
-<span class="sd">		This function calculates the TGP for a point on the target body with geographic coordinates (lon_s, lat_s) at a distance a from the COM, due to a list of external bodies.</span>
-<span class="sd">		</span>
-<span class="sd">		Input:</span>
-<span class="sd">		- loc_sta: Dictionary with the geographic coordinates of the station, including depth. For example: dict(lat=4.49, lon=-73.14, depth=0)</span>
-<span class="sd">		- dates: Dictionary with start, stop, and step dates. For example: dict(start=&quot;2025-01-01 00:00:00&quot;, stop=&quot;2025-01-29 00:00:00&quot;, step=&quot;1h&quot;)</span>
-<span class="sd">		- bodies: List of external bodies to consider, e.g. [&#39;Moon&#39;, &#39;Sun&#39;, &#39;Mercury&#39;]</span>
-<span class="sd">		- nmax: Maximum degree to consider in the tidal calculation.</span>
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        bodies : list of str</span>
+<span class="sd">            List of external body names (e.g., [&#39;Moon&#39;, &#39;Sun&#39;]).</span>
+<span class="sd">        loc_sta : dict</span>
+<span class="sd">            Coordinates of the station (lat, lon, depth).</span>
+<span class="sd">        dates : dict</span>
+<span class="sd">            Time range parameters (start, stop, step).</span>
+<span class="sd">        nmax : int, optional</span>
+<span class="sd">            Maximum spherical harmonic degree (default: 6).</span>
+<span class="sd">        time_array : bool, optional</span>
+<span class="sd">            If True, returns the time array along with the potential.</span>
+<span class="sd">        body_signal : bool, optional</span>
+<span class="sd">            If True, returns an array with individual signals for each body (shape: [time, bodies]).</span>
+<span class="sd">            If False, returns the summed total signal (default).</span>
+<span class="sd">        verbose : bool, optional</span>
+<span class="sd">            If True, prints progress messages.</span>
 
-<span class="sd">		Returns:</span>
-<span class="sd">		- Vtid: Array with the time series of V/g at the station for each body</span>
-<span class="sd">		- tjd: Times in JD of the ephemerides (and of V/g).</span>
-<span class="sd">		&#39;&#39;&#39;</span>
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        result : np.ndarray or tuple</span>
+<span class="sd">            - If `body_signal` is False: Total TGP time series V/g [m].</span>
+<span class="sd">            - If `body_signal` is True: Array of shape (N_times, N_bodies) with individual signals.</span>
+<span class="sd">            - If `time_array` is True: Returns (result, et_utc).</span>
 
-		<span class="c1">#Planetary ID for external bodies (outer planets here are really the barycenters)</span>
-		<span class="c1">#bodies_ids = {&#39;Moon&#39;:301, &#39;Sun&#39;:10, &#39;Mercury&#39;:199,</span>
-					<span class="c1">#&#39;Venus&#39;:299, &#39;Earth&#39;:399, &#39;Mars&#39;:4, &#39;Jupiter&#39;:5,</span>
-					<span class="c1">#&#39;Saturn&#39;:6, &#39;Uranus&#39;:7, &#39;Neptune&#39;:8}</span>
+<span class="sd">        Examples</span>
+<span class="sd">        --------</span>
+<span class="sd">        &gt;&gt;&gt; earth = Body(&#39;Earth&#39;)</span>
+<span class="sd">        &gt;&gt;&gt; bodies = [&#39;Moon&#39;, &#39;Sun&#39;]</span>
+<span class="sd">        &gt;&gt;&gt; tgp_total = earth.tgp_many_bodies(bodies, loc, dates)</span>
+<span class="sd">        &quot;&quot;&quot;</span>
 
-		<span class="c1">#Cordinates of the station</span>
-		<span class="n">phi_sta</span><span class="p">,</span> <span class="n">theta_sta</span><span class="p">,</span> <span class="n">a_sta</span> <span class="o">=</span> <span class="n">loc_func</span><span class="p">(</span><span class="n">loc_sta</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">a_ellips</span><span class="p">)</span>
-		<span class="bp">self</span><span class="o">.</span><span class="n">phi_sta</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">theta_sta</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">a_sta</span> <span class="o">=</span> <span class="n">phi_sta</span><span class="p">,</span> <span class="n">theta_sta</span><span class="p">,</span> <span class="n">a_sta</span>
+        <span class="c1">#Planetary ID for external bodies (outer planets here are really the barycenters)</span>
+        <span class="c1">#bodies_ids = {&#39;Moon&#39;:301, &#39;Sun&#39;:10, &#39;Mercury&#39;:199,</span>
+                    <span class="c1">#&#39;Venus&#39;:299, &#39;Earth&#39;:399, &#39;Mars&#39;:4, &#39;Jupiter&#39;:5,</span>
+                    <span class="c1">#&#39;Saturn&#39;:6, &#39;Uranus&#39;:7, &#39;Neptune&#39;:8}</span>
 
-		<span class="c1">#Array of UTC times in ET</span>
-		<span class="n">et_utc</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">array_et_utc</span><span class="p">(</span><span class="n">dates</span><span class="p">)</span>
-		<span class="bp">self</span><span class="o">.</span><span class="n">et_utc</span> <span class="o">=</span> <span class="n">et_utc</span>
+        <span class="c1">#Cordinates of the station</span>
+        <span class="n">phi_sta</span><span class="p">,</span> <span class="n">theta_sta</span><span class="p">,</span> <span class="n">a_sta</span> <span class="o">=</span> <span class="n">loc_func</span><span class="p">(</span><span class="n">loc_sta</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">a_ellips</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">phi_sta</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">theta_sta</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">a_sta</span> <span class="o">=</span> <span class="n">phi_sta</span><span class="p">,</span> <span class="n">theta_sta</span><span class="p">,</span> <span class="n">a_sta</span>
 
-		<span class="c1">#Maximum degree</span>
-		<span class="bp">self</span><span class="o">.</span><span class="n">nmax</span> <span class="o">=</span> <span class="n">nmax</span>
+        <span class="c1">#Array of UTC times in ET</span>
+        <span class="n">et_utc</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">array_et_utc</span><span class="p">(</span><span class="n">dates</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">et_utc</span> <span class="o">=</span> <span class="n">et_utc</span>
 
-		<span class="c1">#Array to store all V/g time series for all bodies</span>
-		<span class="n">V_g_tid_array</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="nb">len</span><span class="p">(</span><span class="n">et_utc</span><span class="p">),</span><span class="nb">len</span><span class="p">(</span><span class="n">bodies</span><span class="p">)))</span>
+        <span class="c1">#Maximum degree</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">nmax</span> <span class="o">=</span> <span class="n">nmax</span>
 
-		<span class="c1">#Loop over external bodies</span>
-		<span class="k">for</span> <span class="n">i</span><span class="p">,</span><span class="n">body</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">bodies</span><span class="p">):</span>
-			<span class="c1">#V/g time series for the body</span>
-			<span class="n">V_g_tid_body</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">tgp_one_body</span><span class="p">(</span><span class="n">body</span><span class="p">,)</span>
-			<span class="n">V_g_tid_array</span><span class="p">[:,</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="n">V_g_tid_body</span>
-			<span class="k">if</span> <span class="n">verbose</span><span class="p">:</span> <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="n">body</span><span class="si">}</span><span class="s1"> contribution calculated!&#39;</span><span class="p">)</span>
-		
-		<span class="k">if</span> <span class="n">body_signal</span> <span class="o">==</span> <span class="kc">True</span><span class="p">:</span>
-			<span class="k">if</span> <span class="n">time_array</span><span class="p">:</span>
-				<span class="k">return</span> <span class="n">V_g_tid_array</span><span class="p">,</span> <span class="n">et_utc</span>
-			<span class="k">else</span><span class="p">:</span>
-				<span class="k">return</span> <span class="n">V_g_tid_array</span>
-		<span class="k">else</span><span class="p">:</span>
-			<span class="c1">#Total V/g summing the contributions of all bodies</span>
-			<span class="n">V_g_tid_total</span> <span class="o">=</span> <span class="n">V_g_tid_array</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
-			<span class="k">if</span> <span class="n">time_array</span><span class="p">:</span>
-				<span class="k">return</span> <span class="n">V_g_tid_total</span><span class="p">,</span> <span class="n">et_utc</span>
-			<span class="k">else</span><span class="p">:</span>
-				<span class="k">return</span> <span class="n">V_g_tid_total</span></div>
+        <span class="c1">#Array to store all V/g time series for all bodies</span>
+        <span class="n">V_g_tid_array</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="nb">len</span><span class="p">(</span><span class="n">et_utc</span><span class="p">),</span><span class="nb">len</span><span class="p">(</span><span class="n">bodies</span><span class="p">)))</span>
+
+        <span class="c1">#Loop over external bodies</span>
+        <span class="k">for</span> <span class="n">i</span><span class="p">,</span><span class="n">body</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">bodies</span><span class="p">):</span>
+            <span class="c1">#V/g time series for the body</span>
+            <span class="n">V_g_tid_body</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">tgp_one_body</span><span class="p">(</span><span class="n">body</span><span class="p">,)</span>
+            <span class="n">V_g_tid_array</span><span class="p">[:,</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="n">V_g_tid_body</span>
+            <span class="k">if</span> <span class="n">verbose</span><span class="p">:</span> <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="n">body</span><span class="si">}</span><span class="s1"> contribution calculated!&#39;</span><span class="p">)</span>
+        
+        <span class="k">if</span> <span class="n">body_signal</span> <span class="o">==</span> <span class="kc">True</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">time_array</span><span class="p">:</span>
+                <span class="k">return</span> <span class="n">V_g_tid_array</span><span class="p">,</span> <span class="n">et_utc</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="k">return</span> <span class="n">V_g_tid_array</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="c1">#Total V/g summing the contributions of all bodies</span>
+            <span class="n">V_g_tid_total</span> <span class="o">=</span> <span class="n">V_g_tid_array</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">time_array</span><span class="p">:</span>
+                <span class="k">return</span> <span class="n">V_g_tid_total</span><span class="p">,</span> <span class="n">et_utc</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="k">return</span> <span class="n">V_g_tid_total</span></div>
 
 
 <div class="viewcode-block" id="Body.plot_one_signal">
 <a class="viewcode-back" href="../../tides.html#tspice.tides.Body.plot_one_signal">[docs]</a>
-	<span class="k">def</span><span class="w"> </span><span class="nf">plot_one_signal</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">et</span><span class="p">,</span> <span class="n">tgp</span><span class="p">,</span> <span class="n">loc</span><span class="p">,</span> <span class="n">colors</span><span class="p">,</span> <span class="n">label</span><span class="o">=</span><span class="sa">r</span><span class="s1">&#39;V_{\text</span><span class="si">{tid}</span><span class="s1">}(t)/g&#39;</span><span class="p">,</span> <span class="n">units</span><span class="o">=</span><span class="s1">&#39;cm&#39;</span><span class="p">,</span> <span class="n">mean_value</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">savepath</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
-<span class="w">		</span><span class="sd">&#39;&#39;&#39;</span>
-<span class="sd">		Plot a single tidal signal over time.</span>
-<span class="sd">		</span>
-<span class="sd">		Input:</span>
-<span class="sd">		- et: Array of ephemeris times.</span>
-<span class="sd">		- tgp: Tidal signal array.</span>
-<span class="sd">		- loc: Dictionary with location (lat, lon, depth).</span>
-<span class="sd">		- colors: List of colors for the plot.</span>
-<span class="sd">		- label: Label for y-axis (default: r&#39;V_{\text{tid}}(t)/g&#39;).</span>
-<span class="sd">		- units: Units for the signal (default: &#39;cm&#39;).</span>
-<span class="sd">		- mean_value: Whether to plot mean value line (default: False).</span>
-<span class="sd">		- savepath: Path to save the figure (default: None).</span>
-<span class="sd">		&#39;&#39;&#39;</span>
-		<span class="n">utc_times</span> <span class="o">=</span> <span class="n">et_to_utc_string</span><span class="p">(</span><span class="n">et</span><span class="p">)</span>
-		<span class="n">ticks</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">linspace</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="n">utc_times</span><span class="p">)</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="mi">6</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="nb">int</span><span class="p">)</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">plot_one_signal</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">et</span><span class="p">,</span> <span class="n">tgp</span><span class="p">,</span> <span class="n">loc</span><span class="p">,</span> <span class="n">colors</span><span class="p">,</span> <span class="n">label</span><span class="o">=</span><span class="sa">r</span><span class="s1">&#39;V_{\text</span><span class="si">{tid}</span><span class="s1">}(t)/g&#39;</span><span class="p">,</span> <span class="n">units</span><span class="o">=</span><span class="s1">&#39;cm&#39;</span><span class="p">,</span> <span class="n">mean_value</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">savepath</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Plot a single tidal signal time series.</span>
 
-		<span class="n">fig</span><span class="p">,</span> <span class="n">ax</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">subplots</span><span class="p">(</span><span class="n">figsize</span><span class="o">=</span><span class="p">(</span><span class="mi">8</span><span class="p">,</span><span class="mi">4</span><span class="p">))</span>
-		<span class="n">ax</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">utc_times</span><span class="p">,</span> <span class="n">tgp</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="n">colors</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        et : np.ndarray</span>
+<span class="sd">            Array of Ephemeris Times.</span>
+<span class="sd">        tgp : np.ndarray</span>
+<span class="sd">            Tidal potential signal array.</span>
+<span class="sd">        loc : dict</span>
+<span class="sd">            Location dictionary (for plot title).</span>
+<span class="sd">        colors : list</span>
+<span class="sd">            List of colors to use (e.g., [&#39;blue&#39;, &#39;red&#39;]). First color for signal, second for mean line.</span>
+<span class="sd">        label : str, optional</span>
+<span class="sd">            Y-axis label (LaTeX formatted). Default: r&#39;V_{\text{tid}}(t)/g&#39;.</span>
+<span class="sd">        units : str, optional</span>
+<span class="sd">            Units for the Y-axis label. Default: &#39;cm&#39;.</span>
+<span class="sd">        mean_value : bool, optional</span>
+<span class="sd">            If True, plots a horizontal line at the mean value.</span>
+<span class="sd">        savepath : str, optional</span>
+<span class="sd">            File path to save the plot image. If None, the plot is not saved.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">utc_times</span> <span class="o">=</span> <span class="n">et_to_utc_string</span><span class="p">(</span><span class="n">et</span><span class="p">)</span>
+        <span class="n">ticks</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">linspace</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="n">utc_times</span><span class="p">)</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="mi">6</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="nb">int</span><span class="p">)</span>
 
-		<span class="n">ax</span><span class="o">.</span><span class="n">set_xlabel</span><span class="p">(</span><span class="s1">&#39;Time [UTC]&#39;</span><span class="p">,</span> <span class="n">fontsize</span><span class="o">=</span><span class="mi">12</span><span class="p">)</span>
-		<span class="n">ax</span><span class="o">.</span><span class="n">set_ylabel</span><span class="p">(</span><span class="sa">r</span><span class="s1">&#39;$&#39;</span><span class="o">+</span><span class="n">label</span><span class="o">+</span><span class="s1">&#39;$ [&#39;</span><span class="o">+</span><span class="n">units</span><span class="o">+</span><span class="s1">&#39;]&#39;</span><span class="p">,</span> <span class="n">fontsize</span><span class="o">=</span><span class="mi">12</span><span class="p">)</span>
-		<span class="n">ax</span><span class="o">.</span><span class="n">set_title</span><span class="p">(</span><span class="s1">&#39;Lon $= </span><span class="si">%.2f</span><span class="s1">$°; Lat $= </span><span class="si">%.2f</span><span class="s1">$°; Depth $= </span><span class="si">%.2f</span><span class="s1">$ km&#39;</span><span class="o">%</span><span class="p">(</span><span class="n">loc</span><span class="p">[</span><span class="s1">&#39;lon&#39;</span><span class="p">],</span> <span class="n">loc</span><span class="p">[</span><span class="s1">&#39;lat&#39;</span><span class="p">],</span> <span class="n">loc</span><span class="p">[</span><span class="s1">&#39;depth&#39;</span><span class="p">]),</span> <span class="n">fontsize</span><span class="o">=</span><span class="mi">12</span><span class="p">)</span>
-		<span class="n">ax</span><span class="o">.</span><span class="n">set_xticks</span><span class="p">([</span><span class="n">utc_times</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">ticks</span><span class="p">])</span>
-		<span class="n">ax</span><span class="o">.</span><span class="n">xaxis</span><span class="o">.</span><span class="n">set_major_formatter</span><span class="p">(</span><span class="n">mdates</span><span class="o">.</span><span class="n">DateFormatter</span><span class="p">(</span><span class="s1">&#39;%Y-%m-</span><span class="si">%d</span><span class="s1">&#39;</span><span class="p">))</span>
-		<span class="n">ax</span><span class="o">.</span><span class="n">xaxis</span><span class="o">.</span><span class="n">set_tick_params</span><span class="p">(</span><span class="n">direction</span><span class="o">=</span><span class="s1">&#39;in&#39;</span><span class="p">,</span> <span class="n">which</span><span class="o">=</span><span class="s1">&#39;both&#39;</span><span class="p">,</span> <span class="n">labelsize</span><span class="o">=</span><span class="mi">12</span><span class="p">)</span>
-		<span class="n">ax</span><span class="o">.</span><span class="n">yaxis</span><span class="o">.</span><span class="n">set_tick_params</span><span class="p">(</span><span class="n">direction</span><span class="o">=</span><span class="s1">&#39;in&#39;</span><span class="p">,</span> <span class="n">which</span><span class="o">=</span><span class="s1">&#39;both&#39;</span><span class="p">,</span> <span class="n">labelsize</span><span class="o">=</span><span class="mi">12</span><span class="p">)</span>
-		<span class="n">ax</span><span class="o">.</span><span class="n">grid</span><span class="p">(</span><span class="n">alpha</span><span class="o">=</span><span class="mf">0.2</span><span class="p">)</span>
-		<span class="n">ax</span><span class="o">.</span><span class="n">margins</span><span class="p">(</span><span class="n">x</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+        <span class="n">fig</span><span class="p">,</span> <span class="n">ax</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">subplots</span><span class="p">(</span><span class="n">figsize</span><span class="o">=</span><span class="p">(</span><span class="mi">8</span><span class="p">,</span><span class="mi">4</span><span class="p">))</span>
+        <span class="n">ax</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">utc_times</span><span class="p">,</span> <span class="n">tgp</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="n">colors</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
 
-		<span class="k">if</span> <span class="n">mean_value</span><span class="p">:</span>
-			<span class="n">tgp_mean</span> <span class="o">=</span> <span class="n">tgp</span><span class="o">.</span><span class="n">mean</span><span class="p">()</span>
-			<span class="n">ax</span><span class="o">.</span><span class="n">hlines</span><span class="p">(</span><span class="n">tgp_mean</span><span class="p">,</span> <span class="n">utc_times</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">utc_times</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">],</span> <span class="n">color</span><span class="o">=</span><span class="n">colors</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="n">label</span><span class="o">=</span><span class="sa">r</span><span class="s1">&#39;Mean$=</span><span class="si">%.2f</span><span class="s1">$ </span><span class="si">%s</span><span class="s1">&#39;</span><span class="o">%</span><span class="p">(</span><span class="n">tgp_mean</span><span class="p">,</span> <span class="n">units</span><span class="p">))</span>
-			<span class="n">ax</span><span class="o">.</span><span class="n">legend</span><span class="p">(</span><span class="n">fontsize</span><span class="o">=</span><span class="mi">12</span><span class="p">,</span> <span class="n">loc</span><span class="o">=</span><span class="s1">&#39;upper right&#39;</span><span class="p">)</span>
+        <span class="n">ax</span><span class="o">.</span><span class="n">set_xlabel</span><span class="p">(</span><span class="s1">&#39;Time [UTC]&#39;</span><span class="p">,</span> <span class="n">fontsize</span><span class="o">=</span><span class="mi">12</span><span class="p">)</span>
+        <span class="n">ax</span><span class="o">.</span><span class="n">set_ylabel</span><span class="p">(</span><span class="sa">r</span><span class="s1">&#39;$&#39;</span><span class="o">+</span><span class="n">label</span><span class="o">+</span><span class="s1">&#39;$ [&#39;</span><span class="o">+</span><span class="n">units</span><span class="o">+</span><span class="s1">&#39;]&#39;</span><span class="p">,</span> <span class="n">fontsize</span><span class="o">=</span><span class="mi">12</span><span class="p">)</span>
+        <span class="n">ax</span><span class="o">.</span><span class="n">set_title</span><span class="p">(</span><span class="s1">&#39;Lon $= </span><span class="si">%.2f</span><span class="s1">$°; Lat $= </span><span class="si">%.2f</span><span class="s1">$°; Depth $= </span><span class="si">%.2f</span><span class="s1">$ km&#39;</span><span class="o">%</span><span class="p">(</span><span class="n">loc</span><span class="p">[</span><span class="s1">&#39;lon&#39;</span><span class="p">],</span> <span class="n">loc</span><span class="p">[</span><span class="s1">&#39;lat&#39;</span><span class="p">],</span> <span class="n">loc</span><span class="p">[</span><span class="s1">&#39;depth&#39;</span><span class="p">]),</span> <span class="n">fontsize</span><span class="o">=</span><span class="mi">12</span><span class="p">)</span>
+        <span class="n">ax</span><span class="o">.</span><span class="n">set_xticks</span><span class="p">([</span><span class="n">utc_times</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">ticks</span><span class="p">])</span>
+        <span class="n">ax</span><span class="o">.</span><span class="n">xaxis</span><span class="o">.</span><span class="n">set_major_formatter</span><span class="p">(</span><span class="n">mdates</span><span class="o">.</span><span class="n">DateFormatter</span><span class="p">(</span><span class="s1">&#39;%Y-%m-</span><span class="si">%d</span><span class="s1">&#39;</span><span class="p">))</span>
+        <span class="n">ax</span><span class="o">.</span><span class="n">xaxis</span><span class="o">.</span><span class="n">set_tick_params</span><span class="p">(</span><span class="n">direction</span><span class="o">=</span><span class="s1">&#39;in&#39;</span><span class="p">,</span> <span class="n">which</span><span class="o">=</span><span class="s1">&#39;both&#39;</span><span class="p">,</span> <span class="n">labelsize</span><span class="o">=</span><span class="mi">12</span><span class="p">)</span>
+        <span class="n">ax</span><span class="o">.</span><span class="n">yaxis</span><span class="o">.</span><span class="n">set_tick_params</span><span class="p">(</span><span class="n">direction</span><span class="o">=</span><span class="s1">&#39;in&#39;</span><span class="p">,</span> <span class="n">which</span><span class="o">=</span><span class="s1">&#39;both&#39;</span><span class="p">,</span> <span class="n">labelsize</span><span class="o">=</span><span class="mi">12</span><span class="p">)</span>
+        <span class="n">ax</span><span class="o">.</span><span class="n">grid</span><span class="p">(</span><span class="n">alpha</span><span class="o">=</span><span class="mf">0.2</span><span class="p">)</span>
+        <span class="n">ax</span><span class="o">.</span><span class="n">margins</span><span class="p">(</span><span class="n">x</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
 
-		<span class="n">fig</span><span class="o">.</span><span class="n">tight_layout</span><span class="p">()</span>
+        <span class="k">if</span> <span class="n">mean_value</span><span class="p">:</span>
+            <span class="n">tgp_mean</span> <span class="o">=</span> <span class="n">tgp</span><span class="o">.</span><span class="n">mean</span><span class="p">()</span>
+            <span class="n">ax</span><span class="o">.</span><span class="n">hlines</span><span class="p">(</span><span class="n">tgp_mean</span><span class="p">,</span> <span class="n">utc_times</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">utc_times</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">],</span> <span class="n">color</span><span class="o">=</span><span class="n">colors</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="n">label</span><span class="o">=</span><span class="sa">r</span><span class="s1">&#39;Mean$=</span><span class="si">%.2f</span><span class="s1">$ </span><span class="si">%s</span><span class="s1">&#39;</span><span class="o">%</span><span class="p">(</span><span class="n">tgp_mean</span><span class="p">,</span> <span class="n">units</span><span class="p">))</span>
+            <span class="n">ax</span><span class="o">.</span><span class="n">legend</span><span class="p">(</span><span class="n">fontsize</span><span class="o">=</span><span class="mi">12</span><span class="p">,</span> <span class="n">loc</span><span class="o">=</span><span class="s1">&#39;upper right&#39;</span><span class="p">)</span>
 
-		<span class="k">if</span> <span class="n">savepath</span><span class="p">:</span>
-			<span class="n">fig</span><span class="o">.</span><span class="n">savefig</span><span class="p">(</span><span class="n">savepath</span><span class="p">,</span> <span class="n">bbox_inches</span><span class="o">=</span><span class="s1">&#39;tight&#39;</span><span class="p">,</span> <span class="n">dpi</span><span class="o">=</span><span class="mi">300</span><span class="p">)</span></div>
+        <span class="n">fig</span><span class="o">.</span><span class="n">tight_layout</span><span class="p">()</span>
+
+        <span class="k">if</span> <span class="n">savepath</span><span class="p">:</span>
+            <span class="n">fig</span><span class="o">.</span><span class="n">savefig</span><span class="p">(</span><span class="n">savepath</span><span class="p">,</span> <span class="n">bbox_inches</span><span class="o">=</span><span class="s1">&#39;tight&#39;</span><span class="p">,</span> <span class="n">dpi</span><span class="o">=</span><span class="mi">300</span><span class="p">)</span></div>
 
 
 <div class="viewcode-block" id="Body.plot_many_signal">
 <a class="viewcode-back" href="../../tides.html#tspice.tides.Body.plot_many_signal">[docs]</a>
-	<span class="k">def</span><span class="w"> </span><span class="nf">plot_many_signal</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">et</span><span class="p">,</span> <span class="n">tgps</span><span class="p">,</span> <span class="n">loc</span><span class="p">,</span> <span class="n">colors</span><span class="p">,</span> <span class="n">y_label</span><span class="o">=</span><span class="sa">r</span><span class="s1">&#39;V(t)/g&#39;</span><span class="p">,</span> <span class="n">signal_labels</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">units</span><span class="o">=</span><span class="s1">&#39;cm&#39;</span><span class="p">,</span> <span class="n">savepath</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
-<span class="w">		</span><span class="sd">&#39;&#39;&#39;</span>
-<span class="sd">		Plot multiple tidal signals on the same plot.</span>
-<span class="sd">		</span>
-<span class="sd">		Input:</span>
-<span class="sd">		- et: Array of ephemeris times.</span>
-<span class="sd">		- tgps: List of tidal signal arrays.</span>
-<span class="sd">		- loc: Dictionary with location (lat, lon, depth).</span>
-<span class="sd">		- colors: List of colors for each signal.</span>
-<span class="sd">		- y_label: Label for y-axis (default: r&#39;V(t)/g&#39;).</span>
-<span class="sd">		- signal_labels: List of labels for each signal (default: None).</span>
-<span class="sd">		- units: Units for the signals (default: &#39;cm&#39;).</span>
-<span class="sd">		- savepath: Path to save the figure (default: None).</span>
-<span class="sd">		&#39;&#39;&#39;</span>
-		<span class="n">utc_times</span> <span class="o">=</span> <span class="n">et_to_utc_string</span><span class="p">(</span><span class="n">et</span><span class="p">)</span>
-		<span class="n">ticks</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">linspace</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="n">utc_times</span><span class="p">)</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="mi">6</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="nb">int</span><span class="p">)</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">plot_many_signal</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">et</span><span class="p">,</span> <span class="n">tgps</span><span class="p">,</span> <span class="n">loc</span><span class="p">,</span> <span class="n">colors</span><span class="p">,</span> <span class="n">y_label</span><span class="o">=</span><span class="sa">r</span><span class="s1">&#39;V(t)/g&#39;</span><span class="p">,</span> <span class="n">signal_labels</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">units</span><span class="o">=</span><span class="s1">&#39;cm&#39;</span><span class="p">,</span> <span class="n">savepath</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Plot multiple tidal signals on the same figure.</span>
 
-		<span class="n">fig</span><span class="p">,</span> <span class="n">ax</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">subplots</span><span class="p">(</span><span class="n">figsize</span><span class="o">=</span><span class="p">(</span><span class="mi">8</span><span class="p">,</span><span class="mi">4</span><span class="p">))</span>
-		<span class="k">for</span> <span class="n">i</span><span class="p">,</span><span class="n">signal</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">tgps</span><span class="p">):</span>
-			<span class="n">ax</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">utc_times</span><span class="p">,</span> <span class="n">signal</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="n">colors</span><span class="p">[</span><span class="n">i</span><span class="p">],</span> <span class="n">label</span><span class="o">=</span><span class="n">signal_labels</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="k">if</span> <span class="n">signal_labels</span> <span class="k">else</span> <span class="kc">None</span><span class="p">)</span>
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        et : np.ndarray</span>
+<span class="sd">            Array of Ephemeris Times.</span>
+<span class="sd">        tgps : list of np.ndarray</span>
+<span class="sd">            List of tidal signal arrays to plot (one per body/component).</span>
+<span class="sd">        loc : dict</span>
+<span class="sd">            Location dictionary (for plot title).</span>
+<span class="sd">        colors : list</span>
+<span class="sd">            List of colors for each signal trace.</span>
+<span class="sd">        y_label : str, optional</span>
+<span class="sd">            Y-axis label. Default: r&#39;V(t)/g&#39;.</span>
+<span class="sd">        signal_labels : list of str, optional</span>
+<span class="sd">            Labels for the legend corresponding to each signal.</span>
+<span class="sd">        units : str, optional</span>
+<span class="sd">            Units for the Y-axis label. Default: &#39;cm&#39;.</span>
+<span class="sd">        savepath : str, optional</span>
+<span class="sd">            File path to save the plot image.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">utc_times</span> <span class="o">=</span> <span class="n">et_to_utc_string</span><span class="p">(</span><span class="n">et</span><span class="p">)</span>
+        <span class="n">ticks</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">linspace</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="n">utc_times</span><span class="p">)</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="mi">6</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="nb">int</span><span class="p">)</span>
 
-		<span class="n">ax</span><span class="o">.</span><span class="n">set_xlabel</span><span class="p">(</span><span class="s1">&#39;Time [UTC]&#39;</span><span class="p">,</span> <span class="n">fontsize</span><span class="o">=</span><span class="mi">12</span><span class="p">)</span>
-		<span class="n">ax</span><span class="o">.</span><span class="n">set_ylabel</span><span class="p">(</span><span class="sa">r</span><span class="s1">&#39;$&#39;</span><span class="o">+</span><span class="n">y_label</span><span class="o">+</span><span class="s1">&#39;$ [&#39;</span><span class="o">+</span><span class="n">units</span><span class="o">+</span><span class="s1">&#39;]&#39;</span><span class="p">,</span> <span class="n">fontsize</span><span class="o">=</span><span class="mi">12</span><span class="p">)</span>
-		<span class="n">ax</span><span class="o">.</span><span class="n">set_title</span><span class="p">(</span><span class="s1">&#39;Lon $= </span><span class="si">%.2f</span><span class="s1">$°; Lat $= </span><span class="si">%.2f</span><span class="s1">$°; Depth $= </span><span class="si">%.2f</span><span class="s1">$ km&#39;</span><span class="o">%</span><span class="p">(</span><span class="n">loc</span><span class="p">[</span><span class="s1">&#39;lon&#39;</span><span class="p">],</span> <span class="n">loc</span><span class="p">[</span><span class="s1">&#39;lat&#39;</span><span class="p">],</span> <span class="n">loc</span><span class="p">[</span><span class="s1">&#39;depth&#39;</span><span class="p">]),</span> <span class="n">fontsize</span><span class="o">=</span><span class="mi">12</span><span class="p">)</span>
-		<span class="n">ax</span><span class="o">.</span><span class="n">set_xticks</span><span class="p">([</span><span class="n">utc_times</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">ticks</span><span class="p">])</span>
-		<span class="n">ax</span><span class="o">.</span><span class="n">xaxis</span><span class="o">.</span><span class="n">set_major_formatter</span><span class="p">(</span><span class="n">mdates</span><span class="o">.</span><span class="n">DateFormatter</span><span class="p">(</span><span class="s1">&#39;%Y-%m-</span><span class="si">%d</span><span class="s1">&#39;</span><span class="p">))</span>
-		<span class="n">ax</span><span class="o">.</span><span class="n">xaxis</span><span class="o">.</span><span class="n">set_tick_params</span><span class="p">(</span><span class="n">direction</span><span class="o">=</span><span class="s1">&#39;in&#39;</span><span class="p">,</span> <span class="n">which</span><span class="o">=</span><span class="s1">&#39;both&#39;</span><span class="p">,</span> <span class="n">labelsize</span><span class="o">=</span><span class="mi">12</span><span class="p">)</span>
-		<span class="n">ax</span><span class="o">.</span><span class="n">yaxis</span><span class="o">.</span><span class="n">set_tick_params</span><span class="p">(</span><span class="n">direction</span><span class="o">=</span><span class="s1">&#39;in&#39;</span><span class="p">,</span> <span class="n">which</span><span class="o">=</span><span class="s1">&#39;both&#39;</span><span class="p">,</span> <span class="n">labelsize</span><span class="o">=</span><span class="mi">12</span><span class="p">)</span>
-		<span class="n">ax</span><span class="o">.</span><span class="n">grid</span><span class="p">(</span><span class="n">alpha</span><span class="o">=</span><span class="mf">0.2</span><span class="p">)</span>
-		<span class="n">ax</span><span class="o">.</span><span class="n">margins</span><span class="p">(</span><span class="n">x</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
-		<span class="k">if</span> <span class="n">signal_labels</span><span class="p">:</span>
-			<span class="n">ax</span><span class="o">.</span><span class="n">legend</span><span class="p">(</span><span class="n">fontsize</span><span class="o">=</span><span class="mi">12</span><span class="p">,</span> <span class="n">loc</span><span class="o">=</span><span class="s1">&#39;best&#39;</span><span class="p">)</span>
+        <span class="n">fig</span><span class="p">,</span> <span class="n">ax</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">subplots</span><span class="p">(</span><span class="n">figsize</span><span class="o">=</span><span class="p">(</span><span class="mi">8</span><span class="p">,</span><span class="mi">4</span><span class="p">))</span>
+        <span class="k">for</span> <span class="n">i</span><span class="p">,</span><span class="n">signal</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">tgps</span><span class="p">):</span>
+            <span class="n">ax</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">utc_times</span><span class="p">,</span> <span class="n">signal</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="n">colors</span><span class="p">[</span><span class="n">i</span><span class="p">],</span> <span class="n">label</span><span class="o">=</span><span class="n">signal_labels</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="k">if</span> <span class="n">signal_labels</span> <span class="k">else</span> <span class="kc">None</span><span class="p">)</span>
 
-		<span class="n">fig</span><span class="o">.</span><span class="n">tight_layout</span><span class="p">()</span>
+        <span class="n">ax</span><span class="o">.</span><span class="n">set_xlabel</span><span class="p">(</span><span class="s1">&#39;Time [UTC]&#39;</span><span class="p">,</span> <span class="n">fontsize</span><span class="o">=</span><span class="mi">12</span><span class="p">)</span>
+        <span class="n">ax</span><span class="o">.</span><span class="n">set_ylabel</span><span class="p">(</span><span class="sa">r</span><span class="s1">&#39;$&#39;</span><span class="o">+</span><span class="n">y_label</span><span class="o">+</span><span class="s1">&#39;$ [&#39;</span><span class="o">+</span><span class="n">units</span><span class="o">+</span><span class="s1">&#39;]&#39;</span><span class="p">,</span> <span class="n">fontsize</span><span class="o">=</span><span class="mi">12</span><span class="p">)</span>
+        <span class="n">ax</span><span class="o">.</span><span class="n">set_title</span><span class="p">(</span><span class="s1">&#39;Lon $= </span><span class="si">%.2f</span><span class="s1">$°; Lat $= </span><span class="si">%.2f</span><span class="s1">$°; Depth $= </span><span class="si">%.2f</span><span class="s1">$ km&#39;</span><span class="o">%</span><span class="p">(</span><span class="n">loc</span><span class="p">[</span><span class="s1">&#39;lon&#39;</span><span class="p">],</span> <span class="n">loc</span><span class="p">[</span><span class="s1">&#39;lat&#39;</span><span class="p">],</span> <span class="n">loc</span><span class="p">[</span><span class="s1">&#39;depth&#39;</span><span class="p">]),</span> <span class="n">fontsize</span><span class="o">=</span><span class="mi">12</span><span class="p">)</span>
+        <span class="n">ax</span><span class="o">.</span><span class="n">set_xticks</span><span class="p">([</span><span class="n">utc_times</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">ticks</span><span class="p">])</span>
+        <span class="n">ax</span><span class="o">.</span><span class="n">xaxis</span><span class="o">.</span><span class="n">set_major_formatter</span><span class="p">(</span><span class="n">mdates</span><span class="o">.</span><span class="n">DateFormatter</span><span class="p">(</span><span class="s1">&#39;%Y-%m-</span><span class="si">%d</span><span class="s1">&#39;</span><span class="p">))</span>
+        <span class="n">ax</span><span class="o">.</span><span class="n">xaxis</span><span class="o">.</span><span class="n">set_tick_params</span><span class="p">(</span><span class="n">direction</span><span class="o">=</span><span class="s1">&#39;in&#39;</span><span class="p">,</span> <span class="n">which</span><span class="o">=</span><span class="s1">&#39;both&#39;</span><span class="p">,</span> <span class="n">labelsize</span><span class="o">=</span><span class="mi">12</span><span class="p">)</span>
+        <span class="n">ax</span><span class="o">.</span><span class="n">yaxis</span><span class="o">.</span><span class="n">set_tick_params</span><span class="p">(</span><span class="n">direction</span><span class="o">=</span><span class="s1">&#39;in&#39;</span><span class="p">,</span> <span class="n">which</span><span class="o">=</span><span class="s1">&#39;both&#39;</span><span class="p">,</span> <span class="n">labelsize</span><span class="o">=</span><span class="mi">12</span><span class="p">)</span>
+        <span class="n">ax</span><span class="o">.</span><span class="n">grid</span><span class="p">(</span><span class="n">alpha</span><span class="o">=</span><span class="mf">0.2</span><span class="p">)</span>
+        <span class="n">ax</span><span class="o">.</span><span class="n">margins</span><span class="p">(</span><span class="n">x</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">signal_labels</span><span class="p">:</span>
+            <span class="n">ax</span><span class="o">.</span><span class="n">legend</span><span class="p">(</span><span class="n">fontsize</span><span class="o">=</span><span class="mi">12</span><span class="p">,</span> <span class="n">loc</span><span class="o">=</span><span class="s1">&#39;best&#39;</span><span class="p">)</span>
 
-		<span class="k">if</span> <span class="n">savepath</span><span class="p">:</span>
-			<span class="n">fig</span><span class="o">.</span><span class="n">savefig</span><span class="p">(</span><span class="n">savepath</span><span class="p">,</span> <span class="n">bbox_inches</span><span class="o">=</span><span class="s1">&#39;tight&#39;</span><span class="p">,</span> <span class="n">dpi</span><span class="o">=</span><span class="mi">300</span><span class="p">)</span></div>
+        <span class="n">fig</span><span class="o">.</span><span class="n">tight_layout</span><span class="p">()</span>
+
+        <span class="k">if</span> <span class="n">savepath</span><span class="p">:</span>
+            <span class="n">fig</span><span class="o">.</span><span class="n">savefig</span><span class="p">(</span><span class="n">savepath</span><span class="p">,</span> <span class="n">bbox_inches</span><span class="o">=</span><span class="s1">&#39;tight&#39;</span><span class="p">,</span> <span class="n">dpi</span><span class="o">=</span><span class="mi">300</span><span class="p">)</span></div>
 </div>
 
 
@@ -545,41 +639,48 @@
         <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">name</span><span class="p">)</span>
         <span class="c1">#GM_main, a_ellips, a_main, f_main, g_ref</span>
 
+
 <div class="viewcode-block" id="BodyResponse.scale_constants">
 <a class="viewcode-back" href="../../tides.html#tspice.tides.BodyResponse.scale_constants">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">scale_constants</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">verbose</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Calculate characteristic scales for adimensionalization of internal solution variables.</span>
 
-<span class="w">        </span><span class="sd">&#39;&#39;&#39;</span>
-<span class="sd">        Function to calculate characteristic scales for adimensionalization of the internal solutions yis.</span>
+<span class="sd">        This method computes scaling factors based on the body&#39;s physical properties</span>
+<span class="sd">        to facilitate numerical integration.</span>
 
-<span class="sd">        Inputs:</span>
-<span class="sd">        - verbose: Boolean to print the characteristic scales (default: True)</span>
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        verbose : bool, optional</span>
+<span class="sd">            If True, prints the calculated characteristic scales to stdout (default: True).</span>
 
-<span class="sd">        Outputs:</span>
-<span class="sd">        - L: Length scale [m]</span>
-<span class="sd">        - M: Mass scale [kg]</span>
-<span class="sd">        - RHO: Density scale [kg/m^3]</span>
-<span class="sd">        - P: Pressure/Elasticity scale [Pa]</span>
-<span class="sd">        - V: Velocity scale [m/s]</span>
-<span class="sd">        - T: Time scale [s]</span>
-<span class="sd">        - OMEGA: Angular frequency scale [rad/s]</span>
-<span class="sd">        - Gad: Gravity scale [m/s^2]</span>
-
-<span class="sd">        &#39;&#39;&#39;</span>
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        None</span>
+<span class="sd">            Scales are stored as class attributes:</span>
+<span class="sd">            - self.L     : Length scale [m]</span>
+<span class="sd">            - self.M     : Mass scale [kg]</span>
+<span class="sd">            - self.RHO   : Density scale [kg/m^3]</span>
+<span class="sd">            - self.P     : Pressure scale [Pa]</span>
+<span class="sd">            - self.V     : Velocity scale [m/s]</span>
+<span class="sd">            - self.T     : Time scale [s]</span>
+<span class="sd">            - self.OMEGA : Angular frequency scale [rad/s]</span>
+<span class="sd">            - self.Gad   : Gravity scale [m/s^2]</span>
+<span class="sd">        &quot;&quot;&quot;</span>
 
         <span class="c1">#Scale constants</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">G</span> <span class="o">=</span> <span class="mf">6.67430e-11</span>	<span class="c1">#Gravitational constant in [m^3/kg/s^2]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">G</span> <span class="o">=</span> <span class="mf">6.67430e-11</span>    <span class="c1">#Gravitational constant in [m^3/kg/s^2]</span>
 
         <span class="c1">#[PENDING] Check this, I&#39;m making int(self.a_main) for the radius to be the same as the PREM model</span>
         <span class="c1">#In the future we should guarantee that the planetary model has the same radius as the SPICE mean radius</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">L</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">a_p</span><span class="p">)</span><span class="o">*</span><span class="mf">1e3</span>	<span class="c1">#Length in [m] </span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">L</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">a_p</span><span class="p">)</span><span class="o">*</span><span class="mf">1e3</span>  <span class="c1">#Length in [m] </span>
 
-        <span class="bp">self</span><span class="o">.</span><span class="n">M</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">GM</span><span class="o">*</span><span class="mf">1e9</span><span class="o">/</span><span class="bp">self</span><span class="o">.</span><span class="n">G</span>	<span class="c1">#Mass in [kg]</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">RHO</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">M</span><span class="o">/</span><span class="bp">self</span><span class="o">.</span><span class="n">L</span><span class="o">**</span><span class="mi">3</span>	<span class="c1">#kg/m^3</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">P</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">G</span><span class="o">*</span><span class="bp">self</span><span class="o">.</span><span class="n">M</span><span class="o">**</span><span class="mi">2</span><span class="o">/</span><span class="bp">self</span><span class="o">.</span><span class="n">L</span><span class="o">**</span><span class="mi">4</span>	<span class="c1">#Pressure/Elasticity modules in [Pa]</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">V</span> <span class="o">=</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">P</span><span class="o">/</span><span class="bp">self</span><span class="o">.</span><span class="n">RHO</span><span class="p">)</span><span class="o">**</span><span class="mf">0.5</span>	<span class="c1">#Velocity in [m/s]</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">T</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">L</span><span class="o">/</span><span class="bp">self</span><span class="o">.</span><span class="n">V</span>	<span class="c1">#Time in [s]</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">OMEGA</span> <span class="o">=</span> <span class="mi">1</span><span class="o">/</span><span class="bp">self</span><span class="o">.</span><span class="n">T</span>	<span class="c1">#Angular frecuency in [rad/s]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">M</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">GM</span><span class="o">*</span><span class="mf">1e9</span><span class="o">/</span><span class="bp">self</span><span class="o">.</span><span class="n">G</span> <span class="c1">#Mass in [kg]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">RHO</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">M</span><span class="o">/</span><span class="bp">self</span><span class="o">.</span><span class="n">L</span><span class="o">**</span><span class="mi">3</span> <span class="c1">#kg/m^3</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">P</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">G</span><span class="o">*</span><span class="bp">self</span><span class="o">.</span><span class="n">M</span><span class="o">**</span><span class="mi">2</span><span class="o">/</span><span class="bp">self</span><span class="o">.</span><span class="n">L</span><span class="o">**</span><span class="mi">4</span> <span class="c1">#Pressure/Elasticity modules in [Pa]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">V</span> <span class="o">=</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">P</span><span class="o">/</span><span class="bp">self</span><span class="o">.</span><span class="n">RHO</span><span class="p">)</span><span class="o">**</span><span class="mf">0.5</span> <span class="c1">#Velocity in [m/s]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">T</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">L</span><span class="o">/</span><span class="bp">self</span><span class="o">.</span><span class="n">V</span>  <span class="c1">#Time in [s]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">OMEGA</span> <span class="o">=</span> <span class="mi">1</span><span class="o">/</span><span class="bp">self</span><span class="o">.</span><span class="n">T</span>   <span class="c1">#Angular frecuency in [rad/s]</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">Gad</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">G</span><span class="o">*</span><span class="bp">self</span><span class="o">.</span><span class="n">RHO</span><span class="o">*</span><span class="bp">self</span><span class="o">.</span><span class="n">L</span> <span class="c1">#Gravity acceleration in [m/s^2]</span>
 
         <span class="k">if</span> <span class="n">verbose</span><span class="p">:</span>
@@ -595,28 +696,37 @@
 
 
 
+
 <div class="viewcode-block" id="BodyResponse.read_layers">
 <a class="viewcode-back" href="../../tides.html#tspice.tides.BodyResponse.read_layers">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">read_layers</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">layers_list</span><span class="p">,</span> <span class="n">r0_ini_ad</span><span class="p">,</span> <span class="n">nsteps_total</span><span class="o">=</span><span class="mf">5e4</span><span class="p">,</span> <span class="n">dr</span><span class="o">=</span><span class="mi">1</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Process the planetary layers and define integration steps for each.</span>
 
-<span class="w">        </span><span class="sd">&#39;&#39;&#39;</span>
-<span class="sd">        Function to read the layers of the planetary model and define the steps for each layer in the integration.</span>
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        layers_list : list of dict</span>
+<span class="sd">            List defining the planet&#39;s internal layers. Each dict must contain:</span>
+<span class="sd">            - &#39;name&#39;: Layer name (str).</span>
+<span class="sd">            - &#39;type&#39;: &#39;solid&#39; or &#39;fluid&#39;.</span>
+<span class="sd">            - &#39;r0&#39;: Start radius [m].</span>
+<span class="sd">            - &#39;rf&#39;: End radius [m].</span>
+<span class="sd">        r0_ini_ad : float</span>
+<span class="sd">            Initial dimensionless radius for integration (prevents singularity at r=0).</span>
+<span class="sd">        nsteps_total : int, optional</span>
+<span class="sd">             Approximate total number of integration steps (default: 50,000).</span>
+<span class="sd">        dr : float, optional</span>
+<span class="sd">             Transition width between layers [m] to avoid discontinuities (default: 1 m).</span>
 
-<span class="sd">        Inputs:</span>
-<span class="sd">        - layers_list: List of layers for the integration. Each layer is a dictionary with the following keys:</span>
-<span class="sd">            - &#39;name&#39;: Name of the layer (string)</span>
-<span class="sd">            - &#39;r0&#39;: Initial radius of the layer [m]</span>
-<span class="sd">            - &#39;rf&#39;: Final radius of the layer [m]</span>
-<span class="sd">            - &#39;type&#39;: Type of the layer (&#39;solid&#39; or &#39;liquid&#39;)</span>
-<span class="sd">        - r0_ini_ad: Initial radius for integration [adimensional]. Default is 1 km to avoid singularities at the center</span>
-<span class="sd">        - nsteps_total: Number of steps for the total integration (default: 5e4 steps)</span>
-<span class="sd">        - dr: Delta r to avoid discontinuities between layers [m]. Default is 1 m</span>
-
-<span class="sd">        Outputs:</span>
-<span class="sd">        - sorted_layers_list: List of layers sorted by initial radius (from center to surface)</span>
-<span class="sd">        - nsteps_dict: Dictionary with the number of steps for each layer</span>
-<span class="sd">        - steps_dict: Dictionary with the integration steps for each layer</span>
-<span class="sd">        &#39;&#39;&#39;</span>
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        sorted_layers_list : list of dict</span>
+<span class="sd">            Layers sorted by radius (center to surface).</span>
+<span class="sd">        nsteps_dict : dict</span>
+<span class="sd">            Number of steps assigned to each layer.</span>
+<span class="sd">        steps_dict : dict</span>
+<span class="sd">            Radial grid points (dimensionless) for each layer.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
 
         <span class="c1">#Sorted layers by initial radius</span>
         <span class="n">sorted_layers_list</span> <span class="o">=</span> <span class="nb">sorted</span><span class="p">(</span><span class="n">layers_list</span><span class="p">,</span> <span class="n">key</span><span class="o">=</span><span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="n">x</span><span class="p">[</span><span class="s1">&#39;r0&#39;</span><span class="p">])</span>
@@ -631,15 +741,15 @@
 
             <span class="c1">#For the first layer</span>
             <span class="k">if</span> <span class="n">l</span><span class="o">==</span><span class="mi">0</span><span class="p">:</span>
-                <span class="n">rf_ad</span> <span class="o">=</span> <span class="n">layer</span><span class="p">[</span><span class="s1">&#39;rf&#39;</span><span class="p">]</span><span class="o">/</span><span class="bp">self</span><span class="o">.</span><span class="n">L</span>	<span class="c1">#[adimensional]</span>
+                <span class="n">rf_ad</span> <span class="o">=</span> <span class="n">layer</span><span class="p">[</span><span class="s1">&#39;rf&#39;</span><span class="p">]</span><span class="o">/</span><span class="bp">self</span><span class="o">.</span><span class="n">L</span>  <span class="c1">#[adimensional]</span>
                 <span class="n">nsteps</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">rf_ad</span><span class="o">*</span><span class="n">nsteps_total</span><span class="p">)</span>
                 <span class="n">nsteps_dict</span><span class="p">[</span><span class="n">layer</span><span class="p">[</span><span class="s1">&#39;name&#39;</span><span class="p">]]</span> <span class="o">=</span> <span class="n">nsteps</span>
                 <span class="n">steps_dict</span><span class="p">[</span><span class="n">layer</span><span class="p">[</span><span class="s1">&#39;name&#39;</span><span class="p">]]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">linspace</span><span class="p">(</span><span class="n">r0_ini_ad</span><span class="p">,</span> <span class="n">rf_ad</span><span class="p">,</span> <span class="n">nsteps</span><span class="p">)</span>
 
             <span class="c1">#For the other layers</span>
             <span class="k">else</span><span class="p">:</span>
-                <span class="n">r0_ad</span> <span class="o">=</span> <span class="p">(</span><span class="n">layer</span><span class="p">[</span><span class="s1">&#39;r0&#39;</span><span class="p">]</span><span class="o">+</span><span class="n">dr</span><span class="p">)</span><span class="o">/</span><span class="bp">self</span><span class="o">.</span><span class="n">L</span>	<span class="c1">#[adimensional]</span>
-                <span class="n">rf_ad</span> <span class="o">=</span> <span class="n">layer</span><span class="p">[</span><span class="s1">&#39;rf&#39;</span><span class="p">]</span><span class="o">/</span><span class="bp">self</span><span class="o">.</span><span class="n">L</span>	<span class="c1">#[adimensional]</span>
+                <span class="n">r0_ad</span> <span class="o">=</span> <span class="p">(</span><span class="n">layer</span><span class="p">[</span><span class="s1">&#39;r0&#39;</span><span class="p">]</span><span class="o">+</span><span class="n">dr</span><span class="p">)</span><span class="o">/</span><span class="bp">self</span><span class="o">.</span><span class="n">L</span> <span class="c1">#[adimensional]</span>
+                <span class="n">rf_ad</span> <span class="o">=</span> <span class="n">layer</span><span class="p">[</span><span class="s1">&#39;rf&#39;</span><span class="p">]</span><span class="o">/</span><span class="bp">self</span><span class="o">.</span><span class="n">L</span>  <span class="c1">#[adimensional]</span>
                 <span class="n">nsteps</span> <span class="o">=</span> <span class="nb">int</span><span class="p">((</span><span class="n">rf_ad</span> <span class="o">-</span> <span class="n">r0_ad</span><span class="p">)</span><span class="o">*</span><span class="n">nsteps_total</span><span class="p">)</span>
                 <span class="n">nsteps_dict</span><span class="p">[</span><span class="n">layer</span><span class="p">[</span><span class="s1">&#39;name&#39;</span><span class="p">]]</span> <span class="o">=</span> <span class="n">nsteps</span>
                 <span class="n">steps_dict</span><span class="p">[</span><span class="n">layer</span><span class="p">[</span><span class="s1">&#39;name&#39;</span><span class="p">]]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">linspace</span><span class="p">(</span><span class="n">r0_ad</span><span class="p">,</span> <span class="n">rf_ad</span><span class="p">,</span> <span class="n">nsteps</span><span class="p">)</span>
@@ -647,34 +757,39 @@
         <span class="k">return</span> <span class="n">sorted_layers_list</span><span class="p">,</span> <span class="n">nsteps_dict</span><span class="p">,</span> <span class="n">steps_dict</span></div>
 
     
+
 <div class="viewcode-block" id="BodyResponse.set_integration_parameters_ad">
 <a class="viewcode-back" href="../../tides.html#tspice.tides.BodyResponse.set_integration_parameters_ad">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">set_integration_parameters_ad</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">n</span><span class="p">,</span> <span class="n">f_days</span><span class="p">,</span> <span class="n">layers_list</span><span class="p">,</span> <span class="n">planet_profile</span><span class="p">,</span> <span class="n">nsteps</span><span class="o">=</span><span class="mf">5e4</span><span class="p">,</span> <span class="n">r0_ini</span><span class="o">=</span><span class="mf">1e3</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Configure dimensionless parameters and profiles for numerical integration.</span>
 
-<span class="w">        </span><span class="sd">&#39;&#39;&#39;</span>
-<span class="sd">        Define the adimensional parameters needed for the integration of the equations of motion: n, omega, planetary profiles, steps, layers, etc.</span>
-<span class="sd">        </span>
-<span class="sd">        Inputs:</span>
-<span class="sd">        - n: Degree of the tidal solution</span>
-<span class="sd">        - f_days: Frequency of the tidal forcing [cycles per day]</span>
-<span class="sd">        - nsteps: Number of steps for the total integration</span>
-<span class="sd">        - r0_ini: Initial radius for integration [m]. Default is 1 km to avoid singularities at the center</span>
-<span class="sd">        - layers_list: List of layers for the integration. Each layer is a dictionary with the following keys:</span>
-<span class="sd">            - &#39;name&#39;: Name of the layer (string)</span>
-<span class="sd">            - &#39;r0&#39;: Initial radius of the layer [m]</span>
-<span class="sd">            - &#39;rf&#39;: Final radius of the layer [m]</span>
-<span class="sd">            - &#39;type&#39;: Type of the layer (&#39;solid&#39; or &#39;liquid&#39;)</span>
-<span class="sd">        - planet_profile: Dictionary with the planetary profiles as functions of the radius (can be dimensional or adimensional). The dictionary must contain the following keys:</span>
-<span class="sd">            - &#39;dimensionless&#39;: Boolean indicating if the profiles are adimensional (True) or dimensional (False)</span>
-<span class="sd">            - &#39;rho&#39;: Density profile function [kg/m^3 or adimensional]</span>
-<span class="sd">            - &#39;g&#39;: Gravitational acceleration profile function [m/s^2 or adimensional]</span>
-<span class="sd">            - &#39;mu&#39;: Shear modulus profile function [Pa or adimensional]</span>
-<span class="sd">            - &#39;lamb&#39;: Lamé&#39;s first parameter profile function [Pa or adimensional]</span>
+<span class="sd">        This method prepares the physics and grid for solving the Love number ODEs.</span>
 
-<span class="sd">        Outputs:</span>
-<span class="sd">        - None (the parameters are stored as attributes of the class). We can access them as self.n, self.omega, self.rho0_ad, etc.</span>
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        n : int</span>
+<span class="sd">            Spherical harmonic degree of the tidal forcing (e.g., 2).</span>
+<span class="sd">        f_days : float</span>
+<span class="sd">             Tidal frequency [cycles per day].</span>
+<span class="sd">        layers_list : list of dict</span>
+<span class="sd">             Planetary internal layer structure.</span>
+<span class="sd">        planet_profile : dict</span>
+<span class="sd">             Dictionary containing physical property interpolators (rho, g, mu, lamb).</span>
+<span class="sd">             Must include a &#39;dimensionless&#39; key (bool).</span>
+<span class="sd">        nsteps : int, optional</span>
+<span class="sd">             Total integration steps (default: 50,000).</span>
+<span class="sd">        r0_ini : float, optional</span>
+<span class="sd">             Initial integration radius [m] (default: 1000 m).</span>
 
-<span class="sd">        &#39;&#39;&#39;</span>
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        None</span>
+<span class="sd">            Sets instance attributes:</span>
+<span class="sd">            - self.n, self.omega, self.omega_ad</span>
+<span class="sd">            - self.rho0_ad, self.mu_ad, self.lamb_ad, self.g0_ad (interpolators)</span>
+<span class="sd">            - self.steps_dict, self.nsteps_dict</span>
+<span class="sd">        &quot;&quot;&quot;</span>
 
         <span class="c1">#Calculate the scale constants if not done yet  </span>
         <span class="bp">self</span><span class="o">.</span><span class="n">scale_constants</span><span class="p">(</span><span class="n">verbose</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>      
@@ -683,9 +798,9 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">n</span> <span class="o">=</span> <span class="n">n</span>
 
         <span class="c1">#Frequency of the tidal forcing</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">f_days</span> <span class="o">=</span> <span class="n">f_days</span>	<span class="c1">#[cycles per day]</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">omega</span> <span class="o">=</span> <span class="n">f_days</span><span class="o">*</span><span class="mi">2</span><span class="o">*</span><span class="n">np</span><span class="o">.</span><span class="n">pi</span><span class="o">/</span><span class="p">(</span><span class="mi">3600</span><span class="o">*</span><span class="mi">24</span><span class="p">)</span>	<span class="c1">#[rad/s]</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">omega_ad</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">omega</span><span class="o">/</span><span class="bp">self</span><span class="o">.</span><span class="n">OMEGA</span>	<span class="c1">#Adimensional angular frequency</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">f_days</span> <span class="o">=</span> <span class="n">f_days</span>    <span class="c1">#[cycles per day]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">omega</span> <span class="o">=</span> <span class="n">f_days</span><span class="o">*</span><span class="mi">2</span><span class="o">*</span><span class="n">np</span><span class="o">.</span><span class="n">pi</span><span class="o">/</span><span class="p">(</span><span class="mi">3600</span><span class="o">*</span><span class="mi">24</span><span class="p">)</span>   <span class="c1">#[rad/s]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">omega_ad</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">omega</span><span class="o">/</span><span class="bp">self</span><span class="o">.</span><span class="n">OMEGA</span>   <span class="c1">#Adimensional angular frequency</span>
 
         <span class="c1">#Planetary profiles (functions of r_ad)</span>
         <span class="k">if</span> <span class="n">planet_profile</span><span class="p">[</span><span class="s1">&#39;dimensionless&#39;</span><span class="p">]:</span>    <span class="c1">#If the profiles are already adimensional</span>
@@ -704,7 +819,7 @@
 
         <span class="c1">#Initial radius for integration</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">r0_ini</span> <span class="o">=</span> <span class="n">r0_ini</span>    <span class="c1">#[m]</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">r0_ini_ad</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">r0_ini</span><span class="o">/</span><span class="bp">self</span><span class="o">.</span><span class="n">L</span>	<span class="c1">#[adimensional]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">r0_ini_ad</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">r0_ini</span><span class="o">/</span><span class="bp">self</span><span class="o">.</span><span class="n">L</span> <span class="c1">#[adimensional]</span>
 
         <span class="c1">#Steps for each layer in the integration</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">layers_list</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">nsteps_dict</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">steps_dict</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">read_layers</span><span class="p">(</span><span class="n">layers_list</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">r0_ini_ad</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">nsteps_total</span><span class="p">)</span>
@@ -818,7 +933,7 @@
                 <span class="n">z7_til</span> <span class="o">=</span> <span class="n">z6_til</span> <span class="o">+</span> <span class="mi">4</span><span class="o">*</span><span class="n">np</span><span class="o">.</span><span class="n">pi</span><span class="o">*</span><span class="n">rho0_icb</span><span class="o">*</span><span class="n">z1_til</span> <span class="o">+</span> <span class="p">((</span><span class="n">n</span><span class="o">+</span><span class="mi">1</span><span class="p">)</span><span class="o">/</span><span class="n">rs_icb</span> <span class="o">-</span> <span class="mi">4</span><span class="o">*</span><span class="n">np</span><span class="o">.</span><span class="n">pi</span><span class="o">*</span><span class="n">rho0_icb</span><span class="o">/</span><span class="n">g0_icb</span><span class="p">)</span><span class="o">*</span><span class="n">z5_til</span>
 
                 <span class="c1">#In fluid part, we just do one integration</span>
-                <span class="n">Z0_outer_ad</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="n">z5_til</span><span class="p">,</span> <span class="n">z7_til</span><span class="p">])</span>	
+                <span class="n">Z0_outer_ad</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="n">z5_til</span><span class="p">,</span> <span class="n">z7_til</span><span class="p">])</span>    
 
                 <span class="c1">#Integration in the fluid layer</span>
                 <span class="n">z_outer_ad_redu</span> <span class="o">=</span> <span class="n">solve_ivp</span><span class="p">(</span><span class="n">dzdr_fluid_AmorinGudkova2024_ad</span><span class="p">,</span> <span class="p">(</span><span class="n">rs_ad</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">rs_ad</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]),</span> <span class="n">Z0_outer_ad</span><span class="p">,</span> <span class="n">t_eval</span><span class="o">=</span><span class="n">rs_ad</span><span class="p">,</span> <span class="n">method</span><span class="o">=</span><span class="s1">&#39;BDF&#39;</span><span class="p">,</span> <span class="n">args</span><span class="o">=</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">params_ad</span><span class="p">,),</span> <span class="n">dense_output</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
@@ -843,9 +958,9 @@
                 <span class="n">z5_b</span><span class="p">,</span> <span class="n">z7_b</span> <span class="o">=</span> <span class="n">z_outer_ad_redu</span><span class="o">.</span><span class="n">y</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span><span class="o">-</span><span class="mi">1</span><span class="p">],</span> <span class="n">z_outer_ad_redu</span><span class="o">.</span><span class="n">y</span><span class="p">[</span><span class="mi">1</span><span class="p">,</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
                 
                 <span class="c1">#New three independent solutions from the zis</span>
-                <span class="n">Y0_alpha_mantle_ad</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="mi">0</span><span class="p">,</span> <span class="o">-</span><span class="n">rho0_cmb</span><span class="o">*</span><span class="n">z5_b</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="n">z5_b</span><span class="p">,</span> <span class="n">z7_b</span> <span class="o">-</span> <span class="p">((</span><span class="n">n</span><span class="o">+</span><span class="mi">1</span><span class="p">)</span><span class="o">/</span><span class="n">rs_cmb</span> <span class="o">-</span> <span class="mi">4</span><span class="o">*</span><span class="n">np</span><span class="o">.</span><span class="n">pi</span><span class="o">*</span><span class="n">rho0_cmb</span><span class="o">/</span><span class="n">g0_cmb</span><span class="p">)</span><span class="o">*</span><span class="n">z5_b</span><span class="p">])</span>	<span class="c1">#Coefficient A</span>
-                <span class="n">Y0_beta_mantle_ad</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="mi">1</span><span class="p">,</span> <span class="n">rho0_cmb</span><span class="o">*</span><span class="n">g0_cmb</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="o">-</span><span class="mi">4</span><span class="o">*</span><span class="n">np</span><span class="o">.</span><span class="n">pi</span><span class="o">*</span><span class="n">rho0_cmb</span><span class="p">])</span>	<span class="c1">#Coefficient D=z1_b</span>
-                <span class="n">Y0_gamma_mantle_ad</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">])</span>	<span class="c1">#Coefficient E=y3_b / discontinuity in the tangential displacement</span>
+                <span class="n">Y0_alpha_mantle_ad</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="mi">0</span><span class="p">,</span> <span class="o">-</span><span class="n">rho0_cmb</span><span class="o">*</span><span class="n">z5_b</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="n">z5_b</span><span class="p">,</span> <span class="n">z7_b</span> <span class="o">-</span> <span class="p">((</span><span class="n">n</span><span class="o">+</span><span class="mi">1</span><span class="p">)</span><span class="o">/</span><span class="n">rs_cmb</span> <span class="o">-</span> <span class="mi">4</span><span class="o">*</span><span class="n">np</span><span class="o">.</span><span class="n">pi</span><span class="o">*</span><span class="n">rho0_cmb</span><span class="o">/</span><span class="n">g0_cmb</span><span class="p">)</span><span class="o">*</span><span class="n">z5_b</span><span class="p">])</span>    <span class="c1">#Coefficient A</span>
+                <span class="n">Y0_beta_mantle_ad</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="mi">1</span><span class="p">,</span> <span class="n">rho0_cmb</span><span class="o">*</span><span class="n">g0_cmb</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="o">-</span><span class="mi">4</span><span class="o">*</span><span class="n">np</span><span class="o">.</span><span class="n">pi</span><span class="o">*</span><span class="n">rho0_cmb</span><span class="p">])</span>  <span class="c1">#Coefficient D=z1_b</span>
+                <span class="n">Y0_gamma_mantle_ad</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">])</span>   <span class="c1">#Coefficient E=y3_b / discontinuity in the tangential displacement</span>
 
                 <span class="c1">#Integration in the solid part</span>
                 <span class="n">y_alpha_mantle_ad</span> <span class="o">=</span> <span class="n">solve_ivp</span><span class="p">(</span><span class="n">dydr_solid_AmorinGudkova2024_ad</span><span class="p">,</span> <span class="p">(</span><span class="n">rs_ad</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">rs_ad</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]),</span> <span class="n">Y0_alpha_mantle_ad</span><span class="p">,</span> <span class="n">t_eval</span><span class="o">=</span><span class="n">rs_ad</span><span class="p">,</span> <span class="n">method</span><span class="o">=</span><span class="s1">&#39;BDF&#39;</span><span class="p">,</span> <span class="n">args</span><span class="o">=</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">params_ad</span><span class="p">,),</span> <span class="n">dense_output</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>

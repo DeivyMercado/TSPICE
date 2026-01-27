@@ -28,16 +28,38 @@ Create an Earth model and access its properties:
 >>> profile = earth.planet_profile
 >>> print(f"Density at center: {profile['rho'](0):.2f} kg/m^3")
 
-Use Earth model for Love number calculations:
+Use Earth model for Love number calculations (integration):
 
->>> from tspice import BodyResponse
->>> earth_response = BodyResponse('Earth')
+>>> import tspice as tsp
+>>> from tspice.planet import Earth
+>>> 
+>>> # 1. Define responding body and characteristic scales
+>>> earth_interior = tsp.BodyResponse('Earth')
+>>> earth_interior.scale_constants()
+>>> 
+>>> # 2. Load planet profile (Modified PREM)
 >>> earth_model = Earth()
->>> earth_response.set_integration_parameters_ad(
-...     n=2, f_days=1.0,
-...     layers_list=[...],
-...     planet_profile=earth_model.planet_profile
+>>> planet_profile = earth_model.planet_profile
+>>> 
+>>> # 3. Define internal layers (Fluid Outer Core sandwiched between Solid Inner Core and Mantle)
+>>> layers_list = [
+...     dict(name='Outer Core', type='fluid', r0=1221500.0, rf=3480000.0),
+...     dict(name='Inner Core', type='solid', r0=0, rf=1221500.0),
+...     dict(name='Mantle + crust', type='solid', r0=3480000.0, rf=earth_interior.L)
+... ]
+>>> 
+>>> # 4. Set integration parameters (e.g., M2 tide, n=2)
+>>> f_day = 1.93502
+>>> earth_interior.set_integration_parameters_ad(
+...     n=2, f_days=f_day,
+...     layers_list=layers_list,
+...     planet_profile=planet_profile,
+...     r0_ini=6e3
 ... )
+>>> 
+>>> # 5. Integrate coupled ODEs
+>>> earth_interior.integrate_internal_solutions_ad(verbose=True)
+>>> print(f"k_2 = {earth_interior.k_n}, h_2 = {earth_interior.h_n}, l_2 = {earth_interior.l_n}")
 """
 
 import numpy as np
@@ -51,7 +73,11 @@ from tspice import get_data
 class Earth:
     def __init__(self):
         """
-        Earth class implementing the PREM model with modifications from Amorin & Gudkova (2025).
+        Initialize the Earth interior model.
+
+        This method loads the PREM model data, applies the crustal modifications
+        suggested by Amorin & Gudkova (2025), and calculates the gravity profile
+        and mass distribution required for tidal response integration.
         """
         # New density, mu and K parameters
         self.rho_new = 2178.9  # kg/m^3
@@ -217,6 +243,26 @@ class Earth:
     def planet_profile(self):
         """
         Returns the planet profile dictionary compatible with BodyResponse.
+
+        The profile contains vectorized interpolators for physical properties
+        as a function of radius `r` (in meters).
+
+        Returns
+        -------
+        dict
+            Dictionary containing the following keys (values are callable interpolators):
+            - 'rho' : Density [kg/m^3]
+            - 'lamb': First Lamé parameter [Pa]
+            - 'mu'  : Shear modulus (Second Lamé parameter) [Pa]
+            - 'g'   : Gravitational acceleration [m/s^2]
+            - 'dimensionless': Boolean flag (False for this dimensional model)
+        
+        Examples
+        --------
+        >>> earth = Earth()
+        >>> profile = earth.planet_profile
+        >>> rho_surface = profile['rho'](6371000)
+        >>> g_surface = profile['g'](6371000)
         """
         return {
             'rho': self.rho_r_interp,

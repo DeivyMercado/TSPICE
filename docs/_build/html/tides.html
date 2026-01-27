@@ -142,103 +142,190 @@ internal deformations of celestial bodies using SPICE ephemerides.</p>
 <dl class="py method">
 <dt class="sig sig-object py" id="tspice.tides.Body.Kn_func">
 <span class="sig-name descname"><span class="pre">Kn_func</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">n</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">M_ext</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">M</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">a_p</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/tspice/tides.html#Body.Kn_func"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#tspice.tides.Body.Kn_func" title="Link to this definition"></a></dt>
-<dd><p>This program calculate the constant Kn in the Tide-Generating Potential expansion.</p>
-<p>Input:
-- n: Degree of the term
-- a_p: Radius of the target body [m]
-- M: Mass of the target body [any mass units]
-- M_ext: Mass of the external body [the same as M]</p>
-<p>Output:
-- Kn: Constant K_n for a = a_p</p>
-<p>Note:
-1. To get the potential for other distance from the COM,
-should multiply this value by (a/a_p)^n
-2. This definition is different to the one use in Agnew (2015)
-that includes the factor 1/r_mean, with r_mean the mean distance
-to the external body.</p>
+<dd><p>Calculate the constant coefficient K_n for the Tide-Generating Potential (TGP).</p>
+<p>The coefficient is defined as:
+K_n = (4 * pi / (2n + 1)) * (M_ext / M) * a_p^(n+2)</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>n</strong> (<em>int</em>) – Spherical harmonic degree.</p></li>
+<li><p><strong>M_ext</strong> (<em>float</em>) – Mass of the external perturbing body.</p></li>
+<li><p><strong>M</strong> (<em>float</em><em>, </em><em>optional</em>) – Mass of the central body. Defaults to self.GM (if available).</p></li>
+<li><p><strong>a_p</strong> (<em>float</em><em>, </em><em>optional</em>) – Radius of the central body. Defaults to self.a_p (if available).</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>The calculated K_n constant (in units compatible with input, typically km^(n+2)).</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>float</p>
+</dd>
+</dl>
+<p class="rubric">Notes</p>
+<p>To obtain the potential at a distance <cite>a</cite> from the center of mass, multiply this value by (a/a_p)^n.
+This definition differs from Agnew (2015) by a factor of 1/r_mean.</p>
 </dd></dl>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="tspice.tides.Body.array_et_utc">
 <span class="sig-name descname"><span class="pre">array_et_utc</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">date</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">return_step_seconds</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/tspice/tides.html#Body.array_et_utc"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#tspice.tides.Body.array_et_utc" title="Link to this definition"></a></dt>
-<dd><p>This function creates an array of times in ET from a dictionary with start, stop, step, and time_frame (UTC or TDB).</p>
-<p>Input:
-- date: Dictionary with start, stop, step, and time_frame (UTC or TDB).</p>
-<p>Output:
-- et_utc: Array of times in ET.</p>
+<dd><p>Generate an array of Ephemeris Times (ET) based on a date dictionary.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>date</strong> (<em>dict</em>) – Dictionary containing time range parameters:
+- ‘start’: Start date string (e.g., ‘2025-01-01’).
+- ‘stop’: Stop date string.
+- ‘step’: Time step string (e.g., ‘1h’, ‘30m’).
+- ‘time_frame’: Time frame, currently only ‘UTC’ is supported.</p></li>
+<li><p><strong>return_step_seconds</strong> (<em>bool</em><em>, </em><em>optional</em>) – If True, returns the step size in seconds along with the ET array.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p><ul class="simple">
+<li><p><em>np.ndarray</em> – Array of times in Ephemeris Time (ET/TDB seconds past J2000).</p></li>
+<li><p><em>float (optional)</em> – Step size in seconds (if <cite>return_step_seconds</cite> is True).</p></li>
+</ul>
+</p>
+</dd>
+</dl>
+<p class="rubric">Examples</p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">body</span> <span class="o">=</span> <span class="n">Body</span><span class="p">(</span><span class="s1">&#39;Earth&#39;</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">date</span> <span class="o">=</span> <span class="p">{</span><span class="s1">&#39;start&#39;</span><span class="p">:</span> <span class="s1">&#39;2025-01-01&#39;</span><span class="p">,</span> <span class="s1">&#39;stop&#39;</span><span class="p">:</span> <span class="s1">&#39;2025-01-02&#39;</span><span class="p">,</span> <span class="s1">&#39;step&#39;</span><span class="p">:</span> <span class="s1">&#39;1h&#39;</span><span class="p">}</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">et_array</span> <span class="o">=</span> <span class="n">body</span><span class="o">.</span><span class="n">array_et_utc</span><span class="p">(</span><span class="n">date</span><span class="p">)</span>
+</pre></div>
+</div>
 </dd></dl>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="tspice.tides.Body.plot_many_signal">
 <span class="sig-name descname"><span class="pre">plot_many_signal</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">et</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">tgps</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">loc</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">colors</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">y_label</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'V(t)/g'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">signal_labels</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">units</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'cm'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">savepath</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/tspice/tides.html#Body.plot_many_signal"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#tspice.tides.Body.plot_many_signal" title="Link to this definition"></a></dt>
-<dd><p>Plot multiple tidal signals on the same plot.</p>
-<p>Input:
-- et: Array of ephemeris times.
-- tgps: List of tidal signal arrays.
-- loc: Dictionary with location (lat, lon, depth).
-- colors: List of colors for each signal.
-- y_label: Label for y-axis (default: r’V(t)/g’).
-- signal_labels: List of labels for each signal (default: None).
-- units: Units for the signals (default: ‘cm’).
-- savepath: Path to save the figure (default: None).</p>
+<dd><p>Plot multiple tidal signals on the same figure.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>et</strong> (<em>np.ndarray</em>) – Array of Ephemeris Times.</p></li>
+<li><p><strong>tgps</strong> (<em>list</em><em> of </em><em>np.ndarray</em>) – List of tidal signal arrays to plot (one per body/component).</p></li>
+<li><p><strong>loc</strong> (<em>dict</em>) – Location dictionary (for plot title).</p></li>
+<li><p><strong>colors</strong> (<em>list</em>) – List of colors for each signal trace.</p></li>
+<li><p><strong>y_label</strong> (<em>str</em><em>, </em><em>optional</em>) – Y-axis label. Default: r’V(t)/g’.</p></li>
+<li><p><strong>signal_labels</strong> (<em>list</em><em> of </em><em>str</em><em>, </em><em>optional</em>) – Labels for the legend corresponding to each signal.</p></li>
+<li><p><strong>units</strong> (<em>str</em><em>, </em><em>optional</em>) – Units for the Y-axis label. Default: ‘cm’.</p></li>
+<li><p><strong>savepath</strong> (<em>str</em><em>, </em><em>optional</em>) – File path to save the plot image.</p></li>
+</ul>
+</dd>
+</dl>
 </dd></dl>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="tspice.tides.Body.plot_one_signal">
 <span class="sig-name descname"><span class="pre">plot_one_signal</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">et</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">tgp</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">loc</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">colors</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">label</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'V_{\\text{tid}}(t)/g'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">units</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'cm'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">mean_value</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">savepath</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/tspice/tides.html#Body.plot_one_signal"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#tspice.tides.Body.plot_one_signal" title="Link to this definition"></a></dt>
-<dd><p>Plot a single tidal signal over time.</p>
-<p>Input:
-- et: Array of ephemeris times.
-- tgp: Tidal signal array.
-- loc: Dictionary with location (lat, lon, depth).
-- colors: List of colors for the plot.
-- label: Label for y-axis (default: r’V_{       ext{tid}}(t)/g’).
-- units: Units for the signal (default: ‘cm’).
-- mean_value: Whether to plot mean value line (default: False).
-- savepath: Path to save the figure (default: None).</p>
+<dd><p>Plot a single tidal signal time series.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>et</strong> (<em>np.ndarray</em>) – Array of Ephemeris Times.</p></li>
+<li><p><strong>tgp</strong> (<em>np.ndarray</em>) – Tidal potential signal array.</p></li>
+<li><p><strong>loc</strong> (<em>dict</em>) – Location dictionary (for plot title).</p></li>
+<li><p><strong>colors</strong> (<em>list</em>) – List of colors to use (e.g., [‘blue’, ‘red’]). First color for signal, second for mean line.</p></li>
+<li><p><strong>label</strong> (<em>str</em><em>, </em><em>optional</em>) – Y-axis label (LaTeX formatted). Default: r’V_{      ext{tid}}(t)/g’.</p></li>
+<li><p><strong>units</strong> (<em>str</em><em>, </em><em>optional</em>) – Units for the Y-axis label. Default: ‘cm’.</p></li>
+<li><p><strong>mean_value</strong> (<em>bool</em><em>, </em><em>optional</em>) – If True, plots a horizontal line at the mean value.</p></li>
+<li><p><strong>savepath</strong> (<em>str</em><em>, </em><em>optional</em>) – File path to save the plot image. If None, the plot is not saved.</p></li>
+</ul>
+</dd>
+</dl>
 </dd></dl>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="tspice.tides.Body.subpoint_coordinates">
 <span class="sig-name descname"><span class="pre">subpoint_coordinates</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">et_utc</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">body</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/tspice/tides.html#Body.subpoint_coordinates"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#tspice.tides.Body.subpoint_coordinates" title="Link to this definition"></a></dt>
-<dd><p>This function calculates the geographical coordinates of the subpoint
-of an external body on the target body for an array of times in ET.</p>
-<p>Input:
-- et_utc: Array of times in ET.
-- body: Name of the external body, e.g. ‘Moon’, ‘Sun’, ‘Mercury’, etc.</p>
-<p>Output:
-- phis_ext: Array of longitudes of the subpoint [rad].
-- thetas_ext: Array of colatitudes of the subpoint [rad].
-- alts_ext: Array of altitudes of the subpoint above the reference ellipsoid [km].</p>
+<dd><p>Calculate geographical coordinates of the sub-body point.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>et_utc</strong> (<em>np.ndarray</em>) – Array of times in Ephemeris Time (ET).</p></li>
+<li><p><strong>body</strong> (<em>str</em>) – Name of the external body (e.g., ‘Moon’, ‘Sun’).</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p><ul class="simple">
+<li><p><strong>phis_ext</strong> (<em>np.ndarray</em>) – Longitudes of the subpoint [rad].</p></li>
+<li><p><strong>thetas_ext</strong> (<em>np.ndarray</em>) – Colatitudes of the subpoint [rad].</p></li>
+<li><p><strong>alts_ext</strong> (<em>np.ndarray</em>) – Altitudes of the subpoint above the reference ellipsoid [km].</p></li>
+</ul>
+</p>
+</dd>
+</dl>
 </dd></dl>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="tspice.tides.Body.tgp_many_bodies">
 <span class="sig-name descname"><span class="pre">tgp_many_bodies</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">bodies</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">loc_sta</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dates</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">nmax</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">6</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">time_array</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">body_signal</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">verbose</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/tspice/tides.html#Body.tgp_many_bodies"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#tspice.tides.Body.tgp_many_bodies" title="Link to this definition"></a></dt>
-<dd><p>This function calculates the TGP for a point on the target body with geographic coordinates (lon_s, lat_s) at a distance a from the COM, due to a list of external bodies.</p>
-<p>Input:
-- loc_sta: Dictionary with the geographic coordinates of the station, including depth. For example: dict(lat=4.49, lon=-73.14, depth=0)
-- dates: Dictionary with start, stop, and step dates. For example: dict(start=”2025-01-01 00:00:00”, stop=”2025-01-29 00:00:00”, step=”1h”)
-- bodies: List of external bodies to consider, e.g. [‘Moon’, ‘Sun’, ‘Mercury’]
-- nmax: Maximum degree to consider in the tidal calculation.</p>
-<p>Returns:
-- Vtid: Array with the time series of V/g at the station for each body
-- tjd: Times in JD of the ephemerides (and of V/g).</p>
+<dd><p>Calculate the combined Tide-Generating Potential (TGP) from multiple external bodies.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>bodies</strong> (<em>list</em><em> of </em><em>str</em>) – List of external body names (e.g., [‘Moon’, ‘Sun’]).</p></li>
+<li><p><strong>loc_sta</strong> (<em>dict</em>) – Coordinates of the station (lat, lon, depth).</p></li>
+<li><p><strong>dates</strong> (<em>dict</em>) – Time range parameters (start, stop, step).</p></li>
+<li><p><strong>nmax</strong> (<em>int</em><em>, </em><em>optional</em>) – Maximum spherical harmonic degree (default: 6).</p></li>
+<li><p><strong>time_array</strong> (<em>bool</em><em>, </em><em>optional</em>) – If True, returns the time array along with the potential.</p></li>
+<li><p><strong>body_signal</strong> (<em>bool</em><em>, </em><em>optional</em>) – If True, returns an array with individual signals for each body (shape: [time, bodies]).
+If False, returns the summed total signal (default).</p></li>
+<li><p><strong>verbose</strong> (<em>bool</em><em>, </em><em>optional</em>) – If True, prints progress messages.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p><p><strong>result</strong> –</p>
+<ul class="simple">
+<li><p>If <cite>body_signal</cite> is False: Total TGP time series V/g [m].</p></li>
+<li><p>If <cite>body_signal</cite> is True: Array of shape (N_times, N_bodies) with individual signals.</p></li>
+<li><p>If <cite>time_array</cite> is True: Returns (result, et_utc).</p></li>
+</ul>
+</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>np.ndarray or tuple</p>
+</dd>
+</dl>
+<p class="rubric">Examples</p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">earth</span> <span class="o">=</span> <span class="n">Body</span><span class="p">(</span><span class="s1">&#39;Earth&#39;</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">bodies</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;Moon&#39;</span><span class="p">,</span> <span class="s1">&#39;Sun&#39;</span><span class="p">]</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">tgp_total</span> <span class="o">=</span> <span class="n">earth</span><span class="o">.</span><span class="n">tgp_many_bodies</span><span class="p">(</span><span class="n">bodies</span><span class="p">,</span> <span class="n">loc</span><span class="p">,</span> <span class="n">dates</span><span class="p">)</span>
+</pre></div>
+</div>
 </dd></dl>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="tspice.tides.Body.tgp_one_body">
 <span class="sig-name descname"><span class="pre">tgp_one_body</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">body</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">loc_sta</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dates</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">nmax</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">time_array</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/tspice/tides.html#Body.tgp_one_body"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#tspice.tides.Body.tgp_one_body" title="Link to this definition"></a></dt>
-<dd><p>This function calculates the TGP for a point on the target body with geographic coordinates (lon_s, lat_s) at a distance a from the COM,
-due to a list of external bodies.</p>
-<p>Input:
-- loc_sta: Dictionary with the geographic coordinates of the station, including depth. For example: dict(lat=4.49, lon=-73.14, depth=0)
-- dates: Dictionary with start, stop, and step dates. For example: dict(start=”2025-01-01 00:00:00”, stop=”2025-01-29 00:00:00”, step=”1h”)
-- bodies: the body to consider, e.g. ‘Moon’, ‘Sun’, ‘Mercury’.
-- nmax: Maximum degree to consider in the tidal calculation.</p>
-<p>Returns:
-- Vtid: Array with the time series of V/g at the station for each body
-- tjd: Times in JD of the ephemerides (and of V/g).</p>
+<dd><p>Calculate the Tide-Generating Potential (TGP) due to a single external body.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>body</strong> (<em>str</em>) – Name of the external body (e.g., ‘Moon’).</p></li>
+<li><p><strong>loc_sta</strong> (<em>dict</em><em>, </em><em>optional</em>) – Coordinates of the station (lat, lon, depth). Required if not called within <cite>tgp_many_bodies</cite>.</p></li>
+<li><p><strong>dates</strong> (<em>dict</em><em>, </em><em>optional</em>) – Time range parameters. Required if not called within <cite>tgp_many_bodies</cite>.</p></li>
+<li><p><strong>nmax</strong> (<em>int</em><em>, </em><em>optional</em>) – Maximum spherical harmonic degree (default: self.nmax or user specified).</p></li>
+<li><p><strong>time_array</strong> (<em>bool</em><em>, </em><em>optional</em>) – If True, returns the time array along with the potential.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p><ul class="simple">
+<li><p><strong>Vtid</strong> (<em>np.ndarray</em>) – Time series of the tidal potential V/g [m] at the station.</p></li>
+<li><p><strong>et_utc</strong> (<em>np.ndarray (optional)</em>) – Ephemeris times corresponding to the signal (if <cite>time_array</cite> is True).</p></li>
+</ul>
+</p>
+</dd>
+</dl>
+<p class="rubric">Examples</p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">earth</span> <span class="o">=</span> <span class="n">Body</span><span class="p">(</span><span class="s1">&#39;Earth&#39;</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">loc</span> <span class="o">=</span> <span class="p">{</span><span class="s1">&#39;lat&#39;</span><span class="p">:</span> <span class="mi">0</span><span class="p">,</span> <span class="s1">&#39;lon&#39;</span><span class="p">:</span> <span class="mi">0</span><span class="p">,</span> <span class="s1">&#39;depth&#39;</span><span class="p">:</span> <span class="mi">0</span><span class="p">}</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">dates</span> <span class="o">=</span> <span class="p">{</span><span class="s1">&#39;start&#39;</span><span class="p">:</span> <span class="s1">&#39;2025-01-01&#39;</span><span class="p">,</span> <span class="s1">&#39;stop&#39;</span><span class="p">:</span> <span class="s1">&#39;2025-01-02&#39;</span><span class="p">,</span> <span class="s1">&#39;step&#39;</span><span class="p">:</span> <span class="s1">&#39;1h&#39;</span><span class="p">}</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">tgp</span> <span class="o">=</span> <span class="n">earth</span><span class="o">.</span><span class="n">tgp_one_body</span><span class="p">(</span><span class="s1">&#39;Moon&#39;</span><span class="p">,</span> <span class="n">loc</span><span class="p">,</span> <span class="n">dates</span><span class="p">,</span> <span class="n">nmax</span><span class="o">=</span><span class="mi">2</span><span class="p">)</span>
+</pre></div>
+</div>
 </dd></dl>
 
 </dd></dl>
@@ -264,78 +351,85 @@ due to a list of external bodies.</p>
 <dl class="py method">
 <dt class="sig sig-object py" id="tspice.tides.BodyResponse.read_layers">
 <span class="sig-name descname"><span class="pre">read_layers</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">layers_list</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">r0_ini_ad</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">nsteps_total</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">50000.0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dr</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/tspice/tides.html#BodyResponse.read_layers"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#tspice.tides.BodyResponse.read_layers" title="Link to this definition"></a></dt>
-<dd><p>Function to read the layers of the planetary model and define the steps for each layer in the integration.</p>
-<p>Inputs:
-- layers_list: List of layers for the integration. Each layer is a dictionary with the following keys:</p>
-<blockquote>
-<div><ul class="simple">
-<li><p>‘name’: Name of the layer (string)</p></li>
-<li><p>‘r0’: Initial radius of the layer [m]</p></li>
-<li><p>‘rf’: Final radius of the layer [m]</p></li>
-<li><p>‘type’: Type of the layer (‘solid’ or ‘liquid’)</p></li>
+<dd><p>Process the planetary layers and define integration steps for each.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>layers_list</strong> (<em>list</em><em> of </em><em>dict</em>) – List defining the planet’s internal layers. Each dict must contain:
+- ‘name’: Layer name (str).
+- ‘type’: ‘solid’ or ‘fluid’.
+- ‘r0’: Start radius [m].
+- ‘rf’: End radius [m].</p></li>
+<li><p><strong>r0_ini_ad</strong> (<em>float</em>) – Initial dimensionless radius for integration (prevents singularity at r=0).</p></li>
+<li><p><strong>nsteps_total</strong> (<em>int</em><em>, </em><em>optional</em>) – Approximate total number of integration steps (default: 50,000).</p></li>
+<li><p><strong>dr</strong> (<em>float</em><em>, </em><em>optional</em>) – Transition width between layers [m] to avoid discontinuities (default: 1 m).</p></li>
 </ul>
-</div></blockquote>
-<ul class="simple">
-<li><p>r0_ini_ad: Initial radius for integration [adimensional]. Default is 1 km to avoid singularities at the center</p></li>
-<li><p>nsteps_total: Number of steps for the total integration (default: 5e4 steps)</p></li>
-<li><p>dr: Delta r to avoid discontinuities between layers [m]. Default is 1 m</p></li>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p><ul class="simple">
+<li><p><strong>sorted_layers_list</strong> (<em>list of dict</em>) – Layers sorted by radius (center to surface).</p></li>
+<li><p><strong>nsteps_dict</strong> (<em>dict</em>) – Number of steps assigned to each layer.</p></li>
+<li><p><strong>steps_dict</strong> (<em>dict</em>) – Radial grid points (dimensionless) for each layer.</p></li>
 </ul>
-<p>Outputs:
-- sorted_layers_list: List of layers sorted by initial radius (from center to surface)
-- nsteps_dict: Dictionary with the number of steps for each layer
-- steps_dict: Dictionary with the integration steps for each layer</p>
+</p>
+</dd>
+</dl>
 </dd></dl>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="tspice.tides.BodyResponse.scale_constants">
 <span class="sig-name descname"><span class="pre">scale_constants</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">verbose</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/tspice/tides.html#BodyResponse.scale_constants"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#tspice.tides.BodyResponse.scale_constants" title="Link to this definition"></a></dt>
-<dd><p>Function to calculate characteristic scales for adimensionalization of the internal solutions yis.</p>
-<p>Inputs:
-- verbose: Boolean to print the characteristic scales (default: True)</p>
-<p>Outputs:
-- L: Length scale [m]
-- M: Mass scale [kg]
-- RHO: Density scale [kg/m^3]
-- P: Pressure/Elasticity scale [Pa]
-- V: Velocity scale [m/s]
-- T: Time scale [s]
-- OMEGA: Angular frequency scale [rad/s]
-- Gad: Gravity scale [m/s^2]</p>
+<dd><p>Calculate characteristic scales for adimensionalization of internal solution variables.</p>
+<p>This method computes scaling factors based on the body’s physical properties
+to facilitate numerical integration.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>verbose</strong> (<em>bool</em><em>, </em><em>optional</em>) – If True, prints the calculated characteristic scales to stdout (default: True).</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>Scales are stored as class attributes:
+- self.L     : Length scale [m]
+- self.M     : Mass scale [kg]
+- self.RHO   : Density scale [kg/m^3]
+- self.P     : Pressure scale [Pa]
+- self.V     : Velocity scale [m/s]
+- self.T     : Time scale [s]
+- self.OMEGA : Angular frequency scale [rad/s]
+- self.Gad   : Gravity scale [m/s^2]</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>None</p>
+</dd>
+</dl>
 </dd></dl>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="tspice.tides.BodyResponse.set_integration_parameters_ad">
 <span class="sig-name descname"><span class="pre">set_integration_parameters_ad</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">n</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">f_days</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">layers_list</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">planet_profile</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">nsteps</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">50000.0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">r0_ini</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1000.0</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/tspice/tides.html#BodyResponse.set_integration_parameters_ad"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#tspice.tides.BodyResponse.set_integration_parameters_ad" title="Link to this definition"></a></dt>
-<dd><p>Define the adimensional parameters needed for the integration of the equations of motion: n, omega, planetary profiles, steps, layers, etc.</p>
-<p>Inputs:
-- n: Degree of the tidal solution
-- f_days: Frequency of the tidal forcing [cycles per day]
-- nsteps: Number of steps for the total integration
-- r0_ini: Initial radius for integration [m]. Default is 1 km to avoid singularities at the center
-- layers_list: List of layers for the integration. Each layer is a dictionary with the following keys:</p>
-<blockquote>
-<div><ul class="simple">
-<li><p>‘name’: Name of the layer (string)</p></li>
-<li><p>‘r0’: Initial radius of the layer [m]</p></li>
-<li><p>‘rf’: Final radius of the layer [m]</p></li>
-<li><p>‘type’: Type of the layer (‘solid’ or ‘liquid’)</p></li>
-</ul>
-</div></blockquote>
-<ul class="simple">
-<li><dl class="simple">
-<dt>planet_profile: Dictionary with the planetary profiles as functions of the radius (can be dimensional or adimensional). The dictionary must contain the following keys:</dt><dd><ul>
-<li><p>‘dimensionless’: Boolean indicating if the profiles are adimensional (True) or dimensional (False)</p></li>
-<li><p>‘rho’: Density profile function [kg/m^3 or adimensional]</p></li>
-<li><p>‘g’: Gravitational acceleration profile function [m/s^2 or adimensional]</p></li>
-<li><p>‘mu’: Shear modulus profile function [Pa or adimensional]</p></li>
-<li><p>‘lamb’: Lamé’s first parameter profile function [Pa or adimensional]</p></li>
+<dd><p>Configure dimensionless parameters and profiles for numerical integration.</p>
+<p>This method prepares the physics and grid for solving the Love number ODEs.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>n</strong> (<em>int</em>) – Spherical harmonic degree of the tidal forcing (e.g., 2).</p></li>
+<li><p><strong>f_days</strong> (<em>float</em>) – Tidal frequency [cycles per day].</p></li>
+<li><p><strong>layers_list</strong> (<em>list</em><em> of </em><em>dict</em>) – Planetary internal layer structure.</p></li>
+<li><p><strong>planet_profile</strong> (<em>dict</em>) – Dictionary containing physical property interpolators (rho, g, mu, lamb).
+Must include a ‘dimensionless’ key (bool).</p></li>
+<li><p><strong>nsteps</strong> (<em>int</em><em>, </em><em>optional</em>) – Total integration steps (default: 50,000).</p></li>
+<li><p><strong>r0_ini</strong> (<em>float</em><em>, </em><em>optional</em>) – Initial integration radius [m] (default: 1000 m).</p></li>
 </ul>
 </dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>Sets instance attributes:
+- self.n, self.omega, self.omega_ad
+- self.rho0_ad, self.mu_ad, self.lamb_ad, self.g0_ad (interpolators)
+- self.steps_dict, self.nsteps_dict</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>None</p>
+</dd>
 </dl>
-</li>
-</ul>
-<p>Outputs:
-- None (the parameters are stored as attributes of the class). We can access them as self.n, self.omega, self.rho0_ad, etc.</p>
 </dd></dl>
 
 </dd></dl>

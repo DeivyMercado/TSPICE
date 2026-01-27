@@ -68,371 +68,465 @@ if not hasattr(sps, 'sph_harm'):
 
 # File paths
 file_dir = os.path.dirname(os.path.abspath(__file__)) #Current file location
-data_dir = os.path.join(file_dir, 'data')	#Data files
+data_dir = os.path.join(file_dir, 'data')   #Data files
 
 class Body():
-	def __init__(self, name, solar_system=True):
-		
-		'''
-		This class defines the Body for tidal calculations. The body could be a Solar System body or an exoplanet from a real or hypothetical system.
-            
-		Input:
-		- name: Name of the body, e.g. 'Earth', 'Mars', 'Io', 'Wasp-12b', etc.
-		- solar_system: Boolean to indicate if the body is in the solar system and made part of the SPICE kernels (default True) or an exoplanet from a real or hypothetical system (False). In the case of exoplanets, the user should provide the necessary physical and orbital parameters later for the tidal calculations.
+    def __init__(self, name, solar_system=True):
+        """
+        Initialize the Body object.
+
+        This class defines a celestial body for tidal calculations. It loads physical properties
+        (GM, radii) from SPICE kernels if available.
+
+        Parameters
+        ----------
+        name : str
+            Name of the body, e.g., 'Earth', 'Mars', 'Io'.
+        solar_system : bool, optional
+            If True, assumes the body is in the Solar System and managed by SPICE kernels.
+            If False, it treats the body as an exoplanet (parameters must be set manually).
+            Default is True.
+
+        Raises
+        ------
+        RuntimeError
+            If SPICE kernels are not initialized via `tspice.initialize()`.
+        NotImplementedError
+            If `solar_system` is False (exoplanet support currently pending).
+        """
+
+        #By default, the bodies are from the solar system
+        if solar_system:
         
-        Output:
-		- Body object with the physical parameters of the body.
-		'''
+        #Check if kernels are loaded before allowing creation of a Body
+            import tspice
+            if not tspice.kernels_loaded:
+                raise RuntimeError(
+                    "SPICE kernels not loaded. Please call tspice.initialize() first. "
+                    "Example:\n\n"
+                    "import tspice\n"
+                    "tspice.initialize()\n"
+                    "# or specify a custom directory: tspice.initialize('/path/to/my/kernels')\n"
+                    "body = tspice.Body('Moon')"
+                )
+            
+            #Name, Id and body-fixed frame of the (target) body
+            self.body_name = name
+            self.body_id = spy.bodn2c(name)
+            self.body_frame = spy.cidfrm(self.body_id)[1]
+            
+            try:
+                #GM for the body
+                self.GM = spy.bodvrd(name, 'GM', 1)[1][0]    #in [km^3/s^2]
+            except Exception as e:
+                print(f"Error getting GM for {name}: {e}")
+                self.GM = None
+                
+            try:
+                #a_p is the mean radius for the body
+                self.a_ellips = spy.bodvrd(name, 'RADII', 3)[1]     #in [km]
+                self.a_p = self.a_ellips.mean() #in [km]
+                #Flattening of the body
+                self.f = (self.a_ellips[0]-self.a_ellips[-1])/self.a_ellips[0]
+            except Exception as e:
+                print(f"Error getting RADII for {name}: {e}")
+                self.a_p = None
 
-		#By default, the bodies are from the solar system
-		if solar_system:
-		
-		#Check if kernels are loaded before allowing creation of a Body
-			import tspice
-			if not tspice.kernels_loaded:
-				raise RuntimeError(
-					"SPICE kernels not loaded. Please call tspice.initialize() first. "
-					"Example:\n\n"
-					"import tspice\n"
-					"tspice.initialize()\n"
-					"# or specify a custom directory: tspice.initialize('/path/to/my/kernels')\n"
-					"body = tspice.Body('Moon')"
-				)
-			
-			#Name, Id and body-fixed frame of the (target) body
-			self.body_name = name
-			self.body_id = spy.bodn2c(name)
-			self.body_frame = spy.cidfrm(self.body_id)[1]
-			
-			try:
-				#GM for the body
-				self.GM = spy.bodvrd(name, 'GM', 1)[1][0]    #in [km^3/s^2]
-			except Exception as e:
-				print(f"Error getting GM for {name}: {e}")
-				self.GM = None
-				
-			try:
-				#a_p is the mean radius for the body
-				self.a_ellips = spy.bodvrd(name, 'RADII', 3)[1]		#in [km]
-				self.a_p = self.a_ellips.mean()	#in [km]
-				#Flattening of the body
-				self.f = (self.a_ellips[0]-self.a_ellips[-1])/self.a_ellips[0]
-			except Exception as e:
-				print(f"Error getting RADII for {name}: {e}")
-				self.a_p = None
+            if self.GM and self.a_p:
+                self.g_ref = 1e3*self.GM/self.a_p**2    #in [m/s^2]
+        
+        else:
+            #[PENDING] Add functionality for other bodies outside the solar system
+            raise NotImplementedError("Currently, only solar system bodies are supported.")
 
-			if self.GM and self.a_p:
-				self.g_ref = 1e3*self.GM/self.a_p**2	#in [m/s^2]
-		
-		else:
-			#[PENDING] Add functionality for other bodies outside the solar system
-			raise NotImplementedError("Currently, only solar system bodies are supported.")
+            #[PENDING] Add physical parameters for exoplanets or hypothetical bodies
 
-			#[PENDING] Add physical parameters for exoplanets or hypothetical bodies
+    def array_et_utc(self, date, return_step_seconds=False):
+        """
+        Generate an array of Ephemeris Times (ET) based on a date dictionary.
 
-	def array_et_utc(self, date, return_step_seconds=False):
+        Parameters
+        ----------
+        date : dict
+            Dictionary containing time range parameters:
+            - 'start': Start date string (e.g., '2025-01-01').
+            - 'stop': Stop date string.
+            - 'step': Time step string (e.g., '1h', '30m').
+            - 'time_frame': Time frame, currently only 'UTC' is supported.
+        return_step_seconds : bool, optional
+            If True, returns the step size in seconds along with the ET array.
 
-		'''
-		This function creates an array of times in ET from a dictionary with start, stop, step, and time_frame (UTC or TDB).
+        Returns
+        -------
+        np.ndarray
+            Array of times in Ephemeris Time (ET/TDB seconds past J2000).
+        float (optional)
+            Step size in seconds (if `return_step_seconds` is True).
 
-		Input:
-		- date: Dictionary with start, stop, step, and time_frame (UTC or TDB).
+        Examples
+        --------
+        >>> body = Body('Earth')
+        >>> date = {'start': '2025-01-01', 'stop': '2025-01-02', 'step': '1h'}
+        >>> et_array = body.array_et_utc(date)
+        """
 
-		Output:
-		- et_utc: Array of times in ET.
-		'''
+        if date['time_frame'] == 'UTC' or 'time_frame' not in date.keys():
+            et_utc_start = spy.utc2et(date['start'])
+            et_utc_stop = spy.utc2et(date['stop'])
+            step_seconds = convert_step_to_seconds(date['step'])
+            et_utc = np.arange(et_utc_start, et_utc_stop, step_seconds)
 
-		if date['time_frame'] == 'UTC' or 'time_frame' not in date.keys():
-			et_utc_start = spy.utc2et(date['start'])
-			et_utc_stop = spy.utc2et(date['stop'])
-			step_seconds = convert_step_to_seconds(date['step'])
-			et_utc = np.arange(et_utc_start, et_utc_stop, step_seconds)
+        #[PENDING] Add more conditions later
+        else:
+            raise ValueError("Currently, only 'UTC' time frame is supported.")
 
-		#[PENDING] Add more conditions later
-		else:
-			raise ValueError("Currently, only 'UTC' time frame is supported.")
+        if return_step_seconds:
+            return step_seconds, et_utc
+        else:
+            return et_utc
 
-		if return_step_seconds:
-			return step_seconds, et_utc
-		else:
-			return et_utc
+    #[PENDING] Function to get the body IDs from their names
 
-	#[PENDING] Function to get the body IDs from their names
+    def Kn_func(self, n, M_ext, M=None, a_p=None):
+        """
+        Calculate the constant coefficient K_n for the Tide-Generating Potential (TGP).
 
-	def Kn_func(self, n, M_ext, M=None, a_p=None):
+        The coefficient is defined as:
+        K_n = (4 * pi / (2n + 1)) * (M_ext / M) * a_p^(n+2)
 
-		'''
-		This program calculate the constant Kn in the Tide-Generating Potential expansion.
-		
-		Input:
-		- n: Degree of the term
-		- a_p: Radius of the target body [m]
-		- M: Mass of the target body [any mass units]
-		- M_ext: Mass of the external body [the same as M]
+        Parameters
+        ----------
+        n : int
+            Spherical harmonic degree.
+        M_ext : float
+            Mass of the external perturbing body.
+        M : float, optional
+            Mass of the central body. Defaults to self.GM (if available).
+        a_p : float, optional
+            Radius of the central body. Defaults to self.a_p (if available).
 
-		Output:
-		- Kn: Constant K_n for a = a_p
-		
-		Note:
-		1. To get the potential for other distance from the COM,
-		should multiply this value by (a/a_p)^n
-		2. This definition is different to the one use in Agnew (2015)
-		that includes the factor 1/r_mean, with r_mean the mean distance
-		to the external body.'''
+        Returns
+        -------
+        float
+            The calculated K_n constant (in units compatible with input, typically km^(n+2)).
 
-		if M is None and a_p is None:
-			M = self.GM
-			a_p = self.a_p
+        Notes
+        -----
+        To obtain the potential at a distance `a` from the center of mass, multiply this value by (a/a_p)^n.
+        This definition differs from Agnew (2015) by a factor of 1/r_mean.
+        """
 
-		Kn = (4*np.pi/(2*n+1))*(M_ext/M)*a_p**(n+2)	#in [km^(n+2)]
-		return Kn
-	
-	def subpoint_coordinates(self, et_utc, body):
+        if M is None and a_p is None:
+            M = self.GM
+            a_p = self.a_p
 
-		'''
-		This function calculates the geographical coordinates of the subpoint
-		of an external body on the target body for an array of times in ET.
-		
-		Input:
-		- et_utc: Array of times in ET.
-		- body: Name of the external body, e.g. 'Moon', 'Sun', 'Mercury', etc.
+        Kn = (4*np.pi/(2*n+1))*(M_ext/M)*a_p**(n+2) #in [km^(n+2)]
+        return Kn
+    
+    def subpoint_coordinates(self, et_utc, body):
+        """
+        Calculate geographical coordinates of the sub-body point.
 
-		Output:
-		- phis_ext: Array of longitudes of the subpoint [rad].
-		- thetas_ext: Array of colatitudes of the subpoint [rad].
-		- alts_ext: Array of altitudes of the subpoint above the reference ellipsoid [km].
-		'''
+        Parameters
+        ----------
+        et_utc : np.ndarray
+            Array of times in Ephemeris Time (ET).
+        body : str
+            Name of the external body (e.g., 'Moon', 'Sun').
 
-		#Loop over the times to get the coordinates of the external body subpoint
-		lons_ext, lats_ext, alts_ext = np.zeros(len(et_utc)), np.zeros(len(et_utc)), np.zeros(len(et_utc))
-		for i, t in enumerate(et_utc):
+        Returns
+        -------
+        phis_ext : np.ndarray
+            Longitudes of the subpoint [rad].
+        thetas_ext : np.ndarray
+            Colatitudes of the subpoint [rad].
+        alts_ext : np.ndarray
+            Altitudes of the subpoint above the reference ellipsoid [km].
+        """
 
-			#Rectangular coordinates of the subpoint
-			subp, et, pos = spy.subpnt('INTERCEPT/ELLIPSOID', self.body_name, t, self.body_frame, 'XCN+S', body)
+        #Loop over the times to get the coordinates of the external body subpoint
+        lons_ext, lats_ext, alts_ext = np.zeros(len(et_utc)), np.zeros(len(et_utc)), np.zeros(len(et_utc))
+        for i, t in enumerate(et_utc):
 
-			#Geographical coordinates of the subpoint
-			lon, lat, alt = spy.recgeo(subp, self.a_p, self.f) #in [rad, rad, km]
-			lons_ext[i], lats_ext[i], alts_ext[i] = lon, lat, alt
-		
-		#Final coordinates arrays
-		phis_ext, thetas_ext = lons_ext, np.pi/2 - lats_ext
+            #Rectangular coordinates of the subpoint
+            subp, et, pos = spy.subpnt('INTERCEPT/ELLIPSOID', self.body_name, t, self.body_frame, 'XCN+S', body)
 
-		return phis_ext, thetas_ext, alts_ext
+            #Geographical coordinates of the subpoint
+            lon, lat, alt = spy.recgeo(subp, self.a_p, self.f) #in [rad, rad, km]
+            lons_ext[i], lats_ext[i], alts_ext[i] = lon, lat, alt
+        
+        #Final coordinates arrays
+        phis_ext, thetas_ext = lons_ext, np.pi/2 - lats_ext
 
-	def tgp_one_body(self, body, loc_sta=None, dates=None, nmax=None, time_array=False):
+        return phis_ext, thetas_ext, alts_ext
 
-		'''
-		This function calculates the TGP for a point on the target body with geographic coordinates (lon_s, lat_s) at a distance a from the COM,
-		due to a list of external bodies.
-		
-		Input:
-		- loc_sta: Dictionary with the geographic coordinates of the station, including depth. For example: dict(lat=4.49, lon=-73.14, depth=0)
-		- dates: Dictionary with start, stop, and step dates. For example: dict(start="2025-01-01 00:00:00", stop="2025-01-29 00:00:00", step="1h")
-		- bodies: the body to consider, e.g. 'Moon', 'Sun', 'Mercury'.
-		- nmax: Maximum degree to consider in the tidal calculation.
+    def tgp_one_body(self, body, loc_sta=None, dates=None, nmax=None, time_array=False):
+        """
+        Calculate the Tide-Generating Potential (TGP) due to a single external body.
 
-		Returns:
-		- Vtid: Array with the time series of V/g at the station for each body
-		- tjd: Times in JD of the ephemerides (and of V/g).
-		'''
+        Parameters
+        ----------
+        body : str
+            Name of the external body (e.g., 'Moon').
+        loc_sta : dict, optional
+            Coordinates of the station (lat, lon, depth). Required if not called within `tgp_many_bodies`.
+        dates : dict, optional
+            Time range parameters. Required if not called within `tgp_many_bodies`.
+        nmax : int, optional
+            Maximum spherical harmonic degree (default: self.nmax or user specified).
+        time_array : bool, optional
+            If True, returns the time array along with the potential.
 
-		#Cordinates of the station
-		if loc_sta is None:
-			#If the function is called within tgp_many_bodies
-			phi_sta, theta_sta, a_sta = self.phi_sta, self.theta_sta, self.a_sta
-		else:
-			phi_sta, theta_sta, a_sta = loc_func(loc_sta, self.a_ellips)
+        Returns
+        -------
+        Vtid : np.ndarray
+            Time series of the tidal potential V/g [m] at the station.
+        et_utc : np.ndarray (optional)
+            Ephemeris times corresponding to the signal (if `time_array` is True).
 
-		#Array of UTC times in ET
-		if dates is None:
-			#If the function is called within tgp_many_bodies
-			et_utc = self.et_utc
-		else:
-			et_utc = self.array_et_utc(dates)
+        Examples
+        --------
+        >>> earth = Body('Earth')
+        >>> loc = {'lat': 0, 'lon': 0, 'depth': 0}
+        >>> dates = {'start': '2025-01-01', 'stop': '2025-01-02', 'step': '1h'}
+        >>> tgp = earth.tgp_one_body('Moon', loc, dates, nmax=2)
+        """
 
-		#Maximum degree
-		if nmax is None:
-			nmax = self.nmax
-		else:
-			nmax = nmax
+        #Cordinates of the station
+        if loc_sta is None:
+            #If the function is called within tgp_many_bodies
+            phi_sta, theta_sta, a_sta = self.phi_sta, self.theta_sta, self.a_sta
+        else:
+            phi_sta, theta_sta, a_sta = loc_func(loc_sta, self.a_ellips)
 
-		#GM for the external body
-		GM_ext = spy.bodvrd(body, 'GM', 1)[1][0] #in [km^3/s^2]
+        #Array of UTC times in ET
+        if dates is None:
+            #If the function is called within tgp_many_bodies
+            et_utc = self.et_utc
+        else:
+            et_utc = self.array_et_utc(dates)
 
-		#State vector and light time travel
-		x, lt = spy.spkezr(body, et_utc, 'ECLIPJ2000', 'XCN+S', self.body_name)	#in [km]
+        #Maximum degree
+        if nmax is None:
+            nmax = self.nmax
+        else:
+            nmax = nmax
 
-		#Position vector
-		r_ext = np.array(x)[:,:3]	#in [km]
-		r = np.linalg.norm(r_ext, axis=1)
-		#r_mean = r.mean()
-		#xit = r/r_mean	#Distance variation in time
+        #GM for the external body
+        GM_ext = spy.bodvrd(body, 'GM', 1)[1][0] #in [km^3/s^2]
 
-		#Subpoint coordinates of the external body
-		phis_ext, thetas_ext, alts_ext = self.subpoint_coordinates(et_utc, body)
+        #State vector and light time travel
+        x, lt = spy.spkezr(body, et_utc, 'ECLIPJ2000', 'XCN+S', self.body_name) #in [km]
 
-		#Vtid/g for all the times
-		V_g_tid_body = np.zeros(len(et_utc))
+        #Position vector
+        r_ext = np.array(x)[:,:3]   #in [km]
+        r = np.linalg.norm(r_ext, axis=1)
+        #r_mean = r.mean()
+        #xit = r/r_mean #Distance variation in time
 
-		#Sum over the degrees
-		n_init = 2
-		n_final = nmax
-		for n in range(n_init,n_final+1):
-			Kn = self.Kn_func(n, GM_ext, self.GM, self.a_p)
-			aamain_n = (a_sta/self.a_p)**n	#For a != a_p
-			fn = aamain_n*Kn/r**(n+1)	#in [km] because a and r is in [km]
+        #Subpoint coordinates of the external body
+        phis_ext, thetas_ext, alts_ext = self.subpoint_coordinates(et_utc, body)
 
-			#Sum over the orders
-			sigma_n = 0
-			for m in range(-n,n+1):
-					Ynm_ext = sps.sph_harm(m, n, phis_ext, thetas_ext)  #External body
-					Ynm_sta = sps.sph_harm(m, n, phi_sta, theta_sta)  #Earth (station)
-					YeYs = np.conjugate(Ynm_ext)*Ynm_sta
-					sigma_n += YeYs.real
+        #Vtid/g for all the times
+        V_g_tid_body = np.zeros(len(et_utc))
 
-			#Potential contribution of degree n
-			V_g_tid_body += fn*sigma_n	
-		
-		#Factor 1e3 to return in [m]
-		V_g_tid_body = V_g_tid_body*1e3
+        #Sum over the degrees
+        n_init = 2
+        n_final = nmax
+        for n in range(n_init,n_final+1):
+            Kn = self.Kn_func(n, GM_ext, self.GM, self.a_p)
+            aamain_n = (a_sta/self.a_p)**n  #For a != a_p
+            fn = aamain_n*Kn/r**(n+1)   #in [km] because a and r is in [km]
 
-		if time_array:
-			return V_g_tid_body, et_utc
-		else:
-			return V_g_tid_body
-	
-	def tgp_many_bodies(self, bodies, loc_sta, dates, nmax=6, time_array=False, body_signal=False, verbose=True):
+            #Sum over the orders
+            sigma_n = 0
+            for m in range(-n,n+1):
+                    Ynm_ext = sps.sph_harm(m, n, phis_ext, thetas_ext)  #External body
+                    Ynm_sta = sps.sph_harm(m, n, phi_sta, theta_sta)  #Earth (station)
+                    YeYs = np.conjugate(Ynm_ext)*Ynm_sta
+                    sigma_n += YeYs.real
 
-		'''
-		This function calculates the TGP for a point on the target body with geographic coordinates (lon_s, lat_s) at a distance a from the COM, due to a list of external bodies.
-		
-		Input:
-		- loc_sta: Dictionary with the geographic coordinates of the station, including depth. For example: dict(lat=4.49, lon=-73.14, depth=0)
-		- dates: Dictionary with start, stop, and step dates. For example: dict(start="2025-01-01 00:00:00", stop="2025-01-29 00:00:00", step="1h")
-		- bodies: List of external bodies to consider, e.g. ['Moon', 'Sun', 'Mercury']
-		- nmax: Maximum degree to consider in the tidal calculation.
+            #Potential contribution of degree n
+            V_g_tid_body += fn*sigma_n  
+        
+        #Factor 1e3 to return in [m]
+        V_g_tid_body = V_g_tid_body*1e3
 
-		Returns:
-		- Vtid: Array with the time series of V/g at the station for each body
-		- tjd: Times in JD of the ephemerides (and of V/g).
-		'''
+        if time_array:
+            return V_g_tid_body, et_utc
+        else:
+            return V_g_tid_body
+    
+    def tgp_many_bodies(self, bodies, loc_sta, dates, nmax=6, time_array=False, body_signal=False, verbose=True):
+        """
+        Calculate the combined Tide-Generating Potential (TGP) from multiple external bodies.
 
-		#Planetary ID for external bodies (outer planets here are really the barycenters)
-		#bodies_ids = {'Moon':301, 'Sun':10, 'Mercury':199,
-					#'Venus':299, 'Earth':399, 'Mars':4, 'Jupiter':5,
-					#'Saturn':6, 'Uranus':7, 'Neptune':8}
+        Parameters
+        ----------
+        bodies : list of str
+            List of external body names (e.g., ['Moon', 'Sun']).
+        loc_sta : dict
+            Coordinates of the station (lat, lon, depth).
+        dates : dict
+            Time range parameters (start, stop, step).
+        nmax : int, optional
+            Maximum spherical harmonic degree (default: 6).
+        time_array : bool, optional
+            If True, returns the time array along with the potential.
+        body_signal : bool, optional
+            If True, returns an array with individual signals for each body (shape: [time, bodies]).
+            If False, returns the summed total signal (default).
+        verbose : bool, optional
+            If True, prints progress messages.
 
-		#Cordinates of the station
-		phi_sta, theta_sta, a_sta = loc_func(loc_sta, self.a_ellips)
-		self.phi_sta, self.theta_sta, self.a_sta = phi_sta, theta_sta, a_sta
+        Returns
+        -------
+        result : np.ndarray or tuple
+            - If `body_signal` is False: Total TGP time series V/g [m].
+            - If `body_signal` is True: Array of shape (N_times, N_bodies) with individual signals.
+            - If `time_array` is True: Returns (result, et_utc).
 
-		#Array of UTC times in ET
-		et_utc = self.array_et_utc(dates)
-		self.et_utc = et_utc
+        Examples
+        --------
+        >>> earth = Body('Earth')
+        >>> bodies = ['Moon', 'Sun']
+        >>> tgp_total = earth.tgp_many_bodies(bodies, loc, dates)
+        """
 
-		#Maximum degree
-		self.nmax = nmax
+        #Planetary ID for external bodies (outer planets here are really the barycenters)
+        #bodies_ids = {'Moon':301, 'Sun':10, 'Mercury':199,
+                    #'Venus':299, 'Earth':399, 'Mars':4, 'Jupiter':5,
+                    #'Saturn':6, 'Uranus':7, 'Neptune':8}
 
-		#Array to store all V/g time series for all bodies
-		V_g_tid_array = np.zeros((len(et_utc),len(bodies)))
+        #Cordinates of the station
+        phi_sta, theta_sta, a_sta = loc_func(loc_sta, self.a_ellips)
+        self.phi_sta, self.theta_sta, self.a_sta = phi_sta, theta_sta, a_sta
 
-		#Loop over external bodies
-		for i,body in enumerate(bodies):
-			#V/g time series for the body
-			V_g_tid_body = self.tgp_one_body(body,)
-			V_g_tid_array[:,i] = V_g_tid_body
-			if verbose: print(f'{body} contribution calculated!')
-		
-		if body_signal == True:
-			if time_array:
-				return V_g_tid_array, et_utc
-			else:
-				return V_g_tid_array
-		else:
-			#Total V/g summing the contributions of all bodies
-			V_g_tid_total = V_g_tid_array.sum(axis=1)
-			if time_array:
-				return V_g_tid_total, et_utc
-			else:
-				return V_g_tid_total
+        #Array of UTC times in ET
+        et_utc = self.array_et_utc(dates)
+        self.et_utc = et_utc
 
-	def plot_one_signal(self, et, tgp, loc, colors, label=r'V_{\text{tid}}(t)/g', units='cm', mean_value=False, savepath=None):
-		'''
-		Plot a single tidal signal over time.
-		
-		Input:
-		- et: Array of ephemeris times.
-		- tgp: Tidal signal array.
-		- loc: Dictionary with location (lat, lon, depth).
-		- colors: List of colors for the plot.
-		- label: Label for y-axis (default: r'V_{\text{tid}}(t)/g').
-		- units: Units for the signal (default: 'cm').
-		- mean_value: Whether to plot mean value line (default: False).
-		- savepath: Path to save the figure (default: None).
-		'''
-		utc_times = et_to_utc_string(et)
-		ticks = np.linspace(0, len(utc_times)-1, 6, dtype=int)
+        #Maximum degree
+        self.nmax = nmax
 
-		fig, ax = plt.subplots(figsize=(8,4))
-		ax.plot(utc_times, tgp, color=colors[0])
+        #Array to store all V/g time series for all bodies
+        V_g_tid_array = np.zeros((len(et_utc),len(bodies)))
 
-		ax.set_xlabel('Time [UTC]', fontsize=12)
-		ax.set_ylabel(r'$'+label+'$ ['+units+']', fontsize=12)
-		ax.set_title('Lon $= %.2f$°; Lat $= %.2f$°; Depth $= %.2f$ km'%(loc['lon'], loc['lat'], loc['depth']), fontsize=12)
-		ax.set_xticks([utc_times[i] for i in ticks])
-		ax.xaxis.set_major_formatter(mdates.DateFormatter('%Y-%m-%d'))
-		ax.xaxis.set_tick_params(direction='in', which='both', labelsize=12)
-		ax.yaxis.set_tick_params(direction='in', which='both', labelsize=12)
-		ax.grid(alpha=0.2)
-		ax.margins(x=0)
+        #Loop over external bodies
+        for i,body in enumerate(bodies):
+            #V/g time series for the body
+            V_g_tid_body = self.tgp_one_body(body,)
+            V_g_tid_array[:,i] = V_g_tid_body
+            if verbose: print(f'{body} contribution calculated!')
+        
+        if body_signal == True:
+            if time_array:
+                return V_g_tid_array, et_utc
+            else:
+                return V_g_tid_array
+        else:
+            #Total V/g summing the contributions of all bodies
+            V_g_tid_total = V_g_tid_array.sum(axis=1)
+            if time_array:
+                return V_g_tid_total, et_utc
+            else:
+                return V_g_tid_total
 
-		if mean_value:
-			tgp_mean = tgp.mean()
-			ax.hlines(tgp_mean, utc_times[0], utc_times[-1], color=colors[1], label=r'Mean$=%.2f$ %s'%(tgp_mean, units))
-			ax.legend(fontsize=12, loc='upper right')
+    def plot_one_signal(self, et, tgp, loc, colors, label=r'V_{\text{tid}}(t)/g', units='cm', mean_value=False, savepath=None):
+        """
+        Plot a single tidal signal time series.
 
-		fig.tight_layout()
+        Parameters
+        ----------
+        et : np.ndarray
+            Array of Ephemeris Times.
+        tgp : np.ndarray
+            Tidal potential signal array.
+        loc : dict
+            Location dictionary (for plot title).
+        colors : list
+            List of colors to use (e.g., ['blue', 'red']). First color for signal, second for mean line.
+        label : str, optional
+            Y-axis label (LaTeX formatted). Default: r'V_{\text{tid}}(t)/g'.
+        units : str, optional
+            Units for the Y-axis label. Default: 'cm'.
+        mean_value : bool, optional
+            If True, plots a horizontal line at the mean value.
+        savepath : str, optional
+            File path to save the plot image. If None, the plot is not saved.
+        """
+        utc_times = et_to_utc_string(et)
+        ticks = np.linspace(0, len(utc_times)-1, 6, dtype=int)
 
-		if savepath:
-			fig.savefig(savepath, bbox_inches='tight', dpi=300)
+        fig, ax = plt.subplots(figsize=(8,4))
+        ax.plot(utc_times, tgp, color=colors[0])
 
-	def plot_many_signal(self, et, tgps, loc, colors, y_label=r'V(t)/g', signal_labels=None, units='cm', savepath=None):
-		'''
-		Plot multiple tidal signals on the same plot.
-		
-		Input:
-		- et: Array of ephemeris times.
-		- tgps: List of tidal signal arrays.
-		- loc: Dictionary with location (lat, lon, depth).
-		- colors: List of colors for each signal.
-		- y_label: Label for y-axis (default: r'V(t)/g').
-		- signal_labels: List of labels for each signal (default: None).
-		- units: Units for the signals (default: 'cm').
-		- savepath: Path to save the figure (default: None).
-		'''
-		utc_times = et_to_utc_string(et)
-		ticks = np.linspace(0, len(utc_times)-1, 6, dtype=int)
+        ax.set_xlabel('Time [UTC]', fontsize=12)
+        ax.set_ylabel(r'$'+label+'$ ['+units+']', fontsize=12)
+        ax.set_title('Lon $= %.2f$°; Lat $= %.2f$°; Depth $= %.2f$ km'%(loc['lon'], loc['lat'], loc['depth']), fontsize=12)
+        ax.set_xticks([utc_times[i] for i in ticks])
+        ax.xaxis.set_major_formatter(mdates.DateFormatter('%Y-%m-%d'))
+        ax.xaxis.set_tick_params(direction='in', which='both', labelsize=12)
+        ax.yaxis.set_tick_params(direction='in', which='both', labelsize=12)
+        ax.grid(alpha=0.2)
+        ax.margins(x=0)
 
-		fig, ax = plt.subplots(figsize=(8,4))
-		for i,signal in enumerate(tgps):
-			ax.plot(utc_times, signal, color=colors[i], label=signal_labels[i] if signal_labels else None)
+        if mean_value:
+            tgp_mean = tgp.mean()
+            ax.hlines(tgp_mean, utc_times[0], utc_times[-1], color=colors[1], label=r'Mean$=%.2f$ %s'%(tgp_mean, units))
+            ax.legend(fontsize=12, loc='upper right')
 
-		ax.set_xlabel('Time [UTC]', fontsize=12)
-		ax.set_ylabel(r'$'+y_label+'$ ['+units+']', fontsize=12)
-		ax.set_title('Lon $= %.2f$°; Lat $= %.2f$°; Depth $= %.2f$ km'%(loc['lon'], loc['lat'], loc['depth']), fontsize=12)
-		ax.set_xticks([utc_times[i] for i in ticks])
-		ax.xaxis.set_major_formatter(mdates.DateFormatter('%Y-%m-%d'))
-		ax.xaxis.set_tick_params(direction='in', which='both', labelsize=12)
-		ax.yaxis.set_tick_params(direction='in', which='both', labelsize=12)
-		ax.grid(alpha=0.2)
-		ax.margins(x=0)
-		if signal_labels:
-			ax.legend(fontsize=12, loc='best')
+        fig.tight_layout()
 
-		fig.tight_layout()
+        if savepath:
+            fig.savefig(savepath, bbox_inches='tight', dpi=300)
 
-		if savepath:
-			fig.savefig(savepath, bbox_inches='tight', dpi=300)
+    def plot_many_signal(self, et, tgps, loc, colors, y_label=r'V(t)/g', signal_labels=None, units='cm', savepath=None):
+        """
+        Plot multiple tidal signals on the same figure.
+
+        Parameters
+        ----------
+        et : np.ndarray
+            Array of Ephemeris Times.
+        tgps : list of np.ndarray
+            List of tidal signal arrays to plot (one per body/component).
+        loc : dict
+            Location dictionary (for plot title).
+        colors : list
+            List of colors for each signal trace.
+        y_label : str, optional
+            Y-axis label. Default: r'V(t)/g'.
+        signal_labels : list of str, optional
+            Labels for the legend corresponding to each signal.
+        units : str, optional
+            Units for the Y-axis label. Default: 'cm'.
+        savepath : str, optional
+            File path to save the plot image.
+        """
+        utc_times = et_to_utc_string(et)
+        ticks = np.linspace(0, len(utc_times)-1, 6, dtype=int)
+
+        fig, ax = plt.subplots(figsize=(8,4))
+        for i,signal in enumerate(tgps):
+            ax.plot(utc_times, signal, color=colors[i], label=signal_labels[i] if signal_labels else None)
+
+        ax.set_xlabel('Time [UTC]', fontsize=12)
+        ax.set_ylabel(r'$'+y_label+'$ ['+units+']', fontsize=12)
+        ax.set_title('Lon $= %.2f$°; Lat $= %.2f$°; Depth $= %.2f$ km'%(loc['lon'], loc['lat'], loc['depth']), fontsize=12)
+        ax.set_xticks([utc_times[i] for i in ticks])
+        ax.xaxis.set_major_formatter(mdates.DateFormatter('%Y-%m-%d'))
+        ax.xaxis.set_tick_params(direction='in', which='both', labelsize=12)
+        ax.yaxis.set_tick_params(direction='in', which='both', labelsize=12)
+        ax.grid(alpha=0.2)
+        ax.margins(x=0)
+        if signal_labels:
+            ax.legend(fontsize=12, loc='best')
+
+        fig.tight_layout()
+
+        if savepath:
+            fig.savefig(savepath, bbox_inches='tight', dpi=300)
 
 class BodyResponse(Body):
 
@@ -442,39 +536,46 @@ class BodyResponse(Body):
         super().__init__(name)
         #GM_main, a_ellips, a_main, f_main, g_ref
 
+
     def scale_constants(self, verbose=True):
+        """
+        Calculate characteristic scales for adimensionalization of internal solution variables.
 
-        '''
-        Function to calculate characteristic scales for adimensionalization of the internal solutions yis.
+        This method computes scaling factors based on the body's physical properties
+        to facilitate numerical integration.
 
-        Inputs:
-        - verbose: Boolean to print the characteristic scales (default: True)
+        Parameters
+        ----------
+        verbose : bool, optional
+            If True, prints the calculated characteristic scales to stdout (default: True).
 
-        Outputs:
-        - L: Length scale [m]
-        - M: Mass scale [kg]
-        - RHO: Density scale [kg/m^3]
-        - P: Pressure/Elasticity scale [Pa]
-        - V: Velocity scale [m/s]
-        - T: Time scale [s]
-        - OMEGA: Angular frequency scale [rad/s]
-        - Gad: Gravity scale [m/s^2]
-
-        '''
+        Returns
+        -------
+        None
+            Scales are stored as class attributes:
+            - self.L     : Length scale [m]
+            - self.M     : Mass scale [kg]
+            - self.RHO   : Density scale [kg/m^3]
+            - self.P     : Pressure scale [Pa]
+            - self.V     : Velocity scale [m/s]
+            - self.T     : Time scale [s]
+            - self.OMEGA : Angular frequency scale [rad/s]
+            - self.Gad   : Gravity scale [m/s^2]
+        """
 
         #Scale constants
-        self.G = 6.67430e-11	#Gravitational constant in [m^3/kg/s^2]
+        self.G = 6.67430e-11    #Gravitational constant in [m^3/kg/s^2]
 
         #[PENDING] Check this, I'm making int(self.a_main) for the radius to be the same as the PREM model
         #In the future we should guarantee that the planetary model has the same radius as the SPICE mean radius
-        self.L = int(self.a_p)*1e3	#Length in [m] 
+        self.L = int(self.a_p)*1e3  #Length in [m] 
 
-        self.M = self.GM*1e9/self.G	#Mass in [kg]
-        self.RHO = self.M/self.L**3	#kg/m^3
-        self.P = self.G*self.M**2/self.L**4	#Pressure/Elasticity modules in [Pa]
-        self.V = (self.P/self.RHO)**0.5	#Velocity in [m/s]
-        self.T = self.L/self.V	#Time in [s]
-        self.OMEGA = 1/self.T	#Angular frecuency in [rad/s]
+        self.M = self.GM*1e9/self.G #Mass in [kg]
+        self.RHO = self.M/self.L**3 #kg/m^3
+        self.P = self.G*self.M**2/self.L**4 #Pressure/Elasticity modules in [Pa]
+        self.V = (self.P/self.RHO)**0.5 #Velocity in [m/s]
+        self.T = self.L/self.V  #Time in [s]
+        self.OMEGA = 1/self.T   #Angular frecuency in [rad/s]
         self.Gad = self.G*self.RHO*self.L #Gravity acceleration in [m/s^2]
 
         if verbose:
@@ -489,26 +590,35 @@ class BodyResponse(Body):
             print(f'Gravity scale Gad = {self.Gad:.2e} m/s^2')
 
 
+
     def read_layers(self, layers_list, r0_ini_ad, nsteps_total=5e4, dr=1):
+        """
+        Process the planetary layers and define integration steps for each.
 
-        '''
-        Function to read the layers of the planetary model and define the steps for each layer in the integration.
+        Parameters
+        ----------
+        layers_list : list of dict
+            List defining the planet's internal layers. Each dict must contain:
+            - 'name': Layer name (str).
+            - 'type': 'solid' or 'fluid'.
+            - 'r0': Start radius [m].
+            - 'rf': End radius [m].
+        r0_ini_ad : float
+            Initial dimensionless radius for integration (prevents singularity at r=0).
+        nsteps_total : int, optional
+             Approximate total number of integration steps (default: 50,000).
+        dr : float, optional
+             Transition width between layers [m] to avoid discontinuities (default: 1 m).
 
-        Inputs:
-        - layers_list: List of layers for the integration. Each layer is a dictionary with the following keys:
-            - 'name': Name of the layer (string)
-            - 'r0': Initial radius of the layer [m]
-            - 'rf': Final radius of the layer [m]
-            - 'type': Type of the layer ('solid' or 'liquid')
-        - r0_ini_ad: Initial radius for integration [adimensional]. Default is 1 km to avoid singularities at the center
-        - nsteps_total: Number of steps for the total integration (default: 5e4 steps)
-        - dr: Delta r to avoid discontinuities between layers [m]. Default is 1 m
-
-        Outputs:
-        - sorted_layers_list: List of layers sorted by initial radius (from center to surface)
-        - nsteps_dict: Dictionary with the number of steps for each layer
-        - steps_dict: Dictionary with the integration steps for each layer
-        '''
+        Returns
+        -------
+        sorted_layers_list : list of dict
+            Layers sorted by radius (center to surface).
+        nsteps_dict : dict
+            Number of steps assigned to each layer.
+        steps_dict : dict
+            Radial grid points (dimensionless) for each layer.
+        """
 
         #Sorted layers by initial radius
         sorted_layers_list = sorted(layers_list, key=lambda x: x['r0'])
@@ -523,47 +633,52 @@ class BodyResponse(Body):
 
             #For the first layer
             if l==0:
-                rf_ad = layer['rf']/self.L	#[adimensional]
+                rf_ad = layer['rf']/self.L  #[adimensional]
                 nsteps = int(rf_ad*nsteps_total)
                 nsteps_dict[layer['name']] = nsteps
                 steps_dict[layer['name']] = np.linspace(r0_ini_ad, rf_ad, nsteps)
 
             #For the other layers
             else:
-                r0_ad = (layer['r0']+dr)/self.L	#[adimensional]
-                rf_ad = layer['rf']/self.L	#[adimensional]
+                r0_ad = (layer['r0']+dr)/self.L #[adimensional]
+                rf_ad = layer['rf']/self.L  #[adimensional]
                 nsteps = int((rf_ad - r0_ad)*nsteps_total)
                 nsteps_dict[layer['name']] = nsteps
                 steps_dict[layer['name']] = np.linspace(r0_ad, rf_ad, nsteps)
 
         return sorted_layers_list, nsteps_dict, steps_dict
     
+
     def set_integration_parameters_ad(self, n, f_days, layers_list, planet_profile, nsteps=5e4, r0_ini=1e3):
+        """
+        Configure dimensionless parameters and profiles for numerical integration.
 
-        '''
-        Define the adimensional parameters needed for the integration of the equations of motion: n, omega, planetary profiles, steps, layers, etc.
-        
-        Inputs:
-        - n: Degree of the tidal solution
-        - f_days: Frequency of the tidal forcing [cycles per day]
-        - nsteps: Number of steps for the total integration
-        - r0_ini: Initial radius for integration [m]. Default is 1 km to avoid singularities at the center
-        - layers_list: List of layers for the integration. Each layer is a dictionary with the following keys:
-            - 'name': Name of the layer (string)
-            - 'r0': Initial radius of the layer [m]
-            - 'rf': Final radius of the layer [m]
-            - 'type': Type of the layer ('solid' or 'liquid')
-        - planet_profile: Dictionary with the planetary profiles as functions of the radius (can be dimensional or adimensional). The dictionary must contain the following keys:
-            - 'dimensionless': Boolean indicating if the profiles are adimensional (True) or dimensional (False)
-            - 'rho': Density profile function [kg/m^3 or adimensional]
-            - 'g': Gravitational acceleration profile function [m/s^2 or adimensional]
-            - 'mu': Shear modulus profile function [Pa or adimensional]
-            - 'lamb': Lamé's first parameter profile function [Pa or adimensional]
+        This method prepares the physics and grid for solving the Love number ODEs.
 
-        Outputs:
-        - None (the parameters are stored as attributes of the class). We can access them as self.n, self.omega, self.rho0_ad, etc.
+        Parameters
+        ----------
+        n : int
+            Spherical harmonic degree of the tidal forcing (e.g., 2).
+        f_days : float
+             Tidal frequency [cycles per day].
+        layers_list : list of dict
+             Planetary internal layer structure.
+        planet_profile : dict
+             Dictionary containing physical property interpolators (rho, g, mu, lamb).
+             Must include a 'dimensionless' key (bool).
+        nsteps : int, optional
+             Total integration steps (default: 50,000).
+        r0_ini : float, optional
+             Initial integration radius [m] (default: 1000 m).
 
-        '''
+        Returns
+        -------
+        None
+            Sets instance attributes:
+            - self.n, self.omega, self.omega_ad
+            - self.rho0_ad, self.mu_ad, self.lamb_ad, self.g0_ad (interpolators)
+            - self.steps_dict, self.nsteps_dict
+        """
 
         #Calculate the scale constants if not done yet  
         self.scale_constants(verbose=False)      
@@ -572,9 +687,9 @@ class BodyResponse(Body):
         self.n = n
 
         #Frequency of the tidal forcing
-        self.f_days = f_days	#[cycles per day]
-        self.omega = f_days*2*np.pi/(3600*24)	#[rad/s]
-        self.omega_ad = self.omega/self.OMEGA	#Adimensional angular frequency
+        self.f_days = f_days    #[cycles per day]
+        self.omega = f_days*2*np.pi/(3600*24)   #[rad/s]
+        self.omega_ad = self.omega/self.OMEGA   #Adimensional angular frequency
 
         #Planetary profiles (functions of r_ad)
         if planet_profile['dimensionless']:    #If the profiles are already adimensional
@@ -593,7 +708,7 @@ class BodyResponse(Body):
 
         #Initial radius for integration
         self.r0_ini = r0_ini    #[m]
-        self.r0_ini_ad = self.r0_ini/self.L	#[adimensional]
+        self.r0_ini_ad = self.r0_ini/self.L #[adimensional]
 
         #Steps for each layer in the integration
         self.layers_list, self.nsteps_dict, self.steps_dict = self.read_layers(layers_list, self.r0_ini_ad, self.nsteps_total)
@@ -701,7 +816,7 @@ class BodyResponse(Body):
                 z7_til = z6_til + 4*np.pi*rho0_icb*z1_til + ((n+1)/rs_icb - 4*np.pi*rho0_icb/g0_icb)*z5_til
 
                 #In fluid part, we just do one integration
-                Z0_outer_ad = np.array([z5_til, z7_til])	
+                Z0_outer_ad = np.array([z5_til, z7_til])    
 
                 #Integration in the fluid layer
                 z_outer_ad_redu = solve_ivp(dzdr_fluid_AmorinGudkova2024_ad, (rs_ad[0], rs_ad[-1]), Z0_outer_ad, t_eval=rs_ad, method='BDF', args=(self.params_ad,), dense_output=False)
@@ -726,9 +841,9 @@ class BodyResponse(Body):
                 z5_b, z7_b = z_outer_ad_redu.y[0,-1], z_outer_ad_redu.y[1,-1]
                 
                 #New three independent solutions from the zis
-                Y0_alpha_mantle_ad = np.array([0, -rho0_cmb*z5_b, 0, 0, z5_b, z7_b - ((n+1)/rs_cmb - 4*np.pi*rho0_cmb/g0_cmb)*z5_b])	#Coefficient A
-                Y0_beta_mantle_ad = np.array([1, rho0_cmb*g0_cmb, 0, 0, 0, -4*np.pi*rho0_cmb])	#Coefficient D=z1_b
-                Y0_gamma_mantle_ad = np.array([0, 0, 1, 0, 0, 0])	#Coefficient E=y3_b / discontinuity in the tangential displacement
+                Y0_alpha_mantle_ad = np.array([0, -rho0_cmb*z5_b, 0, 0, z5_b, z7_b - ((n+1)/rs_cmb - 4*np.pi*rho0_cmb/g0_cmb)*z5_b])    #Coefficient A
+                Y0_beta_mantle_ad = np.array([1, rho0_cmb*g0_cmb, 0, 0, 0, -4*np.pi*rho0_cmb])  #Coefficient D=z1_b
+                Y0_gamma_mantle_ad = np.array([0, 0, 1, 0, 0, 0])   #Coefficient E=y3_b / discontinuity in the tangential displacement
 
                 #Integration in the solid part
                 y_alpha_mantle_ad = solve_ivp(dydr_solid_AmorinGudkova2024_ad, (rs_ad[0], rs_ad[-1]), Y0_alpha_mantle_ad, t_eval=rs_ad, method='BDF', args=(self.params_ad,), dense_output=True)
