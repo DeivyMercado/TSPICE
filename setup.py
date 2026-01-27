@@ -68,5 +68,5 @@ setuptools.setup(
     # OPTIONS
     # ######################################################################
     include_package_data=True,
-    package_data={'tspice': ['data/spice_kernels.json']},
+    package_data={'tspice': ['data/*.*']},
 )
