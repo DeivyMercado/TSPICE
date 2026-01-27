@@ -33,7 +33,7 @@ setuptools.setup(
         "Topic :: Scientific/Engineering :: Astronomy",
         "Topic :: Scientific/Engineering :: Physics",
         "Programming Language :: Python :: 3",
-        "License :: OSI Approved :: GNU Affero General Public License v3 (AGPL)",
+        "License :: OSI Approved :: GNU Affero General Public License v3 (AGPLv3)",
         "Operating System :: OS Independent",
     ],
     version='0.0.2',
